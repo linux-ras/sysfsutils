@@ -431,53 +431,35 @@ struct sysfs_device *sysfs_open_bus_device(unsigned char *busname,
 int sysfs_find_device_bus_name(unsigned char *dev_id, unsigned char *busname, 
 								size_t bsize)
 {
-	struct sysfs_directory *busdir = NULL, *cur = NULL, *devdir = NULL;
-	struct sysfs_link *ln = NULL;
-	unsigned char path[SYSFS_PATH_MAX];
-	unsigned char devpath[SYSFS_PATH_MAX];
+	unsigned char subsys[SYSFS_NAME_LEN], *bus = NULL, *curdev = NULL; 
+	struct dlist *buslist = NULL, *device_list = NULL;
 
 	if (dev_id == NULL || busname == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
-	if (sysfs_get_mnt_path(path, SYSFS_PATH_MAX) != 0) {
-		dprintf ("Error finding sysfs root\n");
-		return -1;
-	}
-	strcat(path, SYSFS_BUS_DIR);
-	busdir = sysfs_open_directory(path);
-	if (busdir == NULL) {
-		dprintf ("Error retrieving bus directory %s\n", path);
-		return -1;
-	}
-	if (sysfs_read_directory(busdir) != 0) {
-		dprintf ("Error reading directory %s\n", path);
-		sysfs_close_directory(busdir);
-		return -1;
-	}
-	if (busdir->subdirs != NULL) {
-		dlist_for_each_data(busdir->subdirs, cur, 
-				struct sysfs_directory) {
-			memset(devpath, 0, SYSFS_PATH_MAX);
-			strcpy(devpath, cur->path);
-			strcat(devpath, SYSFS_DEVICES_DIR);
-			devdir = sysfs_open_directory(devpath);
-			if (devdir == NULL)
-				continue;
-			if (sysfs_read_directory(devdir) != 0) {
-				sysfs_close_directory(devdir);
-				continue;
+	
+	strcpy(subsys, SYSFS_BUS_DIR);	/* subsys = /bus */
+	buslist = sysfs_open_subsystem_list(subsys);
+	if (buslist != NULL) {
+		dlist_for_each_data(buslist, bus, char) {
+			device_list = sysfs_open_bus_devices_list(bus);
+			if (device_list != NULL) {
+				dlist_for_each_data(device_list, 
+						curdev, char) {
+					if (strcmp(dev_id, curdev) == 0) {
+						strncpy(busname, 
+							bus, bsize);
+						sysfs_close_list(device_list);
+						sysfs_close_list(buslist);
+						return 0;
+					}
+				}
+			sysfs_close_list(device_list);
 			}
-			ln = sysfs_get_subdirectory_link(devdir, dev_id);
-			if (ln != NULL) {
-				strcpy(busname, cur->name);
-				sysfs_close_directory(devdir);
-				return 0;
-			}
-			sysfs_close_directory(devdir);
 		}
+		sysfs_close_list(buslist);
 	}
-	strcpy(busname, SYSFS_UNKNOWN);
-	sysfs_close_directory(busdir);
-	return 0;
+	return -1;
 }
+

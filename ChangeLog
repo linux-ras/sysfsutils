@@ -1,4 +1,8 @@
 
+09/05/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Add sysfs_open_bus_devices_list()
+		* Simplify sysfs_find_device_bus_name()
+
 09/04/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Simplify sysfs_open_bus_device
 

@@ -140,6 +140,7 @@ extern int sysfs_get_name_from_path(const unsigned char *path,
 extern int sysfs_get_link(const unsigned char *path, unsigned char *target, 
 								size_t len);
 extern struct dlist *sysfs_open_subsystem_list(unsigned char *name);
+extern struct dlist *sysfs_open_bus_devices_list(unsigned char *name);
 extern void sysfs_close_list(struct dlist *list);
 
 /* sysfs directory and file access */

@@ -229,4 +229,59 @@ struct dlist *sysfs_open_subsystem_list(unsigned char *name)
 	sysfs_close_directory(dir);
 	return list;
 }
-		
+
+
+/**
+ * sysfs_open_bus_devices_list: gets a list of all devices on "name" bus
+ * @name: name of the subsystem, eg., "pci", "scsi", "usb"
+ * Returns a dlist of supported names or NULL if subsystem not supported
+ */ 
+struct dlist *sysfs_open_bus_devices_list(unsigned char *name)
+{
+	unsigned char sysfs_path[SYSFS_PATH_MAX], *device_name = NULL;
+	struct sysfs_directory *dir = NULL;
+	struct sysfs_link *cur = NULL;
+	struct dlist *list = NULL;
+	
+	if (name == NULL)
+		return NULL;
+
+	if (sysfs_get_mnt_path(sysfs_path, SYSFS_PATH_MAX) != 0) {
+		dprintf("Error getting sysfs mount point\n");
+		return NULL;
+	}
+
+	strcat(sysfs_path, "/bus/");
+	strcat(sysfs_path, name);
+	strcat(sysfs_path, "/devices");
+	dir = sysfs_open_directory(sysfs_path);
+	if (dir == NULL) {
+		dprintf("Error opening sysfs_directory at %s\n", sysfs_path);
+		return NULL;
+	}
+
+	if (sysfs_read_directory(dir) != 0) {
+		dprintf("Error reading sysfs_directory at %s\n", sysfs_path);
+		sysfs_close_directory(dir);
+		return NULL;
+	}
+
+	if (dir->links != NULL) {
+		list = dlist_new_with_delete(SYSFS_NAME_LEN,
+				sysfs_del_name);
+		if (list == NULL) {
+			dprintf("Error creating list\n");
+			sysfs_close_directory(dir);
+			return NULL;
+		}
+
+		dlist_for_each_data(dir->links, cur,
+				struct sysfs_link) {
+			device_name = (char *)calloc(1, SYSFS_NAME_LEN);
+			strcpy(device_name, cur->name);
+			dlist_unshift(list, device_name);
+		}
+	}
+	sysfs_close_directory(dir);
+	return list;
+}
