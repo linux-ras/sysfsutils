@@ -391,12 +391,12 @@ struct sysfs_attribute *sysfs_open_driver_attr(const unsigned char *bus,
 
 /**
  * sysfs_open_driver: open driver by name, given its bus
- * @drv_name: Name of the driver
  * @bus_name: Name of the bus
+ * @drv_name: Name of the driver
  * Returns the sysfs_driver reference on success and NULL on failure
  */
-struct sysfs_driver *sysfs_open_driver(const unsigned char *drv_name,
-				const unsigned char *bus_name)
+struct sysfs_driver *sysfs_open_driver(const unsigned char *bus_name,
+				const unsigned char *drv_name)
 {
 	unsigned char path[SYSFS_PATH_MAX];
 	struct sysfs_driver *driver = NULL;

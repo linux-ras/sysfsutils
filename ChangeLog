@@ -1,5 +1,9 @@
 
 01/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Modified parameter order for "open" functions to make them
+			consistent
+
+01/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added additional CFLAGS for building lib and apps
 
 01/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>

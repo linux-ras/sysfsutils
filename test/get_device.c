@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	device = sysfs_open_device(argv[2], argv[1]);
+	device = sysfs_open_device(argv[1], argv[2]);
 	if (device == NULL) {
 		fprintf(stdout, "Device %s not found on bus %s\n", 
 					argv[2], argv[1]);

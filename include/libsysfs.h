@@ -190,7 +190,7 @@ extern struct dlist *sysfs_get_dir_subdirs(struct sysfs_directory *dir);
 /* sysfs driver access */
 extern void sysfs_close_driver(struct sysfs_driver *driver);
 extern struct sysfs_driver *sysfs_open_driver
-	(const unsigned char *drv_name, const unsigned char *bus_name);
+	(const unsigned char *bus_name, const unsigned char *drv_name);
 extern struct sysfs_driver *sysfs_open_driver_path(const unsigned char *path);
 extern struct sysfs_attribute *sysfs_get_driver_attr
 		(struct sysfs_driver *drv, const unsigned char *name);
@@ -212,7 +212,7 @@ extern struct sysfs_root_device *sysfs_open_root_device
 extern struct dlist *sysfs_get_root_devices(struct sysfs_root_device *root);
 extern void sysfs_close_device(struct sysfs_device *dev);
 extern struct sysfs_device *sysfs_open_device
-		(const unsigned char *bus_id, const unsigned char *bus);
+		(const unsigned char *bus, const unsigned char *bus_id);
 extern struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev);
 extern struct sysfs_device *sysfs_open_device_path(const unsigned char *path);
 extern struct sysfs_attribute *sysfs_get_device_attr

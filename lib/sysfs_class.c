@@ -425,6 +425,11 @@ static int get_blockdev_parent(struct sysfs_class_device *clsdev)
 
 	strcpy(parent_path, clsdev->path);
 	c = strstr(parent_path, SYSFS_BLOCK_NAME);
+	if (c == NULL) {
+		dprintf("Class device %s does not belong to BLOCK subsystem\n",
+				clsdev->name);
+		return 1;
+	}
 	c += strlen(SYSFS_BLOCK_NAME);
 	if (*c == '/')
 		c++;
