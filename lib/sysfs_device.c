@@ -331,3 +331,16 @@ struct sysfs_root_device *sysfs_open_root_device(const unsigned char *name)
 
 	return root;
 }
+
+/**
+ * sysfs_get_device_attributes: returns a dlist of attributes corresponding to
+ * 	the specific device
+ * @device: struct sysfs_device * for which attributes are to be returned
+ */
+struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
+{
+	if (device == NULL || device->directory == NULL) 
+		return NULL;
+
+	return (device->directory->attributes);
+}	

@@ -85,33 +85,6 @@ void remove_end_newline(unsigned char *value)
 }
 
 /**
- * print_device_children: prints out device subdirs.
- * @sdir: print this directory's subdirectories/children.
- */
-void print_device_children(struct sysfs_directory *sdir)
-{
-	if (sdir != NULL) {
-		fprintf(stdout, "\tChildren:\n");
-		if (sdir->subdirs != NULL) {
-			struct sysfs_directory *cur;
-
-			dlist_for_each_data(sdir->subdirs, cur,
-					struct sysfs_directory) {
-				fprintf(stdout, "\t\t%s\n", cur->name);
-			}
-		}	
-		if (sdir->links != NULL) {
-			struct sysfs_link *curl = NULL;
-
-			dlist_for_each_data(sdir->links, curl,
-					struct sysfs_link) {
-				fprintf(stdout, "\t\t%s\n", curl->name);
-			}
-		}
-	}
-}
-
-/**
  * isbinaryvalue: checks to see if attribute is binary or not.
  * @attr: attribute to check.
  * returns 1 if binary or 0 if not.
@@ -191,18 +164,16 @@ void print_attribute(struct sysfs_attribute *attr)
 
 /**
  * print_device_attributes: prints out device attributes.
- * @sdir: print this directory's attributes/files.
+ * @sdir: print this device's attributes/files.
  */
-void print_device_attributes(struct sysfs_directory *sdir)
+void print_device_attributes(struct dlist *attributes)
 {
-	if (sdir != NULL && sdir->attributes != NULL) {
-		struct sysfs_attribute *cur = NULL;;
+	struct sysfs_attribute *cur = NULL;;
 
-		fprintf (stdout, "\tAttributes:\n");
-		dlist_for_each_data(sdir->attributes, cur,
+	fprintf (stdout, "\tAttributes:\n");
+	dlist_for_each_data(attributes, cur,
 				struct sysfs_attribute) {
-			print_attribute(cur);
-		}
+		print_attribute(cur);
 	}
 }
 
@@ -212,16 +183,16 @@ void print_device_attributes(struct sysfs_directory *sdir)
  */
 void print_device(struct sysfs_device *device)
 {
-	if (device != NULL && device->directory != NULL) {
-		fprintf (stdout, "  %s %s\n", device->bus_id, device->name);
-		if (device->directory->subdirs != NULL
-		    || device->directory->links != NULL)
-			print_device_children(device->directory);
-		if (device->directory->attributes != NULL && (show_options 
-		    & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
-		    | SHOW_ALL_ATTRIB_VALUES))) 
-			print_device_attributes(device->directory);
-		if (device->driver_name != NULL) 
+	struct dlist *attributes = NULL;
+	
+	if (device != NULL) {
+		fprintf (stdout, "  %s\n", device->bus_id);
+		if (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
+		    | SHOW_ALL_ATTRIB_VALUES)) 
+			attributes = sysfs_get_device_attributes(device);
+			if (attributes != NULL)
+				print_device_attributes(attributes);
+		if (isalnum(device->driver_name[0])) 
 			fprintf (stdout, "\tDriver: %s\n", 
 						device->driver_name);
 	}
@@ -233,14 +204,15 @@ void print_device(struct sysfs_device *device)
  */
 void print_driver_attributes(struct sysfs_driver *driver)
 {
-	if (driver != NULL && driver->directory != NULL) {
-		struct sysfs_directory *sdir = driver->directory;
-
-		if (sdir->attributes != NULL) {
+	struct dlist *attributes = NULL;
+	
+	if (driver != NULL) {
+		attributes = sysfs_get_driver_attributes(driver);
+		if (attributes != NULL) {
 			struct sysfs_attribute *cur = NULL;
 
 			fprintf (stdout, "\t%s Attributes:\n", driver->name);
-			dlist_for_each_data(sdir->attributes, cur, 
+			dlist_for_each_data(attributes, cur, 
 					struct sysfs_attribute) {
 				print_attribute(cur);
 			}
@@ -254,17 +226,14 @@ void print_driver_attributes(struct sysfs_driver *driver)
  */
 void print_driver_devices(struct sysfs_driver *driver)
 {
-	if (driver != NULL && driver->directory != NULL) {
-		struct sysfs_directory *sdir = driver->directory;
-
-		if (sdir->links != NULL) {
-			struct sysfs_link *cur = NULL;
-
+	struct sysfs_device *device = NULL;
+	
+	if (driver != NULL) {
+		if (driver->devices != NULL) {
 			fprintf (stdout, "\tDevices:\n");
-			dlist_for_each_data(sdir->links, cur,
-					struct sysfs_link) {
-				fprintf(stdout, "\t\t%s\n", cur->name);
-			}
+			dlist_for_each_data(driver->devices, device,
+					struct sysfs_device) 
+				fprintf(stdout, "\t\t%s\n", device->bus_id);
 		}
 	}
 }
@@ -275,19 +244,14 @@ void print_driver_devices(struct sysfs_driver *driver)
  */
 void print_driver(struct sysfs_driver *driver)
 {
-	struct sysfs_directory *sdir = NULL;
-
+	struct dlist *links = NULL, *attributes = NULL;
+	
 	if (driver != NULL) {
 		fprintf (stdout, "  %s\n", driver->name);
-		sdir = driver->directory;
-		if (sdir != NULL) {
-			if (sdir->links != NULL)
-				print_driver_devices(driver);
-			if(sdir->attributes != NULL && (show_options
-			    & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
-			    | SHOW_ALL_ATTRIB_VALUES)))
-				print_driver_attributes(driver);
-		}
+		print_driver_devices(driver);
+		if(show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
+			    | SHOW_ALL_ATTRIB_VALUES))
+			print_driver_attributes(driver);
 	}
 }
 
@@ -319,7 +283,7 @@ int print_sysfs_bus(unsigned char *busname)
 		dlist_for_each_data(bus->devices, curdev,
 				struct sysfs_device) {
 			if (bus_device == NULL || (strcmp(bus_device,
-			    curdev->bus_id) == 0))
+			    curdev->bus_id) == 0)) 
 				print_device(curdev);
 		}
 	}
@@ -340,35 +304,20 @@ int print_sysfs_bus(unsigned char *busname)
  */
 int print_sysfs_buses(void)
 {
-	struct sysfs_directory *busdir = NULL, *current = NULL;
-	unsigned char buspath[SYSFS_PATH_MAX];
-	int ret = 0;
+        unsigned char subsys[SYSFS_NAME_LEN];
+        struct dlist *list = NULL;
+        char *cur = NULL;
+        int ret = 0;
 
-	/* get sysfs mount point */
-	if ((sysfs_get_mnt_path(buspath, SYSFS_PATH_MAX) != 0)) {
-		perror("sysfs_get_mnt_path");
-		fprintf(stderr, "Error getting sysfs mount path - exiting\n");
-		exit(1);
+        strcpy(subsys, SYSFS_BUS_DIR);
+        list = sysfs_open_subsystem_list(subsys);
+        if (list != NULL) {
+		fprintf(stdout, "Supported sysfs buses:\n");
+		dlist_for_each_data(list, cur, char)
+			fprintf(stdout, "\t%s\n", cur);
 	}
-	strcat(buspath, SYSFS_BUS_DIR);
-	busdir = sysfs_open_directory(buspath);
-	if (busdir == NULL) {
-		fprintf(stderr, "Error opening sysfs bus directory at %s\n",
-			buspath);
-		return 1;
-	}
-	if ((sysfs_read_directory(busdir)) != 0) {
-		fprintf(stderr, "Error reading sysfs bus directory at %s\n",
-			buspath);
-		sysfs_close_directory(busdir);
-		return 1;
-	}
-
-	fprintf(stdout, "Supported sysfs buses:\n");
-	dlist_for_each_data(busdir->subdirs, current, struct sysfs_directory) {
-		fprintf(stdout, "\t%s\n", current->name);
-	}
-	sysfs_close_directory(busdir);
+	sysfs_close_list(list);
+									
 	return ret;
 }
 

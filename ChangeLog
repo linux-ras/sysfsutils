@@ -1,4 +1,12 @@
 
+08/28/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+                * Added more utility functions to sysfsutils
+                * Modified commands to make use of the new functions
+                * Updated libsysfs.txt to reflect new structure modifications
+                * Added sysfs_open_subsystem_list() to get subsystem specific
+                        lists from the library
+                * Added sysfs_close_list() - a generic list deletion routine
+
 08/28/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
                 * Added sysfs_root_device struct for modelling /sys/devices
                         path.

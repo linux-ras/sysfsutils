@@ -28,7 +28,7 @@
  */
 static void sysfs_del_attribute(void *attr)
 {
-	        sysfs_close_attribute((struct sysfs_attribute *)attr);
+        sysfs_close_attribute((struct sysfs_attribute *)attr);
 }
 
 /**
@@ -36,7 +36,7 @@ static void sysfs_del_attribute(void *attr)
  */
 static void sysfs_del_link(void *ln)
 {
-	        sysfs_close_link((struct sysfs_link *)ln);
+        sysfs_close_link((struct sysfs_link *)ln);
 }
 
 /**
@@ -44,7 +44,7 @@ static void sysfs_del_link(void *ln)
  */
 static void sysfs_del_directory(void *dir)
 {
-	        sysfs_close_directory((struct sysfs_directory *)dir);
+        sysfs_close_directory((struct sysfs_directory *)dir);
 }
 
 /**

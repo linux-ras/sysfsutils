@@ -154,3 +154,79 @@ int sysfs_get_link(const unsigned char *path, unsigned char *target, size_t len)
 
 	return 0;
 }
+
+
+/**
+ * sysfs_del_name: free function for sysfs_open_subsystem_list
+ * @name: memory area to be freed
+ */ 
+void sysfs_del_name(void *name)
+{
+	free(name);
+}
+
+
+/**
+ * sysfs_close_list: generic list free routine
+ * @list: dlist to free
+ * Returns nothing
+ */
+void sysfs_close_list(struct dlist *list)
+{
+	if (list != NULL)
+		dlist_destroy(list);
+}
+
+/**
+ * sysfs_open_subsystem_list: gets a list of all supported "name" subsystem
+ * 	details from the system
+ * @name: name of the subsystem, eg., "bus", "class", "devices"
+ * Returns a dlist of supported names or NULL if subsystem not supported
+ */ 
+struct dlist *sysfs_open_subsystem_list(unsigned char *name)
+{
+	unsigned char sysfs_path[SYSFS_PATH_MAX], *subsys_name = NULL;
+	struct sysfs_directory *dir = NULL, *cur = NULL;
+	struct dlist *list = NULL;
+	
+	if (name == NULL)
+		return NULL;
+
+	if (sysfs_get_mnt_path(sysfs_path, SYSFS_PATH_MAX) != 0) {
+		dprintf("Error getting sysfs mount point\n");
+		return NULL;
+	}
+
+	strcat(sysfs_path, name);
+	dir = sysfs_open_directory(sysfs_path);
+	if (dir == NULL) {
+		dprintf("Error opening sysfs_directory at %s\n", sysfs_path);
+		return NULL;
+	}
+
+	if (sysfs_read_directory(dir) != 0) {
+		dprintf("Error reading sysfs_directory at %s\n", sysfs_path);
+		sysfs_close_directory(dir);
+		return NULL;
+	}
+
+	if (dir->subdirs != NULL) {
+		list = dlist_new_with_delete(SYSFS_NAME_LEN,
+				sysfs_del_name);
+		if (list == NULL) {
+			dprintf("Error creating list\n");
+			sysfs_close_directory(dir);
+			return NULL;
+		}
+
+		dlist_for_each_data(dir->subdirs, cur,
+				struct sysfs_directory) {
+			subsys_name = (char *)calloc(1, SYSFS_NAME_LEN);
+			strcpy(subsys_name, cur->name);
+			dlist_unshift(list, subsys_name);
+		}
+	}
+	sysfs_close_directory(dir);
+	return list;
+}
+		

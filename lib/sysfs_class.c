@@ -29,6 +29,23 @@ void sysfs_close_cls_dev(void *dev)
 }
 
 /**
+ * class_name_equal: compares class_devices' name
+ * @a: class_name looking for
+ * @b: sysfs_class_device being compared
+ */
+static int class_name_equal(void *a, void *b)
+{
+	if (a == NULL || b == NULL)
+		return 0;
+
+	if (strcmp(((unsigned char *)a), ((struct sysfs_class_device *)b)->name)
+		== 0)
+		return 1;
+
+	return 0;
+}
+
+/**
  * sysfs_close_class_device: closes a single class device.
  * @dev: class device to close.
  */
@@ -267,4 +284,79 @@ struct sysfs_class *sysfs_open_class(const unsigned char *name)
 	}
 
 	return cls;
+}
+
+/**
+ * sysfs_get_class_device: Get specific class device using the device's id
+ * @class: class to find device on
+ * @name: class name of the device
+ */ 
+struct sysfs_class_device *sysfs_get_class_device(struct sysfs_class *class,
+					unsigned char *name)
+{
+	if (class == NULL || name == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	return (struct sysfs_class_device *)dlist_find_custom(class->devices,
+			name, class_name_equal);
+}
+
+/**
+ * sysfs_open_class_device_by_name: Locates a specific class_device and returns it.
+ * Class_device must be closed using sysfs_close_class_device
+ * @classname: Class to search
+ * @name: name of the class_device
+ */
+struct sysfs_class_device *sysfs_open_class_device_by_name
+		(unsigned char *classname, unsigned char *name)
+{
+	struct sysfs_class *class = NULL;
+	struct sysfs_class_device *cdev = NULL, *rcdev = NULL;
+
+	if (classname == NULL || name == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+	
+	class = sysfs_open_class(classname);
+	if (class == NULL) {
+		dprintf("Error opening class %s\n", classname);
+		return NULL;
+	}
+
+	cdev = sysfs_get_class_device(class, name);
+	if (cdev == NULL) {
+		dprintf("Error getting class device %s from class %s\n",
+				name, classname);
+		sysfs_close_class(class);
+		return NULL;
+	}
+
+	rcdev = sysfs_open_class_device(cdev->directory->path);
+	if (rcdev == NULL) {
+		dprintf("Error getting class device %s from class %s\n",
+				name, classname);
+		sysfs_close_class(class);
+		return NULL;
+	}
+	sysfs_close_class(class);
+	
+	return rcdev;
+}
+
+
+/**
+ * sysfs_get_classdev_attributes: returns a dlist of attributes for
+ * 	the requested class_device
+ * @cdev: sysfs_class_dev for which attributes are needed
+ * returns a dlist of attributes if exists, NULL otherwise
+ */
+struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev)
+{
+	if (cdev == NULL || cdev->directory == NULL)
+		return NULL;
+
+	return (cdev->directory->attributes);
 }

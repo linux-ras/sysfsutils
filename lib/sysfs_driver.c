@@ -86,3 +86,31 @@ struct sysfs_driver *sysfs_open_driver(const unsigned char *path)
 	
 	return driver;
 }
+
+/**
+ * sysfs_get_driver_attributes: gets list of attributes for the given driver
+ * @driver: sysfs_driver for which attributes are required
+ * returns a dlist of attributes corresponding to the driver if present
+ * 	NULL otherwise
+ */
+struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver)
+{
+	if (driver == NULL || driver->directory == NULL)
+		return NULL;
+
+	return(driver->directory->attributes);
+}
+
+/**
+ * sysfs_get_driver_links: gets list of links from the given driver
+ * @driver: sysfs_driver for which links list is required
+ * returns a dlist of links corresponding to the driver if present
+ * 	NULL otherwise
+ */
+struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver)
+{
+	if (driver == NULL || driver->directory == NULL)
+		return NULL;
+
+	return(driver->directory->links);
+}
