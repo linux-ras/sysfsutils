@@ -1,4 +1,7 @@
 
+09/04/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Simplify sysfs_open_bus_device
+
 08/29/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Removed "bus_name" from struct sysfs_device
 		* Updated NEWS, TODO and docs/libsysfs.txt files

@@ -392,36 +392,32 @@ struct sysfs_attribute *sysfs_get_bus_attribute(struct sysfs_bus *bus,
 struct sysfs_device *sysfs_open_bus_device(unsigned char *busname, 
 							unsigned char *dev_id)
 {
-	struct sysfs_bus *bus = NULL;
-	struct sysfs_device *dev = NULL, *rdev = NULL;
+	struct sysfs_device *rdev = NULL;
+	char path[SYSFS_PATH_MAX];
 
 	if (busname == NULL || dev_id == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
 
-	bus = sysfs_open_bus(busname);
-	if (bus == NULL) {
-		dprintf("Error opening bus %s\n", busname);
+	memset(path, 0, SYSFS_PATH_MAX);
+	if (sysfs_get_mnt_path(path, SYSFS_PATH_MAX) != 0) {
+		dprintf("Error getting sysfs mount point\n");
 		return NULL;
 	}
 
-	dev = sysfs_get_bus_device(bus, dev_id);
-	if (dev == NULL) {
-		dprintf("Error getting device %s on bus %s\n", dev_id,
-			busname);
-		sysfs_close_bus(bus);
-		return NULL;
-	}
-	rdev = sysfs_open_device(dev->directory->path);
+	strcat(path, "/bus/");
+	strcat(path, busname);
+	strcat(path, "/devices/");
+	strcat(path, dev_id);
+
+	rdev = sysfs_open_device(path);
 	if (rdev == NULL) {
-		dprintf("Error getting device %s on bus %s\n", dev_id,
-			busname);
-		sysfs_close_bus(bus);
+		dprintf("Error getting device %s on bus %s\n",
+				dev_id, busname);
 		return NULL;
 	}
-	sysfs_close_bus(bus);
-
+	
 	return rdev;
 }
 
