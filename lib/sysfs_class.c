@@ -312,7 +312,7 @@ struct sysfs_class_device *sysfs_get_class_device(struct sysfs_class *class,
 struct sysfs_device *sysfs_get_classdev_device
 			(struct sysfs_class_device *clsdev)
 {
-	struct sysfs_link *curlink = NULL;
+	struct sysfs_link *devlink = NULL;
 	
 	if (clsdev == NULL) {
 		errno = EINVAL;
@@ -328,18 +328,15 @@ struct sysfs_device *sysfs_get_classdev_device
 			return NULL;
 	}
 	if (clsdev->directory->links != NULL) {
-		dlist_for_each_data(clsdev->directory->links, 
-				curlink, struct sysfs_link) {
-			if ((strstr(curlink->target, 
-						SYSFS_DEVICES_NAME)) != NULL) {
-				clsdev->sysdevice = sysfs_open_device
-							(curlink->target);
-				if (clsdev->sysdevice == NULL)
-					return NULL;
-				if (clsdev->driver != NULL) 
-					strcpy(clsdev->sysdevice->driver_name,
+		devlink = sysfs_get_directory_link(clsdev->directory, "device");
+		if (devlink != NULL) {
+			clsdev->sysdevice = sysfs_open_device
+						(devlink->target);
+			if (clsdev->sysdevice == NULL)
+				return NULL;
+			if (clsdev->driver != NULL) 
+				strcpy(clsdev->sysdevice->driver_name,
 							clsdev->driver->name);
-			}
 		}
 	}
 	return (clsdev->sysdevice);
@@ -355,7 +352,7 @@ struct sysfs_device *sysfs_get_classdev_device
 struct sysfs_driver *sysfs_get_classdev_driver
 			(struct sysfs_class_device *clsdev)
 {
-	struct sysfs_link *curlink = NULL;
+	struct sysfs_link *drvlink = NULL;
 	
 	if (clsdev == NULL) {
 		errno = EINVAL;
@@ -371,15 +368,13 @@ struct sysfs_driver *sysfs_get_classdev_driver
 			return NULL;
 	}
 	if (clsdev->directory->links != NULL) {
-		dlist_for_each_data(clsdev->directory->links, 
-				curlink, struct sysfs_link) {
-			if ((strstr(curlink->target, 
-						SYSFS_DRIVERS_NAME)) != NULL) {
-				clsdev->driver = sysfs_open_driver
-							(curlink->target);
-				if (clsdev->driver == NULL)
-					return NULL;
-			}
+		drvlink = sysfs_get_directory_link(clsdev->directory, "driver");
+		if (drvlink != NULL) {
+			clsdev->driver = sysfs_open_driver
+						(drvlink->target);
+			if (clsdev->driver == NULL)
+				return NULL;
+			
 		}
 	}
 	return (clsdev->driver);

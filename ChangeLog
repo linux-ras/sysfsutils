@@ -1,5 +1,9 @@
 
 12/02/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Patched code to use already available functions for 
+			optimization.
+
+12/02/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Corrected sysfs_get_directory_attribute()
 
 12/01/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
