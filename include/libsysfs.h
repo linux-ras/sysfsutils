@@ -138,6 +138,9 @@ extern struct sysfs_attribute *sysfs_open_attribute(const unsigned char *path);
 extern int sysfs_read_attribute(struct sysfs_attribute *sysattr);
 extern int sysfs_read_attribute_value(const unsigned char *attrpath, 
 				unsigned char *value, size_t vsize);
+extern int sysfs_write_attribute(struct sysfs_attribute *sysattr);
+extern int sysfs_write_attribute_value(const unsigned char *attrpath,
+				unsigned char *value);
 extern unsigned char *sysfs_get_value_from_attributes(struct dlist *attr, 
 						const unsigned char * name);
 extern void sysfs_close_directory(struct sysfs_directory *sysdir);

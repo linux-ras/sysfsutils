@@ -1,5 +1,5 @@
 
-The authors of sysutils would like to thank the following people who
+The authors of sysfsutils would like to thank the following people who
 have made contributions:
 
 	o Lev Makhlis <mlev@despammed.com>:
@@ -9,3 +9,5 @@ have made contributions:
 	o Eric J Bohm <bohm@gate.csgeeks.org>:
 		- Supplied dlist generic linked list implementation.
 		- Added dlist_for_each* functionality.
+        o Guo Min <min.guo@intel.com>:
+                - Supplied sysfs_write_attribute patch

@@ -160,6 +160,43 @@ struct sysfs_attribute *sysfs_open_attribute(const unsigned char *path)
 
 	return sysattr;
 }
+/**
+ * sysfs_write_attribute: write value to the attribute
+ * @sysattr: attribute to write
+ * returns 0 with success and -1 with error.
+ */
+int sysfs_write_attribute(struct sysfs_attribute *sysattr)
+{
+	int fd;
+	int length;
+	
+	if (sysattr == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	
+	if (!(sysattr->method & SYSFS_METHOD_STORE)) {
+		dprintf ("Store method not supported for attribute %s\n",
+			sysattr->path);
+		return -1;
+	}
+		
+	if ((fd = open(sysattr->path, O_RDWR)) < 0) {
+		dprintf ("Error reading attribute %s\n", sysattr->path);
+		return -1;
+	}
+
+	length = write(fd, sysattr->value, sizeof(sysattr->value));
+	if (length < 0) {
+		dprintf("Error write to the attribute %s\n",
+			sysattr->path);
+		close(fd);
+		return -1;
+	}
+	close(fd);	
+	return 0;
+}
+
 
 /**
  * sysfs_read_attribute: reads value from attribute
@@ -213,6 +250,42 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 
 	return 0;
 }
+
+/**
+ * sysfs_write_attribute_value: given path to attribute, 
+ * value will be saved to the attribute.
+ * @attrpath: sysfs path to attribute
+ * @value: value to give to attribute
+ * returns 0 with success and -1 with error.
+ */
+int sysfs_write_attribute_value(const unsigned char *attrpath, 
+						unsigned char *value)
+{
+	struct sysfs_attribute *attr = NULL;
+	
+	if (attrpath == NULL || value == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	attr = sysfs_open_attribute(attrpath);
+	if (attr == NULL) {
+		dprintf("Invalid attribute path %s\n", attrpath);
+		errno = EINVAL;
+		return -1;
+	}
+	strncpy(attr->value,value,sizeof(value));
+	if ((sysfs_write_attribute(attr) != 0 )) {
+		dprintf("Error write to attribute %s\n", attrpath);
+		sysfs_close_attribute(attr);
+		return -1;
+	}
+
+	sysfs_close_attribute(attr);
+
+	return 0;
+}
+
 
 /**
  * sysfs_read_attribute_value: given path to attribute, return its value.

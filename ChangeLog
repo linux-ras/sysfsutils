@@ -1,4 +1,7 @@
 
+08/28/2003 - Guo Min <min.guo@intel.com>
+                * Added "write" attribute support to sysfsutils
+
 08/28/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
                 * Changed sysfs_driver to contain a dlist of devices
 
