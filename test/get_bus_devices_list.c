@@ -41,12 +41,12 @@ int main(int argc, char *argv[])
 	}
 	name = sysfs_open_bus_devices_list(argv[1]);
 	if (name != NULL) {
-		fprintf(stdout, "Devices on bus %s:\n", argv[1]);
+		fprintf(stdout, "Devices on bus \"%s\":\n", argv[1]);
 		dlist_for_each_data(name, cur, char) {
 			fprintf(stdout, "\t%s\n", cur);
 		}
 	} else
-		fprintf(stdout, "Bus %s not found\n", argv[1]);
+		fprintf(stdout, "Bus \"%s\" not found\n", argv[1]);
 	sysfs_close_list(name);
 
 	return 0;

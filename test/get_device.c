@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
 	device = sysfs_open_device(argv[1], argv[2]);
 	if (device == NULL) {
-		fprintf(stdout, "Device %s not found on bus %s\n", 
+		fprintf(stdout, "Device \"%s\" not found on bus \"%s\"\n", 
 					argv[2], argv[1]);
 		return 1;
 	}
@@ -52,7 +52,8 @@ int main(int argc, char *argv[])
 	if (attrlist != NULL) {
 		dlist_for_each_data(attrlist, attr, 
 					struct sysfs_attribute) 
-			fprintf(stdout, "\t%s : %s", attr->name, attr->value);
+			fprintf(stdout, "\t%-20s : %s", 
+					attr->name, attr->value);
 	}
 	fprintf(stdout, "\n");
 	

@@ -45,25 +45,26 @@ int main(int argc, char *argv[])
 
 	cdev = sysfs_open_class_device(argv[1], argv[2]);
 	if (cdev == NULL) {
-		fprintf(stdout, "Device %s not found\n", argv[2]);
+		fprintf(stdout, "Device \"%s\" not found\n", argv[2]);
 		return 1;
 	}
 	
-	fprintf(stdout, "Class device %s\n", cdev->name);
+	fprintf(stdout, "Class device \"%s\"\n", cdev->name);
 	
 	attrlist = sysfs_get_classdev_attributes(cdev);
 	if (attrlist != NULL) {
 		dlist_for_each_data(attrlist, attr, struct sysfs_attribute) 
-			fprintf(stdout, "\t%s : %s", attr->name, attr->value);
+			fprintf(stdout, "\t%-20s : %s", 
+					attr->name, attr->value);
 	}
 	fprintf(stdout, "\n");
 		
 	device = sysfs_get_classdev_device(cdev);
 	if (device)
-		fprintf(stdout, "\tDevice : %s\n", cdev->sysdevice->bus_id);
+		fprintf(stdout, "\tDevice : \"%s\"\n", cdev->sysdevice->bus_id);
 	driver = sysfs_get_classdev_driver(cdev);
 	if (driver)
-		fprintf(stdout, "\tDriver : %s\n", cdev->driver->name);
+		fprintf(stdout, "\tDriver : \"%s\"\n", cdev->driver->name);
 
 	sysfs_close_class_device(cdev);
 	return 0;
