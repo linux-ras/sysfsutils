@@ -61,14 +61,14 @@ static unsigned char *binary_files[] = {
 
 static int binfiles = 2;
 
-static unsigned int get_pciconfig_word(int offset, char *buf)
+static unsigned int get_pciconfig_word(int offset, unsigned char *buf)
 {
         unsigned short val = (unsigned char)buf[offset] |
 		                ((unsigned char)buf[offset+1] << 8);
         return val;
 }
 
-static unsigned char get_pciconfig_byte(int offset, char *buf)
+static unsigned char get_pciconfig_byte(int offset, unsigned char *buf)
 {
         return((unsigned char)buf[offset]);
 }
@@ -203,7 +203,10 @@ void print_device(struct sysfs_device *device)
 	unsigned char buf[128], *value = NULL;
 	
 	if (device != NULL) {
-		fprintf (stdout, "  %s: ", device->bus_id);
+		if (!(strcmp(bus_to_print, "pci")))
+			fprintf(stdout, "  %s: ", device->bus_id);
+		else
+			fprintf(stdout, "  %s:\n", device->bus_id);
 		attributes = sysfs_get_device_attributes(device);
 		if (attributes != NULL) {
 			if (!(strcmp(bus_to_print, "pci"))) {
@@ -339,7 +342,7 @@ int print_sysfs_buses(void)
 {
         unsigned char subsys[SYSFS_NAME_LEN];
         struct dlist *list = NULL;
-        char *cur = NULL;
+        unsigned char *cur = NULL;
         int ret = 0;
 
         strcpy(subsys, SYSFS_BUS_DIR);
@@ -363,7 +366,7 @@ int main(int argc, char *argv[])
 	extern int optind;
 	extern char *optarg;
 	/*pci ids*/
-	char *pci_id_file = "/usr/local/share/pci.ids";
+	unsigned char *pci_id_file = "/usr/local/share/pci.ids";
 
 	while((opt = getopt(argc, argv, cmd_options)) != EOF) {
 		switch(opt) {

@@ -75,15 +75,24 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-bin_PROGRAMS = dlist_test
+bin_PROGRAMS = dlist_test get_dev_bus get_dev_class get_device get_driver \
+		get_devices_list
+
 dlist_test_SOURCES = dlist_test.c
+get_dev_bus_SOURCES = get_dev_bus.c
+get_dev_class_SOURCES = get_dev_class.c
+get_device_SOURCES = get_device.c
+get_driver_SOURCES = get_driver.c
+get_devices_list_SOURCES = get_devices_list.c
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.a
 subdir = test
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-bin_PROGRAMS = dlist_test$(EXEEXT)
+bin_PROGRAMS = dlist_test$(EXEEXT) get_dev_bus$(EXEEXT) \
+	get_dev_class$(EXEEXT) get_device$(EXEEXT) get_driver$(EXEEXT) \
+	get_devices_list$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_dlist_test_OBJECTS = dlist_test.$(OBJEXT)
@@ -91,6 +100,31 @@ dlist_test_OBJECTS = $(am_dlist_test_OBJECTS)
 dlist_test_LDADD = $(LDADD)
 dlist_test_DEPENDENCIES = ../lib/libsysfs.a
 dlist_test_LDFLAGS =
+am_get_dev_bus_OBJECTS = get_dev_bus.$(OBJEXT)
+get_dev_bus_OBJECTS = $(am_get_dev_bus_OBJECTS)
+get_dev_bus_LDADD = $(LDADD)
+get_dev_bus_DEPENDENCIES = ../lib/libsysfs.a
+get_dev_bus_LDFLAGS =
+am_get_dev_class_OBJECTS = get_dev_class.$(OBJEXT)
+get_dev_class_OBJECTS = $(am_get_dev_class_OBJECTS)
+get_dev_class_LDADD = $(LDADD)
+get_dev_class_DEPENDENCIES = ../lib/libsysfs.a
+get_dev_class_LDFLAGS =
+am_get_device_OBJECTS = get_device.$(OBJEXT)
+get_device_OBJECTS = $(am_get_device_OBJECTS)
+get_device_LDADD = $(LDADD)
+get_device_DEPENDENCIES = ../lib/libsysfs.a
+get_device_LDFLAGS =
+am_get_devices_list_OBJECTS = get_devices_list.$(OBJEXT)
+get_devices_list_OBJECTS = $(am_get_devices_list_OBJECTS)
+get_devices_list_LDADD = $(LDADD)
+get_devices_list_DEPENDENCIES = ../lib/libsysfs.a
+get_devices_list_LDFLAGS =
+am_get_driver_OBJECTS = get_driver.$(OBJEXT)
+get_driver_OBJECTS = $(am_get_driver_OBJECTS)
+get_driver_LDADD = $(LDADD)
+get_driver_DEPENDENCIES = ../lib/libsysfs.a
+get_driver_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -99,15 +133,22 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/dlist_test.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/dlist_test.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/get_dev_bus.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/get_dev_class.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/get_device.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/get_devices_list.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/get_driver.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
-DIST_SOURCES = $(dlist_test_SOURCES)
+DIST_SOURCES = $(dlist_test_SOURCES) $(get_dev_bus_SOURCES) \
+	$(get_dev_class_SOURCES) $(get_device_SOURCES) \
+	$(get_devices_list_SOURCES) $(get_driver_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(dlist_test_SOURCES)
+SOURCES = $(dlist_test_SOURCES) $(get_dev_bus_SOURCES) $(get_dev_class_SOURCES) $(get_device_SOURCES) $(get_devices_list_SOURCES) $(get_driver_SOURCES)
 
 all: all-am
 
@@ -145,6 +186,21 @@ clean-binPROGRAMS:
 dlist_test$(EXEEXT): $(dlist_test_OBJECTS) $(dlist_test_DEPENDENCIES) 
 	@rm -f dlist_test$(EXEEXT)
 	$(LINK) $(dlist_test_LDFLAGS) $(dlist_test_OBJECTS) $(dlist_test_LDADD) $(LIBS)
+get_dev_bus$(EXEEXT): $(get_dev_bus_OBJECTS) $(get_dev_bus_DEPENDENCIES) 
+	@rm -f get_dev_bus$(EXEEXT)
+	$(LINK) $(get_dev_bus_LDFLAGS) $(get_dev_bus_OBJECTS) $(get_dev_bus_LDADD) $(LIBS)
+get_dev_class$(EXEEXT): $(get_dev_class_OBJECTS) $(get_dev_class_DEPENDENCIES) 
+	@rm -f get_dev_class$(EXEEXT)
+	$(LINK) $(get_dev_class_LDFLAGS) $(get_dev_class_OBJECTS) $(get_dev_class_LDADD) $(LIBS)
+get_device$(EXEEXT): $(get_device_OBJECTS) $(get_device_DEPENDENCIES) 
+	@rm -f get_device$(EXEEXT)
+	$(LINK) $(get_device_LDFLAGS) $(get_device_OBJECTS) $(get_device_LDADD) $(LIBS)
+get_devices_list$(EXEEXT): $(get_devices_list_OBJECTS) $(get_devices_list_DEPENDENCIES) 
+	@rm -f get_devices_list$(EXEEXT)
+	$(LINK) $(get_devices_list_LDFLAGS) $(get_devices_list_OBJECTS) $(get_devices_list_LDADD) $(LIBS)
+get_driver$(EXEEXT): $(get_driver_OBJECTS) $(get_driver_DEPENDENCIES) 
+	@rm -f get_driver$(EXEEXT)
+	$(LINK) $(get_driver_LDFLAGS) $(get_driver_OBJECTS) $(get_driver_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -153,6 +209,11 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlist_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_dev_bus.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_dev_class.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_device.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_devices_list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_driver.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)

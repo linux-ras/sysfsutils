@@ -1,4 +1,8 @@
 
+10/06/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Pruned "test" routines
+		* Corrected pci name decode in cmds
+
 10/01/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added number of utility routines in "test" directory
 		* Adapted PCI name decode support from Martin Mares'

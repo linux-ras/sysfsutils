@@ -61,14 +61,14 @@ static unsigned char *binary_files[] = {
 
 static int binfiles = 2;
 
-static unsigned int get_pciconfig_word(int offset, char *buf)
+static unsigned int get_pciconfig_word(int offset, unsigned char *buf)
 {
         unsigned short val = (unsigned char)buf[offset] |
 	                ((unsigned char)buf[offset+1] << 8);
         return val;
 }
 
-static unsigned char get_pciconfig_byte(int offset, char *buf)
+static unsigned char get_pciconfig_byte(int offset, unsigned char *buf)
 {
         return((unsigned char)buf[offset]);
 }
@@ -89,7 +89,7 @@ void usage(void)
 		"\t-r <root_device>\tShow a specific root device tree\n");
 	fprintf(stdout, "\t-v\t\t\tShow all attributes with values\n");
 	fprintf(stdout, "\t-A <attribute_name>\tShow attribute value\n");
-	fprintf(stdout, "\t-B <block_name>\t Show specific block device\n");
+	fprintf(stdout, "\t-B <block_name>\t\tShow specific block device\n");
 	fprintf(stdout, "\t-D\t\t\tShow only drivers\n");
 }
 
@@ -245,14 +245,16 @@ void show_device(struct sysfs_device *device, int level)
 	struct dlist *attributes = NULL;
         unsigned int vendor_id, device_id, subsystem_vendor, subsystem_device;
         unsigned char buf[128], *value = NULL;
-			
 	
 	if (device != NULL) {
 		indent(level);
-		fprintf (stdout, "%s: ", device->bus_id);
+		if (show_bus != NULL && (!(strcmp(show_bus, "pci")))) 
+			fprintf(stdout, "%s: ", device->bus_id);
+		else
+			fprintf(stdout, "%s\n", device->bus_id);
 		attributes = sysfs_get_device_attributes(device);
 		if (attributes != NULL) {
-			if (!(strcmp(show_bus, "pci"))) {
+			if (show_bus != NULL && (!(strcmp(show_bus, "pci")))) {
                                 value = sysfs_get_value_from_attributes
 							(attributes, "config");
 				if (value != NULL) {
@@ -414,7 +416,7 @@ int show_sysfs_bus(unsigned char *busname)
 			fprintf(stdout, "Devices:\n");
 		dlist_for_each_data(bus->devices, curdev, struct sysfs_device) {
 			if (device_to_show == NULL || (strcmp(device_to_show,
-			    curdev->bus_id) == 0))
+			    curdev->bus_id) == 0)) 
 				show_device(curdev, 2);
 		}
 	}
@@ -671,7 +673,7 @@ int main(int argc, char *argv[])
 	int opt;
 	extern int optind;
 	extern char *optarg;
-        char *pci_id_file = "/usr/local/share/pci.ids";
+        unsigned char *pci_id_file = "/usr/local/share/pci.ids";
 	
 	while((opt = getopt(argc, argv, cmd_options)) != EOF) {
 		switch(opt) {

@@ -367,7 +367,7 @@ struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev)
  * @bsize: size of buffer
  * returns 0 with success and -1 with error
  */
-int sysfs_find_device_class_name(unsigned char *bus_id, 
+int sysfs_find_device_class(unsigned char *bus_id, 
 				unsigned char *classname, size_t bsize)
 {
 	unsigned char class[SYSFS_NAME_LEN], clspath[SYSFS_NAME_LEN];
@@ -428,7 +428,7 @@ int sysfs_write_classdev_attr(unsigned char *dev, unsigned char *attrib,
 	}
 	
 	memset(class_name, 0, SYSFS_NAME_LEN);
-	if ((sysfs_find_device_class_name(dev, 
+	if ((sysfs_find_device_class(dev, 
 					class_name, SYSFS_NAME_LEN)) < 0) {
 		dprintf("Class device %s not found\n", dev);
 		return -1;

@@ -245,7 +245,7 @@ extern struct sysfs_class_device *sysfs_open_class_device_by_name
 	(unsigned char *class, unsigned char *name);
 extern struct dlist *sysfs_get_classdev_attributes
 	(struct sysfs_class_device *cdev);
-extern int sysfs_find_device_class_name(unsigned char *bus_id, 
+extern int sysfs_find_device_class(unsigned char *bus_id, 
 		unsigned char *classname, size_t bsize);
 extern int sysfs_write_classdev_attr(unsigned char *dev,
 		unsigned char *attrib, unsigned char *value);

@@ -1,27 +1,43 @@
-/* Gets details of the supplied device */
+/*
+ * get_device.c
+ *
+ * Utility to get details of a given device
+ *
+ * Copyright (C) IBM Corp. 2003
+ *
+ *      This program is free software; you can redistribute it and/or modify it
+ *      under the terms of the GNU General Public License as published by the
+ *      Free Software Foundation version 2 of the License.
+ *
+ *      This program is distributed in the hope that it will be useful, but
+ *      WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *      General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License along
+ *      with this program; if not, write to the Free Software Foundation, Inc.,
+ *      675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <mntent.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <ctype.h>
 
 #include "libsysfs.h"
+
+void print_usage(void)
+{
+        fprintf(stdout, "Usage: get_device [device]\n");
+}
 
 int main(int argc, char *argv[])
 {
 	char *bus = NULL;
-	struct sysfs_driver *driver = NULL;
 	struct sysfs_device *device = NULL;
 	struct sysfs_attribute *attr = NULL;
 
 	if (argc != 2) {
-		fprintf(stdout, "Need 2 args\n");
+		print_usage();
 		return 1;
 	}
 
