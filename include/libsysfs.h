@@ -198,7 +198,7 @@ extern struct sysfs_attribute *sysfs_get_device_attr
 			(struct sysfs_device *dev, const unsigned char *name);
 extern struct dlist *sysfs_get_device_attributes(struct sysfs_device *device);
 extern struct sysfs_device *sysfs_open_device_by_id
-	(const unsigned char *bus_id, const unsigned char *bus, size_t bsize);
+		(const unsigned char *bus_id, const unsigned char *bus);
 extern struct sysfs_attribute *sysfs_open_device_attr(const unsigned char *bus, 
 		const unsigned char *bus_id, const unsigned char *attrib);
 

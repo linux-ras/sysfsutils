@@ -1188,15 +1188,13 @@ Description:	Given the name of the bus on which to look for, this function
 
 Arguments:	const unsigned char *bus_id	Device to look for
 		const unsigned char *bus	Bus on which to search
-		size_t bsize			Size of "bus"
 
 Returns:	struct sysfs_device * with success 
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
 Prototype:	struct sysfs_device *sysfs_open_device_by_id
-				(const unsigned char *bus_id, 
-					const unsigned char *bus, size_t bsize)
+			(const unsigned char *bus_id, const unsigned char *bus)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------

@@ -461,7 +461,6 @@ static int get_device_absolute_path(const unsigned char *device,
  * @bus_id: bus_id of the device to open - has to be the "bus_id" in 
  * 		/sys/bus/xxx/devices
  * @bus: bus the device belongs to
- * @bsize: size of the bus buffer
  * returns struct sysfs_device if found, NULL otherwise
  * NOTE: 
  * 1. Use sysfs_close_device to close the device
@@ -469,7 +468,7 @@ static int get_device_absolute_path(const unsigned char *device,
  * 	Use sysfs_find_device_bus to get the bus name
  */
 struct sysfs_device *sysfs_open_device_by_id(const unsigned char *bus_id, 
-		const unsigned char *bus, size_t bsize)
+						const unsigned char *bus)
 {
 	char sysfs_path[SYSFS_PATH_MAX];
 	struct sysfs_device *device = NULL;
