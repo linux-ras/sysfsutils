@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	} else 
 		fprintf(stdout, "%s is presently not used by any device\n", argv[1]);
 	
-	sysfs_close_drv(driver);
+	sysfs_close_driver_by_name(driver);
 	free(bus);
 	return 0;
 }

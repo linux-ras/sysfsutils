@@ -1,4 +1,8 @@
 
+10/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Miscellaneous changes - renaming of some
+			functions, etc
+			
 10/06/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Pruned "test" routines
 		* Corrected pci name decode in cmds

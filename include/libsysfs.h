@@ -195,8 +195,9 @@ extern void sysfs_close_driver(struct sysfs_driver *driver);
 extern struct sysfs_driver *sysfs_open_driver(const unsigned char *path);
 extern struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver);
 extern struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver);
+extern void sysfs_close_driver_by_name(struct sysfs_driver *driver);
 extern struct sysfs_driver *sysfs_open_driver_by_name
-		(unsigned char *drv_name, unsigned char *bus, size_t bsize);
+	(const unsigned char *drv_name, const unsigned char *bus, size_t bsize);
 extern int sysfs_write_driver_attr(unsigned char *drv, unsigned char *attrib,
 					unsigned char *value);
 
@@ -212,7 +213,7 @@ extern struct sysfs_attribute *sysfs_get_device_attr
 			(struct sysfs_device *dev, const unsigned char *name);
 extern struct dlist *sysfs_get_device_attributes(struct sysfs_device *device);
 extern struct sysfs_device *sysfs_open_device_by_id
-		(const unsigned char *bus_id, unsigned char *bus, size_t bsize);
+	(const unsigned char *bus_id, const unsigned char *bus, size_t bsize);
 extern int sysfs_write_device_attr(unsigned char *dev, unsigned char *attrib,
 					unsigned char *value);
 
@@ -242,10 +243,10 @@ extern struct sysfs_class *sysfs_open_class(const unsigned char *name);
 extern struct sysfs_class_device *sysfs_get_class_device
 	(struct sysfs_class *class, unsigned char *name);
 extern struct sysfs_class_device *sysfs_open_class_device_by_name
-	(unsigned char *class, unsigned char *name);
+	(const unsigned char *class, unsigned char *name);
 extern struct dlist *sysfs_get_classdev_attributes
 	(struct sysfs_class_device *cdev);
-extern int sysfs_find_device_class(unsigned char *bus_id, 
+extern int sysfs_find_device_class(const unsigned char *bus_id, 
 		unsigned char *classname, size_t bsize);
 extern int sysfs_write_classdev_attr(unsigned char *dev,
 		unsigned char *attrib, unsigned char *value);

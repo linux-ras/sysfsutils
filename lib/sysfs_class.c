@@ -310,7 +310,7 @@ struct sysfs_class_device *sysfs_get_class_device(struct sysfs_class *class,
  * @name: name of the class_device
  */
 struct sysfs_class_device *sysfs_open_class_device_by_name
-		(unsigned char *classname, unsigned char *name)
+		(const unsigned char *classname, unsigned char *name)
 {
 	struct sysfs_class *class = NULL;
 	struct sysfs_class_device *cdev = NULL, *rcdev = NULL;
@@ -367,7 +367,7 @@ struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev)
  * @bsize: size of buffer
  * returns 0 with success and -1 with error
  */
-int sysfs_find_device_class(unsigned char *bus_id, 
+int sysfs_find_device_class(const unsigned char *bus_id, 
 				unsigned char *classname, size_t bsize)
 {
 	unsigned char class[SYSFS_NAME_LEN], clspath[SYSFS_NAME_LEN];

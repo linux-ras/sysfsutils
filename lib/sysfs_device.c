@@ -345,10 +345,13 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
  * @bus: bus the device belongs to
  * @bsize: size of the bus buffer
  * returns struct sysfs_device if found, NULL otherwise
- * NOTE: Use sysfs_close_device to close the device
+ * NOTE: 
+ * 1. Use sysfs_close_device to close the device
+ * 2. Bus the device is on must be supplied
+ * 	Use sysfs_find_device_bus to get the bus name
  */
 struct sysfs_device *sysfs_open_device_by_id(const unsigned char *bus_id, 
-		unsigned char *bus, size_t bsize)
+		const unsigned char *bus, size_t bsize)
 {
 	char sysfs_path[SYSFS_PATH_MAX], device_path[SYSFS_PATH_MAX];
 	struct sysfs_device *device = NULL;

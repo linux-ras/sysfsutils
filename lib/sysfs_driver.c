@@ -23,7 +23,7 @@
 #include "libsysfs.h"
 #include "sysfs.h"
 
-void sysfs_close_drv_dev(void *device)
+void sysfs_close_driver_by_name_dev(void *device)
 {
 	sysfs_close_device((struct sysfs_device *)device);
 }
@@ -49,10 +49,10 @@ void sysfs_close_driver(struct sysfs_driver *driver)
 }
 
 /** 
- * sysfs_close_drv: closes driver and deletes device lists too
+ * sysfs_close_driver_by_name: closes driver and deletes device lists too
  * @driver: driver to close
  */ 
-void sysfs_close_drv(struct sysfs_driver *driver)
+void sysfs_close_driver_by_name(struct sysfs_driver *driver)
 {
 	if (driver != NULL) {
 		if (driver->devices != NULL) 
@@ -145,11 +145,14 @@ struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver)
  * @drv_name: driver to open
  * @bus: the driver bus
  * @bsize: size of bus buffer
- * NOTE: Need to call sysfs_close_drv to free up memory
  * returns struct sysfs_driver if found, NULL otherwise
+ * NOTE: 
+ * 1. Need to call sysfs_close_driver_by_name to free up memory
+ * 2. Bus the driver is registered with must be supplied.
+ * 	Use sysfs_find_driver_bus() to obtain the bus name
  */
-struct sysfs_driver *sysfs_open_driver_by_name(unsigned char *drv_name,
-					unsigned char *bus, size_t bsize)
+struct sysfs_driver *sysfs_open_driver_by_name(const unsigned char *drv_name,
+				const unsigned char *bus, size_t bsize)
 {
 	struct dlist *buslist = NULL, *drivers = NULL, *devices = NULL;
 	struct sysfs_driver *driver = NULL;
@@ -185,14 +188,14 @@ struct sysfs_driver *sysfs_open_driver_by_name(unsigned char *drv_name,
 			if (device == NULL) {
 				dprintf("Error opening device at %s\n", 
 						curlink->target);
-				sysfs_close_drv(driver);
+				sysfs_close_driver_by_name(driver);
 				return NULL;
 			}
 			strcpy(device->driver_name, drv_name);
 			if (driver->devices == NULL) 
 				driver->devices = dlist_new_with_delete
 						(sizeof(struct sysfs_device),
-					 		sysfs_close_drv_dev);
+					 		sysfs_close_driver_by_name_dev);
 			dlist_unshift(driver->devices, device);
 		}
 	}
@@ -232,15 +235,15 @@ int sysfs_write_driver_attr(unsigned char *drv, unsigned char *attrib,
         if (attribute == NULL) {
                 dprintf("Attribute %s not defined for driver %s\n", 
 							attrib, drv);
-		sysfs_close_drv(driver);
+		sysfs_close_driver_by_name(driver);
 		return -1;
 	}
 	if ((sysfs_write_attribute(attribute, value)) < 0) {
 		dprintf("Error setting %s to %s\n", attrib, value);
-		sysfs_close_drv(driver);
+		sysfs_close_driver_by_name(driver);
 		return -1;
 	}
-	sysfs_close_drv(driver);
+	sysfs_close_driver_by_name(driver);
 	return 0;
 }
 
