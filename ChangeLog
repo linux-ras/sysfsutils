@@ -1,6 +1,9 @@
 
-08/29/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+08/01/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added autoconf configuration support
 		* Modified IBM Copyright information
+
+08/01/2003 - Released version 0.1.1
 
 07/24/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Changed sysutils name to sysfsutils

@@ -1,7 +1,10 @@
 Version History:
 ---------------
 
- 0.1.1 - Current Development Branch
+ 0.2.0 - Current Development Branch
+	* ADded autoconf configuration support
+ 
+ 0.1.1 - Released August 1, 2003
 	* Created NEWS file for Version History.
 	* Added device reference in sysfs_driver.
 	* Added parent reference in sysfs_device.
