@@ -1,4 +1,7 @@
 
+12/05/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Remove unused argument from sysfs_get_device_by_id()
+
 12/02/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Simplified routine to get bus a device is on
 
