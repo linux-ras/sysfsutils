@@ -1,4 +1,8 @@
 
+03/08/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Remove "unsigned" declarations for prototype 
+			compatibility per Lev Makhlis' suggestion
+
 03/08/2004 - Lev Makhlis <mlev@despammed.com>
 		* Changes for C++ compatibility
 

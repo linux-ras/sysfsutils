@@ -25,8 +25,8 @@
 
 static int sort_char(void *new, void *old)
 {
-	return ((strncmp((unsigned char *)new, (unsigned char *)old, 
-			strlen((unsigned char *)new))) < 0 ? 1 : 0);
+	return ((strncmp((char *)new, (char *)old, 
+			strlen((char *)new))) < 0 ? 1 : 0);
 }
 
 /**
@@ -34,9 +34,9 @@ static int sort_char(void *new, void *old)
  * @path: Path to look for the trailing '/'
  * Returns 0 on success 1 on error
  */ 
-int sysfs_remove_trailing_slash(unsigned char *path)
+int sysfs_remove_trailing_slash(char *path)
 {
-	unsigned char *c = NULL;
+	char *c = NULL;
 
 	if (path == NULL) {
 		errno = EINVAL;
@@ -60,8 +60,8 @@ int sysfs_remove_trailing_slash(unsigned char *path)
  * @len: size of mnt_path
  * returns 0 with success and -1 with error.
  */
-static int sysfs_get_fs_mnt_path(const unsigned char *fs_type, 
-				unsigned char *mnt_path, size_t len)
+static int sysfs_get_fs_mnt_path(const char *fs_type, 
+				char *mnt_path, size_t len)
 {
 	FILE *mnt;
 	struct mntent *mntent;
@@ -107,7 +107,7 @@ static int sysfs_get_fs_mnt_path(const unsigned char *fs_type,
  * @len: size of mnt_path
  * returns 0 with success and -1 with error.
  */
-int sysfs_get_mnt_path(unsigned char *mnt_path, size_t len)
+int sysfs_get_mnt_path(char *mnt_path, size_t len)
 {
 	char *sysfs_path = NULL;
 	int ret = 0;
@@ -133,11 +133,11 @@ int sysfs_get_mnt_path(unsigned char *mnt_path, size_t len)
  * @name: where to put name
  * @len: size of name
  */
-int sysfs_get_name_from_path(const unsigned char *path, unsigned char *name, 
+int sysfs_get_name_from_path(const char *path, char *name, 
 								size_t len)
 {
-	unsigned char tmp[SYSFS_PATH_MAX];
-	unsigned char *n = NULL;
+	char tmp[SYSFS_PATH_MAX];
+	char *n = NULL;
                                                                                 
 	if (path == NULL || name == NULL || len == 0) {
 		errno = EINVAL;
@@ -169,12 +169,12 @@ int sysfs_get_name_from_path(const unsigned char *path, unsigned char *name,
  * @target: where to put name
  * @len: size of name
  */
-int sysfs_get_link(const unsigned char *path, unsigned char *target, size_t len)
+int sysfs_get_link(const char *path, char *target, size_t len)
 {
-	unsigned char devdir[SYSFS_PATH_MAX];
-	unsigned char linkpath[SYSFS_PATH_MAX];
-	unsigned char temp_path[SYSFS_PATH_MAX];
-	unsigned char *d = NULL, *s = NULL;
+	char devdir[SYSFS_PATH_MAX];
+	char linkpath[SYSFS_PATH_MAX];
+	char temp_path[SYSFS_PATH_MAX];
+	char *d = NULL, *s = NULL;
 	int slashes = 0, count = 0;
 
 	if (path == NULL || target == NULL || len == 0) {
@@ -282,10 +282,10 @@ void sysfs_close_list(struct dlist *list)
  * @name: name of the subsystem, eg., "bus", "class", "devices"
  * Returns a dlist of supported names or NULL if subsystem not supported
  */ 
-struct dlist *sysfs_open_subsystem_list(unsigned char *name)
+struct dlist *sysfs_open_subsystem_list(char *name)
 {
-	unsigned char sysfs_path[SYSFS_PATH_MAX], *subsys_name = NULL;
-	unsigned char *c = NULL;
+	char sysfs_path[SYSFS_PATH_MAX], *subsys_name = NULL;
+	char *c = NULL;
 	struct sysfs_directory *dir = NULL, *cur = NULL;
 	struct dlist *list = NULL;
 	
@@ -354,9 +354,9 @@ out:
  * @name: name of the subsystem, eg., "pci", "scsi", "usb"
  * Returns a dlist of supported names or NULL if subsystem not supported
  */ 
-struct dlist *sysfs_open_bus_devices_list(unsigned char *name)
+struct dlist *sysfs_open_bus_devices_list(char *name)
 {
-	unsigned char sysfs_path[SYSFS_PATH_MAX], *device_name = NULL;
+	char sysfs_path[SYSFS_PATH_MAX], *device_name = NULL;
 	struct sysfs_directory *dir = NULL;
 	struct sysfs_link *cur = NULL;
 	struct dlist *list = NULL;
@@ -412,7 +412,7 @@ struct dlist *sysfs_open_bus_devices_list(unsigned char *name)
  * @path: path to validate
  * Returns 0 if path points to dir, 1 otherwise
  */
-int sysfs_path_is_dir(const unsigned char *path)
+int sysfs_path_is_dir(const char *path)
 {
 	struct stat astats;
 
@@ -435,7 +435,7 @@ int sysfs_path_is_dir(const unsigned char *path)
  * @path: path to validate
  * Returns 0 if path points to link, 1 otherwise
  */
-int sysfs_path_is_link(const unsigned char *path)
+int sysfs_path_is_link(const char *path)
 {
 	struct stat astats;
 
@@ -458,7 +458,7 @@ int sysfs_path_is_link(const unsigned char *path)
  * @path: path to validate
  * Returns 0 if path points to file, 1 otherwise
  */
-int sysfs_path_is_file(const unsigned char *path)
+int sysfs_path_is_file(const char *path)
 {
 	struct stat astats;
 

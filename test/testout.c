@@ -26,9 +26,9 @@
 
 #include <test-defs.h>
 
-static void remove_end_newline(unsigned char *value)
+static void remove_end_newline(char *value)
 {
-        unsigned char *p = value + (strlen(value) - 1);
+        char *p = value + (strlen(value) - 1);
 
         if (p != NULL && *p == '\n')
                 *p = '\0';
@@ -178,9 +178,9 @@ void show_class_device_list(struct dlist *devlist)
 void show_list(struct dlist *list)
 {
 	if (list != NULL) {
-		unsigned char *name = NULL;
+		char *name = NULL;
 		
-		dlist_for_each_data(list, name, unsigned char)
+		dlist_for_each_data(list, name, char)
 			dbg_print("%s\n", name);
 	}
 }

@@ -58,7 +58,7 @@ static int dir_attribute_name_equal(void *a, void *b)
 	if (a == NULL || b == NULL)
 		return 0;
 
-	if (strcmp(((unsigned char *)a), ((struct sysfs_attribute *)b)->name) 
+	if (strcmp(((char *)a), ((struct sysfs_attribute *)b)->name) 
 	    == 0)
 		return 1;
 	return 0;
@@ -75,7 +75,7 @@ static int dir_link_name_equal(void *a, void *b)
 	if (a == NULL || b == NULL)
 		return 0;
 
-	if (strcmp(((unsigned char *)a), ((struct sysfs_link *)b)->name) 
+	if (strcmp(((char *)a), ((struct sysfs_link *)b)->name) 
 	    == 0)
 		return 1;
 	return 0;
@@ -92,7 +92,7 @@ static int dir_subdir_name_equal(void *a, void *b)
 	if (a == NULL || b == NULL)
 		return 0;
 
-	if (strcmp(((unsigned char *)a), ((struct sysfs_directory *)b)->name)
+	if (strcmp(((char *)a), ((struct sysfs_directory *)b)->name)
 	    == 0)
 		return 1;
 	return 0;
@@ -126,7 +126,7 @@ static struct sysfs_attribute *alloc_attribute(void)
  * @path: path to attribute.
  * returns sysfs_attribute struct with success and NULL with error.
  */
-struct sysfs_attribute *sysfs_open_attribute(const unsigned char *path)
+struct sysfs_attribute *sysfs_open_attribute(const char *path)
 {
 	struct sysfs_attribute *sysattr = NULL;
 	struct stat fileinfo;
@@ -171,7 +171,7 @@ struct sysfs_attribute *sysfs_open_attribute(const unsigned char *path)
  * returns 0 with success and -1 with error.
  */
 int sysfs_write_attribute(struct sysfs_attribute *sysattr,
-		const unsigned char *new_value, size_t len)
+		const char *new_value, size_t len)
 {
 	int fd;
 	int length;
@@ -259,8 +259,8 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
  */
 int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 {
-	unsigned char *fbuf = NULL;
-	unsigned char *vbuf = NULL;
+	char *fbuf = NULL;
+	char *vbuf = NULL;
 	ssize_t length = 0;
 	long pgsize = 0;
 	int fd;
@@ -276,7 +276,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 		return -1;
 	}
 	pgsize = sysconf(_SC_PAGESIZE);
-	fbuf = (unsigned char *)calloc(1, pgsize+1);
+	fbuf = (char *)calloc(1, pgsize+1);
 	if (fbuf == NULL) {
 		dprintf("calloc failed\n");
 		return -1;
@@ -304,7 +304,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 	}
 	sysattr->len = length;
 	close(fd);
-	vbuf = (unsigned char *)realloc(fbuf, length+1);
+	vbuf = (char *)realloc(fbuf, length+1);
 	if (vbuf == NULL) {
 		dprintf("realloc failed\n");
 		free(fbuf);
@@ -324,8 +324,8 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
  * @vsize: size of value buffer
  * returns 0 with success and -1 with error.
  */
-int sysfs_read_attribute_value(const unsigned char *attrpath, 
-					unsigned char *value, size_t vsize)
+int sysfs_read_attribute_value(const char *attrpath, 
+					char *value, size_t vsize)
 {
 	struct sysfs_attribute *attr = NULL;
 	size_t length = 0;
@@ -361,10 +361,9 @@ int sysfs_read_attribute_value(const unsigned char *attrpath,
  * 	attribute name, return its value
  * @attr: attribute to search
  * @name: name to look for
- * returns unsigned char * value - could be NULL
+ * returns char * value - could be NULL
  */
-unsigned char *sysfs_get_value_from_attributes(struct dlist *attr, 
-					const unsigned char *name)
+char *sysfs_get_value_from_attributes(struct dlist *attr, const char *name)
 {	
 	struct sysfs_attribute *cur = NULL;
 	
@@ -464,7 +463,7 @@ int sysfs_read_all_subdirs(struct sysfs_directory *sysdir)
  * @path: path of directory to open.
  * returns: struct sysfs_directory * with success and NULL on error.
  */
-struct sysfs_directory *sysfs_open_directory(const unsigned char *path)
+struct sysfs_directory *sysfs_open_directory(const char *path)
 {
 	struct sysfs_directory *sdir = NULL;
 
@@ -499,7 +498,7 @@ struct sysfs_directory *sysfs_open_directory(const unsigned char *path)
  * @path: path of link to open.
  * returns: struct sysfs_link * with success and NULL on error.
  */
-struct sysfs_link *sysfs_open_link(const unsigned char *linkpath)
+struct sysfs_link *sysfs_open_link(const char *linkpath)
 {
 	struct sysfs_link *ln = NULL;
 
@@ -530,8 +529,7 @@ struct sysfs_link *sysfs_open_link(const unsigned char *linkpath)
  * @path: path to attribute
  * returns 0 with success and -1 with error.
  */
-static int add_attribute(struct sysfs_directory *sysdir, 
-					const unsigned char *path)
+static int add_attribute(struct sysfs_directory *sysdir, const char *path)
 {
 	struct sysfs_attribute *attr = NULL;
 
@@ -563,8 +561,7 @@ static int add_attribute(struct sysfs_directory *sysdir,
  * @path: path to subdirectory
  * returns 0 with success and -1 with error.
  */
-static int add_subdirectory(struct sysfs_directory *sysdir, 
-					const unsigned char *path)
+static int add_subdirectory(struct sysfs_directory *sysdir, const char *path)
 {
 	struct sysfs_directory *subdir = NULL;
 
@@ -586,7 +583,7 @@ static int add_subdirectory(struct sysfs_directory *sysdir,
  * @path: path to link
  * returns 0 with success and -1 with error.
  */
-static int add_link(struct sysfs_directory *sysdir, const unsigned char *path)
+static int add_link(struct sysfs_directory *sysdir, const char *path)
 {
 	struct sysfs_link *ln = NULL;
 
@@ -611,7 +608,7 @@ int sysfs_read_dir_attributes(struct sysfs_directory *sysdir)
 {
 	DIR *dir = NULL;
 	struct dirent *dirent = NULL;
-	unsigned char file_path[SYSFS_PATH_MAX];
+	char file_path[SYSFS_PATH_MAX];
 	int retval = 0;
 
 	if (sysdir == NULL) {
@@ -650,7 +647,7 @@ int sysfs_read_dir_links(struct sysfs_directory *sysdir)
 {
 	DIR *dir = NULL;
 	struct dirent *dirent = NULL;
-	unsigned char file_path[SYSFS_PATH_MAX];
+	char file_path[SYSFS_PATH_MAX];
 	int retval = 0;
 
 	if (sysdir == NULL) {
@@ -692,7 +689,7 @@ int sysfs_read_dir_subdirs(struct sysfs_directory *sysdir)
 {
 	DIR *dir = NULL;
 	struct dirent *dirent = NULL;
-	unsigned char file_path[SYSFS_PATH_MAX];
+	char file_path[SYSFS_PATH_MAX];
 	int retval = 0;
 
 	if (sysdir == NULL) {
@@ -732,7 +729,7 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 	DIR *dir = NULL;
 	struct dirent *dirent = NULL;
 	struct stat astats;
-	unsigned char file_path[SYSFS_PATH_MAX];
+	char file_path[SYSFS_PATH_MAX];
 	int retval = 0;
 
 	if (sysdir == NULL) {
@@ -871,10 +868,10 @@ int sysfs_refresh_dir_subdirs(struct sysfs_directory *sysdir)
  * returns sysfs_attribute if found and NULL if not found
  */
 struct sysfs_attribute *sysfs_get_directory_attribute
-			(struct sysfs_directory *dir, unsigned char *attrname)
+			(struct sysfs_directory *dir, char *attrname)
 {
 	struct sysfs_attribute *attr = NULL;
-	unsigned char new_path[SYSFS_PATH_MAX];
+	char new_path[SYSFS_PATH_MAX];
 	
 	if (dir == NULL || attrname == NULL) {
 		errno = EINVAL;
@@ -917,7 +914,7 @@ struct sysfs_attribute *sysfs_get_directory_attribute
  * returns reference to sysfs_link if found and NULL if not found
  */
 struct sysfs_link *sysfs_get_directory_link
-			(struct sysfs_directory *dir, unsigned char *linkname)
+			(struct sysfs_directory *dir, char *linkname)
 {
 	if (dir == NULL || linkname == NULL) {
 		errno = EINVAL;
@@ -942,7 +939,7 @@ struct sysfs_link *sysfs_get_directory_link
  * returns reference to subdirectory or NULL if not found
  */
 struct sysfs_directory *sysfs_get_subdirectory(struct sysfs_directory *dir,
-						unsigned char *subname)
+						char *subname)
 {
 	struct sysfs_directory *sub = NULL, *cursub = NULL;
 
@@ -984,7 +981,7 @@ struct sysfs_directory *sysfs_get_subdirectory(struct sysfs_directory *dir,
  * returns reference to link or NULL if not found
  */
 struct sysfs_link *sysfs_get_subdirectory_link(struct sysfs_directory *dir,
-						unsigned char *linkname)
+						char *linkname)
 {
 	struct sysfs_directory *cursub = NULL;
 	struct sysfs_link *ln = NULL;

@@ -26,25 +26,25 @@
  *
  * extern void sysfs_close_root_device(struct sysfs_root_device *root);
  * extern struct sysfs_root_device *sysfs_open_root_device
- * 						(const unsigned char *name);
+ * 						(const char *name);
  * extern struct dlist *sysfs_get_root_devices(struct sysfs_root_device *root);
  * extern void sysfs_close_device(struct sysfs_device *dev);
  * extern struct sysfs_device *sysfs_open_device
- * 		(const unsigned char *bus, const unsigned char *bus_id);
+ * 		(const char *bus, const char *bus_id);
  * extern struct sysfs_device *sysfs_get_device_parent
  * 					(struct sysfs_device *dev);
  * extern struct sysfs_device *sysfs_open_device_path
- * 					(const unsigned char *path);
+ * 					(const char *path);
  * extern struct sysfs_attribute *sysfs_get_device_attr
- * 			(struct sysfs_device *dev, const unsigned char *name);
+ * 			(struct sysfs_device *dev, const char *name);
  * extern struct dlist *sysfs_get_device_attributes
  * 					(struct sysfs_device *device);
  * extern struct dlist *sysfs_refresh_device_attributes
  * 					(struct sysfs_device *device);
  * extern struct sysfs_attribute *sysfs_open_device_attr
- * 				(const unsigned char *bus, 
- * 				const unsigned char *bus_id, 
- * 				const unsigned char *attrib);
+ * 				(const char *bus, 
+ * 				const char *bus_id, 
+ * 				const char *attrib);
  *
  ******************************************************************************
  */
@@ -89,7 +89,7 @@ int test_sysfs_close_root_device(int flag)
 	
 /** 
  * extern struct sysfs_root_device *sysfs_open_root_device
- * 						(const unsigned char *name);
+ * 						(const char *name);
  *
  * flag:
  * 	0:	name -> valid
@@ -254,7 +254,7 @@ int test_sysfs_close_device(int flag)
 
 /**
  * extern struct sysfs_device *sysfs_open_device
- * 		(const unsigned char *bus, const unsigned char *bus_id);
+ * 		(const char *bus, const char *bus_id);
  * 
  * flag:
  * 	0:	bus -> valid, bus_id -> valid
@@ -415,7 +415,7 @@ int test_sysfs_get_device_parent(int flag)
 
 /** 
  * extern struct sysfs_device *sysfs_open_device_path
- * 					(const unsigned char *path);
+ * 					(const char *path);
  *
  * flag:
  * 	0:	path -> valid
@@ -473,7 +473,7 @@ int test_sysfs_open_device_path(int flag)
 
 /** 
  * extern struct sysfs_attribute *sysfs_get_device_attr
- * 		(struct sysfs_device *dev, const unsigned char *name);
+ * 		(struct sysfs_device *dev, const char *name);
  *
  * flag:
  * 	0:	dev -> valid, name -> valid
@@ -715,9 +715,9 @@ int test_sysfs_refresh_device_attributes(int flag)
 
 /**
  * extern struct sysfs_attribute *sysfs_open_device_attr
- * 				(const unsigned char *bus, 
- * 				const unsigned char *bus_id, 
- * 				const unsigned char *attrib);
+ * 				(const char *bus, 
+ * 				const char *bus_id, 
+ * 				const char *attrib);
  *
  * flag:
  * 	0: bus -> valid, bus_id -> valid, attrib -> valid

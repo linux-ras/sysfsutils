@@ -35,10 +35,10 @@
 
 /* Command Options */
 static int show_options = 0;		/* bitmask of show options */
-static unsigned char *attribute_to_show = NULL;	/* show value for this attribute */
-static unsigned char *device_to_show = NULL;	/* show only this bus device */
+static char *attribute_to_show = NULL;	/* show value for this attribute */
+static char *device_to_show = NULL;	/* show only this bus device */
 struct pci_access *pacc = NULL;
-unsigned char *show_bus = NULL;
+char *show_bus = NULL;
 
 static void show_device(struct sysfs_device *device, int level);
 static void show_class_device(struct sysfs_class_device *dev, int level);
@@ -54,13 +54,13 @@ static void show_class_device(struct sysfs_class_device *dev, int level);
                                                                                 
 #define SHOW_ALL		0xff
 
-static unsigned char cmd_options[] = "aA:b:c:CdDhpPr:v";
+static char cmd_options[] = "aA:b:c:CdDhpPr:v";
 
 /*
  * binary_files - defines existing sysfs binary files. These files will be
  * printed in hex.
  */
-static unsigned char *binary_files[] = {
+static char *binary_files[] = {
 	"config",
 	"data"
 };
@@ -112,9 +112,9 @@ static void indent(int level)
  * remove_end_newline: removes newline on the end of an attribute value
  * @value: string to remove newline from
  */
-static void remove_end_newline(unsigned char *value)
+static void remove_end_newline(char *value)
 {
-	unsigned char *p = value + (strlen(value) - 1);
+	char *p = value + (strlen(value) - 1);
 
 	if (p != NULL && *p == '\n')
 		*p = '\0';
@@ -127,7 +127,7 @@ static void remove_end_newline(unsigned char *value)
 static void show_device_children(struct sysfs_device *device, int level)
 {
 	struct sysfs_device *temp_device = NULL, *child = NULL;
-	unsigned int flag = 1;
+	int flag = 1;
 	
 	temp_device = sysfs_open_device_tree(device->path);
 	if (temp_device) {
@@ -270,7 +270,7 @@ static void show_device(struct sysfs_device *device, int level)
 {
 	struct dlist *attributes = NULL;
         unsigned int vendor_id, device_id;
-        unsigned char buf[128], value[256], path[SYSFS_PATH_MAX];
+        char buf[128], value[256], path[SYSFS_PATH_MAX];
 	
 	if (device != NULL) {
 		indent(level);
@@ -414,7 +414,7 @@ static void show_device_tree(struct sysfs_device *root, int level)
  * @busname: bus to print.
  * returns 0 with success or 1 with error.
  */
-static int show_sysfs_bus(unsigned char *busname)
+static int show_sysfs_bus(char *busname)
 {
 	struct sysfs_bus *bus = NULL;
 	struct sysfs_device *curdev = NULL;
@@ -530,7 +530,7 @@ static void show_class_device(struct sysfs_class_device *dev, int level)
  * @classname: class to print.
  * returns 0 with success and 1 with error.
  */
-static int show_sysfs_class(unsigned char *classname)
+static int show_sysfs_class(char *classname)
 {
 	struct sysfs_class *cls = NULL;
 	struct sysfs_class_device *cur = NULL;
@@ -565,7 +565,7 @@ static int show_sysfs_class(unsigned char *classname)
  * @rootname: device root to print.
  * returns 0 with success and 1 with error.
  */
-static int show_sysfs_root(unsigned char *rootname)
+static int show_sysfs_root(char *rootname)
 {
 	struct sysfs_root_device *root = NULL;
 	struct sysfs_device *device = NULL;
@@ -606,9 +606,9 @@ static int show_sysfs_root(unsigned char *rootname)
  */
 static int show_default_info(void)
 {
-	unsigned char subsys[SYSFS_NAME_LEN];
+	char subsys[SYSFS_NAME_LEN];
 	struct dlist *list = NULL;
-	unsigned char *cur = NULL;
+	char *cur = NULL;
 	int retval = 0;
 
 	strcpy(subsys, SYSFS_BUS_NAME);
@@ -644,12 +644,12 @@ static int show_default_info(void)
 /* MAIN */
 int main(int argc, char *argv[])
 {
-/*	unsigned char *show_bus = NULL;*/
-	unsigned char *show_class = NULL;
-	unsigned char *show_root = NULL;
+/*	char *show_bus = NULL;*/
+	char *show_class = NULL;
+	char *show_root = NULL;
 	int retval = 0;
 	int opt;
-        unsigned char *pci_id_file = "/usr/local/share/pci.ids";
+        char *pci_id_file = "/usr/local/share/pci.ids";
 	
 	while((opt = getopt(argc, argv, cmd_options)) != EOF) {
 		switch(opt) {

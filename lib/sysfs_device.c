@@ -31,8 +31,8 @@
 static int get_dev_driver(struct sysfs_device *dev)
 {
 	struct dlist *drvlist = NULL;
-	unsigned char path[SYSFS_PATH_MAX], devpath[SYSFS_PATH_MAX];
-	unsigned char *drv = NULL, *c = NULL;
+	char path[SYSFS_PATH_MAX], devpath[SYSFS_PATH_MAX];
+	char *drv = NULL, *c = NULL;
 	
 	if (dev == NULL) {
 		errno = EINVAL;
@@ -82,8 +82,8 @@ static int get_dev_driver(struct sysfs_device *dev)
  */
 int sysfs_get_device_bus(struct sysfs_device *dev)
 {
-	unsigned char subsys[SYSFS_NAME_LEN], path[SYSFS_PATH_MAX];
-	unsigned char target[SYSFS_PATH_MAX], *bus = NULL, *c = NULL;
+	char subsys[SYSFS_NAME_LEN], path[SYSFS_PATH_MAX];
+	char target[SYSFS_PATH_MAX], *bus = NULL, *c = NULL;
 	struct dlist *buslist = NULL;
 
 	if (dev == NULL) {
@@ -194,7 +194,7 @@ static struct sysfs_device *alloc_device(void)
  * @name: name of root
  * returns struct sysfs_directory with success and NULL with error
  */
-static struct sysfs_directory *open_device_dir(const unsigned char *path)
+static struct sysfs_directory *open_device_dir(const char *path)
 {
 	struct sysfs_directory *rdir = NULL;
 
@@ -223,7 +223,7 @@ static struct sysfs_directory *open_device_dir(const unsigned char *path)
  * @path: path to device, this is the /sys/devices/ path
  * returns sysfs_device structure with success or NULL with error
  */
-struct sysfs_device *sysfs_open_device_path(const unsigned char *path)
+struct sysfs_device *sysfs_open_device_path(const char *path)
 {
 	struct sysfs_device *dev = NULL;
 
@@ -278,7 +278,7 @@ struct sysfs_device *sysfs_open_device_path(const unsigned char *path)
  * returns struct sysfs_device and its children with success or NULL with
  *	error.
  */
-struct sysfs_device *sysfs_open_device_tree(const unsigned char *path)
+struct sysfs_device *sysfs_open_device_tree(const char *path)
 {
 	struct sysfs_device *rootdev = NULL, *new = NULL;
 	struct sysfs_directory *cur = NULL;
@@ -380,10 +380,10 @@ struct dlist *sysfs_get_root_devices(struct sysfs_root_device *root)
  * @name: name of /sys/devices/root to open
  * returns struct sysfs_root_device if success and NULL with error
  */
-struct sysfs_root_device *sysfs_open_root_device(const unsigned char *name)
+struct sysfs_root_device *sysfs_open_root_device(const char *name)
 {
 	struct sysfs_root_device *root = NULL;
-	unsigned char rootpath[SYSFS_PATH_MAX];
+	char rootpath[SYSFS_PATH_MAX];
 
 	if (name == NULL) {
 		errno = EINVAL;
@@ -479,7 +479,7 @@ struct dlist *sysfs_refresh_device_attributes(struct sysfs_device *device)
  * returns sysfs_attribute reference with success or NULL with error.
  */
 struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
-						const unsigned char *name)
+						const char *name)
 {
 	struct dlist *attrlist = NULL;
 
@@ -492,8 +492,7 @@ struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
 	if (attrlist == NULL)
 		return NULL;
 
-	return sysfs_get_directory_attribute(dev->directory, 
-					(unsigned char *)name);
+	return sysfs_get_directory_attribute(dev->directory, (char *)name);
 }
 
 /**
@@ -504,10 +503,10 @@ struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
  * @psize: size of "path"
  * Returns 0 on success -1 on failure
  */
-static int get_device_absolute_path(const unsigned char *device,
-		const unsigned char *bus, unsigned char *path, size_t psize)
+static int get_device_absolute_path(const char *device,	const char *bus, 
+				char *path, size_t psize)
 {
-	unsigned char bus_path[SYSFS_PATH_MAX];
+	char bus_path[SYSFS_PATH_MAX];
 
 	if (device == NULL || path == NULL) {
 		errno = EINVAL;
@@ -549,8 +548,7 @@ static int get_device_absolute_path(const unsigned char *device,
  * 2. Bus the device is on must be supplied
  * 	Use sysfs_find_device_bus to get the bus name
  */
-struct sysfs_device *sysfs_open_device(const unsigned char *bus, 
-						const unsigned char *bus_id)
+struct sysfs_device *sysfs_open_device(const char *bus,	const char *bus_id)
 {
 	char sysfs_path[SYSFS_PATH_MAX];
 	struct sysfs_device *device = NULL;
@@ -583,7 +581,7 @@ struct sysfs_device *sysfs_open_device(const unsigned char *bus,
  */
 struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev)
 {
-	unsigned char ppath[SYSFS_PATH_MAX], *tmp = NULL;
+	char ppath[SYSFS_PATH_MAX], *tmp = NULL;
 
 	if (dev == NULL) {
 		errno = EINVAL;
@@ -640,11 +638,11 @@ struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev)
  * 	A call to sysfs_close_attribute() is required to close
  * 	the attribute returned and free memory. 
  */
-struct sysfs_attribute *sysfs_open_device_attr(const unsigned char *bus,
-		const unsigned char *bus_id, const unsigned char *attrib)
+struct sysfs_attribute *sysfs_open_device_attr(const char *bus,
+		const char *bus_id, const char *attrib)
 {
 	struct sysfs_attribute *attribute = NULL;
-	unsigned char devpath[SYSFS_PATH_MAX];
+	char devpath[SYSFS_PATH_MAX];
 	
 	if (bus == NULL || bus_id == NULL || attrib == NULL) {
 		errno = EINVAL;

@@ -24,17 +24,17 @@
  ***************************************************************************
  * this will test the utility functions provided by libsysfs.
  *
- * extern int sysfs_get_mnt_path(unsigned char *mnt_path, size_t len);
- * extern int sysfs_remove_trailing_slash(unsigned char *path);
- * extern int sysfs_get_name_from_path(const unsigned char *path, 
- * 					unsigned char *name, size_t len);
- * extern int sysfs_path_is_dir(const unsigned char *path);
- * extern int sysfs_path_is_link(const unsigned char *path);
- * extern int sysfs_path_is_file(const unsigned char *path);
- * extern int sysfs_get_link(const unsigned char *path, unsigned char *target, 
+ * extern int sysfs_get_mnt_path(char *mnt_path, size_t len);
+ * extern int sysfs_remove_trailing_slash(char *path);
+ * extern int sysfs_get_name_from_path(const char *path, 
+ * 					char *name, size_t len);
+ * extern int sysfs_path_is_dir(const char *path);
+ * extern int sysfs_path_is_link(const char *path);
+ * extern int sysfs_path_is_file(const char *path);
+ * extern int sysfs_get_link(const char *path, char *target, 
  * 								size_t len);
- * extern struct dlist *sysfs_open_subsystem_list(unsigned char *name);
- * extern struct dlist *sysfs_open_bus_devices_list(unsigned char *name);
+ * extern struct dlist *sysfs_open_subsystem_list(char *name);
+ * extern struct dlist *sysfs_open_bus_devices_list(char *name);
  * extern void sysfs_close_list(struct dlist *list);
  * 
  * 
@@ -45,7 +45,7 @@
 #include <errno.h>
 
 /**
- * extern int sysfs_get_mnt_path(unsigned char *mnt_path, size_t len);
+ * extern int sysfs_get_mnt_path(char *mnt_path, size_t len);
  *
  * flag:
  * 	0:	mnt_path -> valid, len -> valid
@@ -126,7 +126,7 @@ int test_sysfs_get_mnt_path(int flag)
 }
 
 /**
- * extern int sysfs_remove_trailing_slash(unsigned char *path);
+ * extern int sysfs_remove_trailing_slash(char *path);
  *
  * flag:
  * 	0:	path -> valid
@@ -182,8 +182,8 @@ int test_sysfs_remove_trailing_slash(int flag)
 }
 
 /**
- * extern int sysfs_get_name_from_path(const unsigned char *path, 
- * 					unsigned char *name, size_t len);
+ * extern int sysfs_get_name_from_path(const char *path, 
+ * 					char *name, size_t len);
  *
  * flag:
  * 	0:	path -> valid, name -> valid, len -> valid
@@ -254,7 +254,7 @@ int test_sysfs_get_name_from_path(int flag)
 }
 
 /**
- * extern int sysfs_path_is_dir(const unsigned char *path);
+ * extern int sysfs_path_is_dir(const char *path);
  *
  * flag:
  * 	0:	path -> valid 
@@ -311,7 +311,7 @@ int test_sysfs_path_is_dir(int flag)
 }
 
 /**
- * extern int sysfs_path_is_link(const unsigned char *path);
+ * extern int sysfs_path_is_link(const char *path);
  *
  * flag:
  * 	0:	path -> valid 
@@ -368,7 +368,7 @@ int test_sysfs_path_is_link(int flag)
 }
 
 /**
- * extern int sysfs_path_is_file(const unsigned char *path);
+ * extern int sysfs_path_is_file(const char *path);
  *
  * flag:
  * 	0:	path -> valid 
@@ -424,8 +424,8 @@ int test_sysfs_path_is_file(int flag)
 }
 
 /**
- * extern int sysfs_get_link(const unsigned char *path, 
- * 					unsigned char *target, size_t len);
+ * extern int sysfs_get_link(const char *path, 
+ * 					char *target, size_t len);
  *
  * flag:
  * 	0:	path -> valid, target -> valid
@@ -498,7 +498,7 @@ int test_sysfs_get_link(int flag)
 }
 
 /**
- * extern struct dlist *sysfs_open_subsystem_list(unsigned char *name);
+ * extern struct dlist *sysfs_open_subsystem_list(char *name);
  *
  * flag:
  * 	0:	name -> valid
@@ -560,7 +560,7 @@ int  test_sysfs_open_subsystem_list(int flag)
 }
 
 /**
- * extern struct dlist *sysfs_open_bus_devices_list(unsigned char *name);
+ * extern struct dlist *sysfs_open_bus_devices_list(char *name);
  *
  * flag:
  * 	0:	name -> valid

@@ -26,35 +26,35 @@
  * 
  * extern void sysfs_close_attribute(struct sysfs_attribute *sysattr);
  * extern struct sysfs_attribute *sysfs_open_attribute
- * 					(const unsigned char *path);
+ * 					(const char *path);
  * extern int sysfs_read_attribute(struct sysfs_attribute *sysattr);
- * extern int sysfs_read_attribute_value(const unsigned char *attrpath, 
- * 				unsigned char *value, size_t vsize);
+ * extern int sysfs_read_attribute_value(const char *attrpath, 
+ * 				char *value, size_t vsize);
  * extern int sysfs_write_attribute(struct sysfs_attribute *sysattr,
- * 		const unsigned char *new_value, size_t len);
- * extern unsigned char *sysfs_get_value_from_attributes(struct dlist *attr, 
- * 					const unsigned char * name);
+ * 		const char *new_value, size_t len);
+ * extern char *sysfs_get_value_from_attributes(struct dlist *attr, 
+ * 					const char * name);
  * extern int sysfs_refresh_dir_attributes(struct sysfs_directory *sysdir);
  * extern int sysfs_refresh_dir_links(struct sysfs_directory *sysdir);
  * extern int sysfs_refresh_dir_subdirs(struct sysfs_directory *sysdir);
  * extern void sysfs_close_directory(struct sysfs_directory *sysdir);
  * extern struct sysfs_directory *sysfs_open_directory
- * 					(const unsigned char *path);
+ * 					(const char *path);
  * extern int sysfs_read_dir_attributes(struct sysfs_directory *sysdir);
  * extern int sysfs_read_dir_links(struct sysfs_directory *sysdir);
  * extern int sysfs_read_dir_subdirs(struct sysfs_directory *sysdir);
  * extern int sysfs_read_directory(struct sysfs_directory *sysdir);
  * extern int sysfs_read_all_subdirs(struct sysfs_directory *sysdir);
  * extern struct sysfs_directory *sysfs_get_subdirectory
- * 			(struct sysfs_directory *dir, unsigned char *subname);
+ * 			(struct sysfs_directory *dir, char *subname);
  * extern void sysfs_close_link(struct sysfs_link *ln);
- * extern struct sysfs_link *sysfs_open_link(const unsigned char *lnpath);
+ * extern struct sysfs_link *sysfs_open_link(const char *lnpath);
  * extern struct sysfs_link *sysfs_get_directory_link
- * 			(struct sysfs_directory *dir, unsigned char *linkname);
+ * 			(struct sysfs_directory *dir, char *linkname);
  * extern struct sysfs_link *sysfs_get_subdirectory_link
- * 			(struct sysfs_directory *dir, unsigned char *linkname);
+ * 			(struct sysfs_directory *dir, char *linkname);
  * extern struct sysfs_attribute *sysfs_get_directory_attribute
- * 			(struct sysfs_directory *dir, unsigned char *attrname);
+ * 			(struct sysfs_directory *dir, char *attrname);
  * extern struct dlist *sysfs_get_dir_attributes(struct sysfs_directory *dir);
  * extern struct dlist *sysfs_get_dir_links(struct sysfs_directory *dir);
  * extern struct dlist *sysfs_get_dir_subdirs(struct sysfs_directory *dir);
@@ -101,7 +101,7 @@ int test_sysfs_close_attribute(int flag)
 
 /**
  * extern struct sysfs_attribute *sysfs_open_attribute
- * 					(const unsigned char *path);
+ * 					(const char *path);
  *
  * flag:
  * 	0:	path -> valid
@@ -221,8 +221,8 @@ int test_sysfs_read_attribute(int flag)
 }
 
 /**
- * extern int sysfs_read_attribute_value(const unsigned char *attrpath, 
- *					unsigned char *value, size_t vsize);
+ * extern int sysfs_read_attribute_value(const char *attrpath, 
+ *					char *value, size_t vsize);
  * 
  * flag:
  * 	0:	attrpath -> valid, value -> valid 
@@ -294,7 +294,7 @@ int test_sysfs_read_attribute_value(int flag)
 
 /**
  * extern int sysfs_write_attribute(struct sysfs_attribute *sysattr,
- * 			const unsigned char *new_value, size_t len);
+ * 			const char *new_value, size_t len);
  *
  * flag:
  * 	0:	sysattr -> valid, new_value -> valid, len -> valid;
@@ -418,8 +418,8 @@ int test_sysfs_write_attribute(int flag)
 }
 
 /**
- * extern unsigned char *sysfs_get_value_from_attributes(struct dlist *attr, 
- * 					const unsigned char * name);
+ * extern char *sysfs_get_value_from_attributes(struct dlist *attr, 
+ * 					const char * name);
  *
  * flag:
  * 	0:	attr -> valid, name -> valid
@@ -775,7 +775,7 @@ int test_sysfs_close_directory(int flag)
 
 /**
  * extern struct sysfs_directory *sysfs_open_directory
- * 						(const unsigned char *path);
+ * 						(const char *path);
  *
  * flag:
  * 	0:	path -> valid
@@ -1131,7 +1131,7 @@ int test_sysfs_read_all_subdirs(int flag)
 
 /**
  * extern struct sysfs_directory *sysfs_get_subdirectory
- * 			(struct sysfs_directory *dir, unsigned char *subname);
+ * 			(struct sysfs_directory *dir, char *subname);
  *
  * flag:
  * 	0:	dir -> valid, subname -> valid
@@ -1251,7 +1251,7 @@ int test_sysfs_close_link(int flag)
 }
 
 /**
- * extern struct sysfs_link *sysfs_open_link(const unsigned char *lnpath);
+ * extern struct sysfs_link *sysfs_open_link(const char *lnpath);
  *
  * flag:
  * 	0:	lnpath -> valid;
@@ -1308,7 +1308,7 @@ int test_sysfs_open_link(int flag)
 
 /**
  * extern struct sysfs_link *sysfs_get_directory_link
- * 			(struct sysfs_directory *dir, unsigned char *linkname);
+ * 			(struct sysfs_directory *dir, char *linkname);
  *
  * flag:
  * 	0:	dir -> valid, linkname -> valid
@@ -1405,7 +1405,7 @@ int test_sysfs_get_directory_link(int flag)
 
 /**
  * extern struct sysfs_link *sysfs_get_subdirectory_link
- * 			(struct sysfs_directory *dir, unsigned char *linkname);
+ * 			(struct sysfs_directory *dir, char *linkname);
  *
  * flag:
  * 	0:	dir -> valid, linkname -> valid
@@ -1496,7 +1496,7 @@ int test_sysfs_get_subdirectory_link(int flag)
 
 /**
  * extern struct sysfs_attribute *sysfs_get_directory_attribute
- * 			(struct sysfs_directory *dir, unsigned char *attrname);
+ * 			(struct sysfs_directory *dir, char *attrname);
  * 
  * flag:
  * 	0:	dir -> valid, attrname -> valid

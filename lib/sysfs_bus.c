@@ -44,7 +44,7 @@ static int bus_device_id_equal(void *a, void *b)
 	if (a == NULL || b == NULL)
 		return 0;
 
-	if (strcmp(((unsigned char *)a), ((struct sysfs_device *)b)->bus_id) 
+	if (strcmp(((char *)a), ((struct sysfs_device *)b)->bus_id) 
 	    == 0)
 		return 1;
 	return 0;
@@ -61,7 +61,7 @@ static int bus_driver_name_equal(void *a, void *b)
 	if (a == NULL || b == NULL)
 		return 0;
 
-	if (strcmp(((unsigned char *)a), ((struct sysfs_driver *)b)->name) == 0)
+	if (strcmp(((char *)a), ((struct sysfs_driver *)b)->name) == 0)
 		return 1;
 	return 0;
 }
@@ -102,7 +102,7 @@ struct dlist *sysfs_get_bus_devices(struct sysfs_bus *bus)
 	struct sysfs_device *bdev = NULL;
 	struct sysfs_directory *devdir = NULL;
 	struct sysfs_link *curl = NULL;
-	unsigned char path[SYSFS_PATH_MAX];
+	char path[SYSFS_PATH_MAX];
 
 	if (bus == NULL) {
 		errno = EINVAL;
@@ -151,7 +151,7 @@ struct dlist *sysfs_get_bus_drivers(struct sysfs_bus *bus)
 	struct sysfs_driver *driver = NULL;
 	struct sysfs_directory *drvdir = NULL;
 	struct sysfs_directory *cursub = NULL;
-	unsigned char path[SYSFS_PATH_MAX];
+	char path[SYSFS_PATH_MAX];
 
 	if (bus == NULL) {
 		errno = EINVAL;
@@ -193,10 +193,10 @@ struct dlist *sysfs_get_bus_drivers(struct sysfs_bus *bus)
  * sysfs_open_bus: opens specific bus and all its devices on system
  * returns sysfs_bus structure with success or NULL with error.
  */
-struct sysfs_bus *sysfs_open_bus(const unsigned char *name)
+struct sysfs_bus *sysfs_open_bus(const char *name)
 {
 	struct sysfs_bus *bus = NULL;
-	unsigned char buspath[SYSFS_PATH_MAX];
+	char buspath[SYSFS_PATH_MAX];
 
 	if (name == NULL) {
 		errno = EINVAL;
@@ -239,8 +239,7 @@ struct sysfs_bus *sysfs_open_bus(const unsigned char *name)
  * @id: bus_id for device
  * returns struct sysfs_device reference or NULL if not found.
  */
-struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus, 
-							unsigned char *id)
+struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus, char *id)
 {
 	if (bus == NULL || id == NULL) {
 		errno = EINVAL;
@@ -264,7 +263,7 @@ struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus,
  * returns struct sysfs_driver reference or NULL if not found.
  */
 struct sysfs_driver *sysfs_get_bus_driver(struct sysfs_bus *bus, 
-							unsigned char *drvname)
+							char *drvname)
 {
 	if (bus == NULL || drvname == NULL) {
 		errno = EINVAL;
@@ -338,7 +337,7 @@ struct dlist *sysfs_refresh_bus_attributes(struct sysfs_bus *bus)
  * returns reference to sysfs_attribute if found or NULL if not found
  */
 struct sysfs_attribute *sysfs_get_bus_attribute(struct sysfs_bus *bus,
-						unsigned char *attrname)
+						char *attrname)
 {
 	struct dlist *attrlist = NULL;
 	
@@ -360,10 +359,9 @@ struct sysfs_attribute *sysfs_get_bus_attribute(struct sysfs_bus *bus,
  * @bsize: buffer size
  * returns 0 with success, -1 with error
  */
-int sysfs_find_driver_bus(const unsigned char *driver, unsigned char *busname,
-							size_t bsize)
+int sysfs_find_driver_bus(const char *driver, char *busname, size_t bsize)
 {
-	unsigned char subsys[SYSFS_PATH_MAX], *bus = NULL, *curdrv = NULL;
+	char subsys[SYSFS_PATH_MAX], *bus = NULL, *curdrv = NULL;
 	struct dlist *buslist = NULL, *drivers = NULL;
 
 	if (driver == NULL || busname == NULL) {

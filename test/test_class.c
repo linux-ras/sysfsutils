@@ -26,9 +26,9 @@
  *
  * extern void sysfs_close_class_device(struct sysfs_class_device *dev);
  * extern struct sysfs_class_device *sysfs_open_class_device_path
- * 					(const unsigned char *path);
+ * 					(const char *path);
  * extern struct sysfs_class_device *sysfs_open_class_device
- * 	(const unsigned char *class, const unsigned char *name);
+ * 	(const char *classname, const char *name);
  * extern struct sysfs_device *sysfs_get_classdev_device
  * 				(struct sysfs_class_device *clsdev);
  * extern struct sysfs_driver *sysfs_get_classdev_driver
@@ -36,20 +36,19 @@
  * extern struct sysfs_class_device *sysfs_get_classdev_parent
  *				(struct sysfs_class_device *clsdev);
  * extern void sysfs_close_class(struct sysfs_class *cls);
- * extern struct sysfs_class *sysfs_open_class(const unsigned char *name);
+ * extern struct sysfs_class *sysfs_open_class(const char *name);
  * extern struct dlist *sysfs_get_class_devices(struct sysfs_class *cls);
  * extern struct sysfs_class_device *sysfs_get_class_device
- * 			(struct sysfs_class *class, unsigned char *name);
+ * 			(struct sysfs_class *cls, char *name);
  * extern struct dlist *sysfs_get_classdev_attributes
  * 				(struct sysfs_class_device *cdev);
  * extern struct dlist *sysfs_refresh_classdev_attributes
  * 				(struct sysfs_class_device *cdev);
  * extern struct sysfs_attribute *sysfs_get_classdev_attr
- * 	(struct sysfs_class_device *clsdev, const unsigned char *name);
+ * 	(struct sysfs_class_device *clsdev, const char *name);
  * extern struct sysfs_attribute *sysfs_open_classdev_attr
- * 			(const unsigned char *classname, 
- * 			const unsigned char *dev, 
- * 			const unsigned char *attrib); 
+ * 			(const char *classname, 
+ * 			const char *dev, const char *attrib); 
  *****************************************************************************
  */
 
@@ -94,7 +93,7 @@ int test_sysfs_close_class_device(int flag)
 
 /**
  * extern struct sysfs_class_device *sysfs_open_class_device_path
- * 					(const unsigned char *path);
+ * 					(const char *path);
  * flag:
  * 	0:	path -> valid
  * 	1:	path -> invalid
@@ -152,7 +151,7 @@ int test_sysfs_open_class_device_path(int flag)
 
 /**
  * extern struct sysfs_class_device *sysfs_open_class_device
- * 	(const unsigned char *class, const unsigned char *name);
+ * 	(const char *class, const char *name);
  *
  * flag:
  * 	0:	class -> valid , name -> valid
@@ -479,7 +478,7 @@ int test_sysfs_close_class(int flag)
 }
  
 /** 
- * extern struct sysfs_class *sysfs_open_class(const unsigned char *name);
+ * extern struct sysfs_class *sysfs_open_class(const char *name);
  *
  * flag:
  * 	0:	name -> valid
@@ -603,7 +602,7 @@ int test_sysfs_get_class_devices(int flag)
 
 /** 
  * extern struct sysfs_class_device *sysfs_get_class_device
- * 	(struct sysfs_class *class, unsigned char *name);
+ * 	(struct sysfs_class *class, char *name);
  *
  * flag:
  * 	0:	class -> valid, name -> valid
@@ -830,7 +829,7 @@ int test_sysfs_refresh_classdev_attributes(int flag)
 
 /**
  * extern struct sysfs_attribute *sysfs_get_classdev_attr
- * 	(struct sysfs_class_device *clsdev, const unsigned char *name);
+ * 	(struct sysfs_class_device *clsdev, const char *name);
  *
  * flag:
  * 	0:	clsdev -> valid, name -> valid
@@ -940,9 +939,9 @@ int test_sysfs_get_classdev_attr(int flag)
 
 /**
  * extern struct sysfs_attribute *sysfs_open_classdev_attr
- * 			(const unsigned char *classname, 
- * 			const unsigned char *dev, 
- * 			const unsigned char *attrib); 
+ * 			(const char *classname, 
+ * 			const char *dev, 
+ * 			const char *attrib); 
  * flag:
  * 	0:	classname -> valid, dev -> valid, attrib -> valid
  * 	1:	classname -> valid, dev -> valid, attrib -> invalid

@@ -25,20 +25,20 @@
  * this will test the bus related functions provided by libsysfs.
  *
  * extern void sysfs_close_bus(struct sysfs_bus *bus);
- * extern struct sysfs_bus *sysfs_open_bus(const unsigned char *name);
+ * extern struct sysfs_bus *sysfs_open_bus(const char *name);
  * extern struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus,
- * 						unsigned char *id);
+ * 						char *id);
  * extern struct sysfs_driver *sysfs_get_bus_driver(struct sysfs_bus *bus,
- * 						unsigned char *drvname);
+ * 						char *drvname);
  * extern struct dlist *sysfs_get_bus_drivers(struct sysfs_bus *bus);
  * extern struct dlist *sysfs_get_bus_devices(struct sysfs_bus *bus);
  * extern struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus);
  * extern struct dlist *sysfs_refresh_bus_attributes(struct sysfs_bus *bus);
  * extern struct sysfs_attribute *sysfs_get_bus_attribute
  * 						(struct sysfs_bus *bus,
- * 						unsigned char *attrname);
- * extern int sysfs_find_driver_bus(const unsigned char *driver, 
- * 				unsigned char *busname,	size_t bsize);
+ * 						char *attrname);
+ * extern int sysfs_find_driver_bus(const char *driver, 
+ * 				char *busname,	size_t bsize);
  ******************************************************************************
  */
 
@@ -79,7 +79,7 @@ int  test_sysfs_close_bus(int flag)
 }
 
 /**
- * extern struct sysfs_bus *sysfs_open_bus(const unsigned char *name);
+ * extern struct sysfs_bus *sysfs_open_bus(const char *name);
  *
  * flag:
  * 	0 -	name -> valid
@@ -138,7 +138,7 @@ int test_sysfs_open_bus(int flag)
 
 /**
  * extern struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus,
- * 						unsigned char *id);
+ * 						char *id);
  *
  * flag:
  * 	0 	: bus -> valid, id -> valid
@@ -240,7 +240,7 @@ int test_sysfs_get_bus_device(int flag)
 
 /**
  * extern struct sysfs_driver *sysfs_get_bus_driver(struct sysfs_bus *bus,
- * 						unsigned char *drvname);
+ * 						char *drvname);
  *
  * flag:
  * 	0 	: bus -> valid, drvname -> valid
@@ -595,7 +595,7 @@ int test_sysfs_refresh_bus_attributes(int flag)
 /**
  * extern struct sysfs_attribute *sysfs_get_bus_attribute
  * 						(struct sysfs_bus *bus,
- * 						unsigned char *attrname);
+ * 						char *attrname);
  * flag:
  * 	0 	: bus -> valid, attrname -> valid
  * 	1 	: bus -> valid, attrname -> invalid
@@ -696,8 +696,8 @@ int test_sysfs_get_bus_attribute(int flag)
 }
 
 /**
- * extern int sysfs_find_driver_bus(const unsigned char *driver, 
- * 				unsigned char *busname,	size_t bsize);
+ * extern int sysfs_find_driver_bus(const char *driver, 
+ * 				char *busname,	size_t bsize);
  * 
  * flag:
  * 	0:	driver -> valid, busname -> valid, size ->valid.

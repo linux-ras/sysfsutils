@@ -26,11 +26,11 @@
  *
  * extern void sysfs_close_driver(struct sysfs_driver *driver);
  * extern struct sysfs_driver *sysfs_open_driver
- * 	(const unsigned char *bus_name, const unsigned char *drv_name);
+ * 	(const char *bus_name, const char *drv_name);
  * extern struct sysfs_driver *sysfs_open_driver_path
- * 					(const unsigned char *path);
+ * 					(const char *path);
  * extern struct sysfs_attribute *sysfs_get_driver_attr
- * 		(struct sysfs_driver *drv, const unsigned char *name);
+ * 		(struct sysfs_driver *drv, const char *name);
  * extern struct dlist *sysfs_get_driver_attributes
  * 					(struct sysfs_driver *driver);
  * extern struct dlist *sysfs_get_driver_devices(struct sysfs_driver *driver);
@@ -38,12 +38,12 @@
  * 					(struct sysfs_driver *driver);
  * extern struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver);
  * extern struct sysfs_device *sysfs_get_driver_device
- * 	(struct sysfs_driver *driver, const unsigned char *name);
+ * 	(struct sysfs_driver *driver, const char *name);
  * extern struct dlist *sysfs_refresh_driver_attributes
  * 					(struct sysfs_driver *driver);
  * extern struct sysfs_attribute *sysfs_open_driver_attr
- * 		(const unsigned char *bus, const unsigned char *drv, 
- * 					const unsigned char *attrib);
+ * 		(const char *bus, const char *drv, 
+ * 					const char *attrib);
  * 
  ******************************************************************************
  */
@@ -82,7 +82,7 @@ int test_sysfs_close_driver(int flag)
 
 /** 
  * extern struct sysfs_driver *sysfs_open_driver_path
- * 					(const unsigned char *path);
+ * 					(const char *path);
  * 
  * flag:
  * 	0:	path -> valid
@@ -141,7 +141,7 @@ int test_sysfs_open_driver_path(int flag)
 
 /** 
  * extern struct sysfs_driver *sysfs_open_driver
- * 	(const unsigned char *bus_name, const unsigned char *drv_name);
+ * 	(const char *bus_name, const char *drv_name);
  * 
  * flag:
  * 	0:	path -> valid, name -> valid
@@ -235,7 +235,7 @@ int test_sysfs_open_driver(int flag)
 
 /**
  * extern struct sysfs_attribute *sysfs_get_driver_attr
- * 		(struct sysfs_driver *drv, const unsigned char *name);
+ * 		(struct sysfs_driver *drv, const char *name);
  *
  * flag:
  * 	0:	drv -> valid, name -> valid
@@ -354,7 +354,7 @@ int test_sysfs_get_driver_attributes(int flag)
 {
 	struct sysfs_driver *driver = NULL;
 	struct dlist *list = NULL;
-	unsigned char *drv = NULL;
+	char *drv = NULL;
 
 	switch (flag) {
 	case 0:
@@ -427,7 +427,7 @@ int test_sysfs_get_driver_devices(int flag)
 {
 	struct sysfs_driver *driver = NULL;
 	struct dlist *list = NULL;
-	unsigned char *drv = NULL;
+	char *drv = NULL;
 
 	switch (flag) {
 	case 0:
@@ -624,7 +624,7 @@ int test_sysfs_get_driver_links(int flag)
 
 /**
  * extern struct sysfs_device *sysfs_get_driver_device
- * 	(struct sysfs_driver *driver, const unsigned char *name);
+ * 	(struct sysfs_driver *driver, const char *name);
  *
  * flag:
  * 	0:	driver -> valid, name -> valid
@@ -786,8 +786,8 @@ int test_sysfs_refresh_driver_attributes(int flag)
 
 /**
  * extern struct sysfs_attribute *sysfs_open_driver_attr
- * 			(const unsigned char *bus, const unsigned char *drv, 
- * 			const unsigned char *attrib);
+ * 			(const char *bus, const char *drv, 
+ * 			const char *attrib);
  *
  * flag:
  * 	0: bus -> valid, drv -> valid, attrib -> valid

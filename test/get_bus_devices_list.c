@@ -33,7 +33,7 @@ static void print_usage(void)
 int main(int argc, char *argv[])
 {
 	struct dlist *name = NULL;
-	unsigned char *cur = NULL;
+	char *cur = NULL;
 
 	if (argc != 2) {
 		print_usage();

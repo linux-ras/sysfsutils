@@ -196,7 +196,7 @@ int (*func_table[81])(int) = {
 	test_sysfs_open_classdev_attr,
 };
 
-unsigned char *dir_paths[] = {
+char *dir_paths[] = {
 	val_dir_path,
 	val_root_dev_path,
 	val_class_dev_path,
@@ -206,18 +206,18 @@ unsigned char *dir_paths[] = {
 	NULL
 };
 
-unsigned char *file_paths[] = {
+char *file_paths[] = {
 	val_file_path,
 	val_write_attr_path,
 	NULL
 };
 
-unsigned char *link_paths[] = {
+char *link_paths[] = {
 	val_link_path,
 	NULL
 };
 
-static int path_is_dir(const unsigned char *path)
+static int path_is_dir(const char *path)
 {
 	struct stat astats;
 
@@ -232,7 +232,7 @@ direrr:
 	return 1;
 }
 
-static int path_is_file(const unsigned char *path)
+static int path_is_file(const char *path)
 {
 	struct stat astats;
 
@@ -247,7 +247,7 @@ fileerr:
 	return 1;
 }
 
-static int path_is_link(const unsigned char *path)
+static int path_is_link(const char *path)
 {
 	struct stat astats;
 
@@ -267,9 +267,9 @@ linkerr:
  */
 static int check_header(void)
 {
-	unsigned char *var_path = NULL;
-	unsigned char path1[SYSFS_PATH_MAX];
-	unsigned int i = 0;
+	char *var_path = NULL;
+	char path1[SYSFS_PATH_MAX];
+	int i = 0;
 
 	for (i = 0; dir_paths[i] != NULL; i++) {
 		var_path = dir_paths[i];
