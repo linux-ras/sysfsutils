@@ -1,6 +1,14 @@
 
+10/20/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added code to install header files (from include dir)
+			to /usr/local/include/ directory
+		* Added "read_attr" functions for device, driver and
+			class; simplified "write_attr" handling
+		* Made sysfs_get_directory_attribute() recurse subdirs
+		* Fixed potential bugs in sysfs_dir.c
+
 10/17/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
-		* Add "path" to device in sysfs_device structure
+		* Added "path" to device in sysfs_device structure
 
 10/15/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Fixed bug in sysfs_block.c (initrd)

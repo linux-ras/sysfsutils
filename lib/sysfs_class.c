@@ -413,7 +413,7 @@ int sysfs_find_device_class(const unsigned char *bus_id,
  * @name: attribute name to get
  * returns sysfs_attribute reference with success or NULL with error
  */
-struct sysfs_attribute *sysfs_get_classdev_attribute
+struct sysfs_attribute *sysfs_get_classdev_attr
 		(struct sysfs_class_device *clsdev, const unsigned char *name)
 {
 	struct sysfs_attribute *cur = NULL;
@@ -438,6 +438,7 @@ struct sysfs_attribute *sysfs_get_classdev_attribute
  * @dev: class device name for which the attribute has to be changed
  * @attrib: attribute to change
  * @value: value to change to
+ * @len: size of buffer at "value"
  * Returns 0 on success and -1 on error
  */
 int sysfs_write_classdev_attr(unsigned char *dev, unsigned char *attrib,
@@ -475,6 +476,56 @@ int sysfs_write_classdev_attr(unsigned char *dev, unsigned char *attrib,
 		sysfs_close_class_device(clsdev);
 		return -1;
 	}
+	sysfs_close_class_device(clsdev);
+	return 0;
+}
+
+/**
+ * sysfs_read_classdev_attr: read an attribute for a given class device
+ * @dev: class device name for which the attribute has to be read
+ * @attrib: attribute to read
+ * @value: buffer to return value to user
+ * @len: size of buffer at "value"
+ * Returns 0 on success and -1 on error
+ */
+int sysfs_read_classdev_attr(unsigned char *dev, unsigned char *attrib,
+				unsigned char *value, size_t len)
+{
+	struct sysfs_class_device *clsdev = NULL;
+	struct sysfs_attribute *attribute = NULL;
+	unsigned char class_name[SYSFS_NAME_LEN];
+
+	if (dev == NULL || attrib == NULL || value == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	
+	memset(class_name, 0, SYSFS_NAME_LEN);
+	if ((sysfs_find_device_class(dev, 
+					class_name, SYSFS_NAME_LEN)) < 0) {
+		dprintf("Class device %s not found\n", dev);
+		return -1;
+	}
+	clsdev = sysfs_open_class_device_by_name(class_name, dev);
+	if (clsdev == NULL) {
+		dprintf("Error opening %s in class %s\n", dev, class_name);
+		return -1;
+	}
+	attribute = sysfs_get_directory_attribute(clsdev->directory, attrib);
+	if (attribute == NULL) {
+		dprintf("Attribute %s not defined for device %s on class %s\n",
+				attrib, dev, class_name);
+		sysfs_close_class_device(clsdev);
+		return -1;
+	}
+	if (attribute->len > len) {
+		dprintf("Value length %d is greater that suppled buffer %d\n",
+				attribute->len, len);
+		sysfs_close_class_device(clsdev);
+		return -1;
+	}
+	strncpy(value, attribute->value, attribute->len);
+	value[(attribute->len)+1] = 0;
 	sysfs_close_class_device(clsdev);
 	return 0;
 }

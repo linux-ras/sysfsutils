@@ -149,8 +149,10 @@ struct sysfs_attribute *sysfs_open_attribute(const unsigned char *path)
 	}
 	strncpy(sysattr->path, path, sizeof(sysattr->path));
 	if ((stat(sysattr->path, &fileinfo)) != 0) {
-		dprintf("stat failed\n");
+		dprintf("Stat failed: No such attribute?\n");
 		sysattr->method = 0;
+		free(sysattr);
+		sysattr = NULL;
 	} else {
 		if (fileinfo.st_mode & S_IRUSR)
 			sysattr->method |= SYSFS_METHOD_SHOW;
@@ -211,24 +213,30 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 					len, sysattr->name);
 		/* 
 		 * since we could not write user supplied number of bytes,
-		 * restore the old value
+		 * restore the old value if one available
 		 */
-		length = write(fd, sysattr->value, sysattr->len);
-		close(fd);
-		return -1;
+		if (sysattr->method & SYSFS_METHOD_SHOW) {
+			length = write(fd, sysattr->value, sysattr->len);
+			close(fd);
+			return -1;
+		}
 	}
 	
 	/*
 	 * Validate length that has been copied. Alloc appropriate area
-	 * in sysfs_attribute
+	 * in sysfs_attribute. Verify first if the attribute supports reading
+	 * (show method). If it does not, do not bother
 	 */ 
-	if (length != sysattr->len) {
-		sysattr->value = (char *)realloc(sysattr->value, length);
-		sysattr->len = length;
-		strncpy(sysattr->value, new_value, length);
-	} else {
-		/*"length" of the new value is same as old one */ 
-		strncpy(sysattr->value, new_value, length);
+	if (sysattr->method & SYSFS_METHOD_SHOW) {
+		if (length != sysattr->len) {
+			sysattr->value = (char *)realloc(sysattr->value, 
+								length);
+			sysattr->len = length;
+			strncpy(sysattr->value, new_value, length);
+		} else {
+			/*"length" of the new value is same as old one */ 
+			strncpy(sysattr->value, new_value, length);
+		}
 	}
 			
 	close(fd);	
@@ -582,12 +590,30 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 struct sysfs_attribute *sysfs_get_directory_attribute
 			(struct sysfs_directory *dir, unsigned char *attrname)
 {
+	struct sysfs_directory *sdir = NULL;
+	struct sysfs_attribute *attr = NULL;
+	
 	if (dir == NULL || attrname == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
-	return (struct sysfs_attribute *)dlist_find_custom(dir->attributes,
+	
+	attr = (struct sysfs_attribute *)dlist_find_custom(dir->attributes,
 		attrname, dir_attribute_name_equal);
+	if (attr != NULL)
+		return attr;
+	
+	if (dir->subdirs != NULL) {
+		dlist_for_each_data(dir->subdirs, sdir, 
+					struct sysfs_directory) {
+			if (sdir->attributes == NULL)
+				continue;
+			attr = sysfs_get_directory_attribute(sdir, attrname);
+			if (attr != NULL)
+				return attr;
+		}
+	}
+	return NULL;
 }
 
 /**
@@ -627,12 +653,15 @@ struct sysfs_directory *sysfs_get_subdirectory(struct sysfs_directory *dir,
 	if (sub != NULL) 
 		return sub;
 
-	dlist_for_each_data(dir->subdirs, cursub, struct sysfs_directory) {
-		if (cursub->subdirs == NULL)
-			continue;
-		sub = sysfs_get_subdirectory(cursub, subname);
-		if (sub != NULL)
-			return sub;
+	if (dir->subdirs != NULL) {
+		dlist_for_each_data(dir->subdirs, cursub, 
+					struct sysfs_directory) {
+			if (cursub->subdirs == NULL)
+				continue;
+			sub = sysfs_get_subdirectory(cursub, subname);
+			if (sub != NULL)
+				return sub;
+		}
 	}
 	return NULL;
 }
@@ -661,12 +690,15 @@ struct sysfs_link *sysfs_get_subdirectory_link(struct sysfs_directory *dir,
 	if (dir->subdirs == NULL)
 		return NULL;
 
-	dlist_for_each_data(dir->subdirs, cursub, struct sysfs_directory) {
-		if (cursub->subdirs == NULL)
-			continue;
-		ln = sysfs_get_subdirectory_link(cursub, linkname);
-		if (ln != NULL)
-			return ln;
+	if (dir->subdirs != NULL) {
+		dlist_for_each_data(dir->subdirs, cursub, 
+						struct sysfs_directory) {
+			if (cursub->subdirs == NULL)
+				continue;
+			ln = sysfs_get_subdirectory_link(cursub, linkname);
+			if (ln != NULL)
+				return ln;
+		}
 	}
 	return NULL;
 }

@@ -225,6 +225,43 @@ struct sysfs_driver *sysfs_open_driver_by_name(const unsigned char *drv_name,
 }
 
 /**
+ * get_driver_path: looks up the bus the driver is on and builds path to
+ * 		the driver.
+ * @drv: driver to look for
+ * @path: buffer to return path to driver
+ * @psize: size of "path"
+ * Returns 0 on success and -1 on error
+ */
+static int get_driver_path(const unsigned char *drv, 
+				unsigned char *path, size_t psize)
+{
+	unsigned char bus_name[SYSFS_NAME_LEN];
+
+	if (drv == NULL || path == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	memset(bus_name, 0, SYSFS_NAME_LEN);
+	memset(path, 0, SYSFS_PATH_MAX);
+	if ((sysfs_find_driver_bus(drv, bus_name, SYSFS_NAME_LEN)) < 0) {
+		dprintf("Driver %s not found\n", drv);
+		return -1;
+	}
+	if (sysfs_get_mnt_path(path, SYSFS_PATH_MAX) != 0) {
+		dprintf("Error getting sysfs mount path\n");
+		return -1;
+	}
+	strcat(path, SYSFS_BUS_DIR);
+	strcat(path, "/");
+	strcat(path, bus_name);
+	strcat(path, SYSFS_DRIVERS_DIR);
+	strcat(path, "/");
+	strcat(path, drv);
+	fprintf(stdout, "get_driver_path %s\n", path);
+	return 0;
+}
+
+/**
  * sysfs_write_driver_attr: modify "writable" driver attribute
  * @drv: driver whose attribute has to be modified
  * @attrib: Attribute to be modified
@@ -234,38 +271,97 @@ struct sysfs_driver *sysfs_open_driver_by_name(const unsigned char *drv_name,
 int sysfs_write_driver_attr(unsigned char *drv, unsigned char *attrib,
 					unsigned char *value, size_t len)
 {
-	struct sysfs_driver *driver = NULL;
 	struct sysfs_attribute *attribute = NULL;
-	unsigned char busname[SYSFS_NAME_LEN];
+	unsigned char path[SYSFS_PATH_MAX];
 
 	if (drv == NULL || attrib == NULL || value == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	memset(busname, 0, SYSFS_NAME_LEN);
-	if ((sysfs_find_driver_bus(drv, busname, SYSFS_NAME_LEN)) < 0) {
-		dprintf("Driver %s not found\n", drv);
+	memset(path, 0, SYSFS_PATH_MAX);
+	if ((get_driver_path(drv, path, SYSFS_PATH_MAX)) != 0) {
+		dprintf("Error getting to driver %s\n", drv);
 		return -1;
 	}
-	driver = sysfs_open_driver_by_name(drv, busname, SYSFS_NAME_LEN);
-	if (driver == NULL) {
-		dprintf("Could not open driverr %s\n", drv);
-		return -1;
-	}
-	attribute = sysfs_get_directory_attribute(driver->directory, attrib);
+	strcat(path, "/");
+	strcat(path, attrib);
+	attribute = sysfs_open_attribute(path);
         if (attribute == NULL) {
-                dprintf("Attribute %s not defined for driver %s\n", 
+                dprintf("Attribute %s could not be retrieved for driver %s\n",
 							attrib, drv);
-		sysfs_close_driver_by_name(driver);
 		return -1;
+	}
+	if (attribute->method & SYSFS_METHOD_SHOW) {
+		if ((sysfs_read_attribute(attribute)) != 0) {
+			dprintf("Error reading attribute %s for driver %s\n",
+					attrib, drv);
+			sysfs_close_attribute(attribute);
+			return -1;
+		}
 	}
 	if ((sysfs_write_attribute(attribute, value, len)) < 0) {
 		dprintf("Error setting %s to %s\n", attrib, value);
-		sysfs_close_driver_by_name(driver);
+		sysfs_close_attribute(attribute);
 		return -1;
 	}
-	sysfs_close_driver_by_name(driver);
+	sysfs_close_attribute(attribute);
+	return 0;
+}
+
+/**
+ * sysfs_read_driver_attr: read the user supplied driver attribute
+ * @drv: driver whose attribute has to be read
+ * @attrib: Attribute to be read
+ * @value: Buffer to return the read value
+ * @len: Length of the buffer "value"
+ * Returns 0 on success -1 on failure
+ */ 
+int sysfs_read_driver_attr(unsigned char *drv, unsigned char *attrib,
+					unsigned char *value, size_t len)
+{
+	struct sysfs_attribute *attribute = NULL;
+	unsigned char busname[SYSFS_NAME_LEN], path[SYSFS_PATH_MAX];
+
+	if (drv == NULL || attrib == NULL || value == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	memset(path, 0, SYSFS_NAME_LEN);
+	if ((get_driver_path(drv, path, SYSFS_PATH_MAX)) != 0) {
+		dprintf("Error getting to driver %s\n", drv);
+		return -1;
+	}
+	strcat(path, "/");
+	strcat(path, attrib);
+	attribute = sysfs_open_attribute(path);
+        if (attribute == NULL) {
+		dprintf("Error opening attribute %s for driver %s\n",
+				attrib, drv);
+		return -1;
+	}
+	if (!(attribute->method & SYSFS_METHOD_SHOW)) {
+		dprintf("Show method not supported for attribute %s\n",
+				attrib);
+		sysfs_close_attribute(attribute);
+		return -1;
+	}
+	if ((sysfs_read_attribute(attribute)) != 0) {
+                dprintf("Error reading attribute %s for driver %s\n", 
+				attrib, drv);
+		sysfs_close_attribute(attribute);
+		return -1;
+	}
+	if (attribute->len > len) {
+		dprintf("Value length %d is larger than supplied buffer %d\n",
+				attribute->len, len);
+		sysfs_close_attribute(attribute);
+		return -1;
+	}
+	strncpy(value, attribute->value, attribute->len);
+	value[(attribute->len)+1] = 0;
+	sysfs_close_attribute(attribute);
 	return 0;
 }
 

@@ -388,6 +388,51 @@ struct sysfs_device *sysfs_open_device_by_id(const unsigned char *bus_id,
 }
 
 /**
+ * get_device_absolute_path: looks up the bus the device is on, gets 
+ * 		absolute path to the device
+ * @device: device for which path is needed
+ * @path: buffer to store absolute path
+ * @psize: size of "path"
+ * Returns 0 on success -1 on failure
+ */
+static int get_device_absolute_path(const unsigned char *device, 
+					unsigned char *path, size_t psize)
+{
+	unsigned char bus_name[SYSFS_NAME_LEN], bus_path[SYSFS_PATH_MAX];
+
+	if (device == NULL || path == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	memset(bus_name, 0, SYSFS_NAME_LEN);
+	memset(bus_path, 0, SYSFS_NAME_LEN);
+	if ((sysfs_find_device_bus(device, bus_name, SYSFS_NAME_LEN)) != 0) {
+		dprintf("Device %s not found\n", device);
+		return -1;
+	}
+	if (sysfs_get_mnt_path(bus_path, SYSFS_PATH_MAX) != 0) {
+		dprintf ("Sysfs not supported on this system\n");
+		return -1;
+	}
+	strcat(bus_path, SYSFS_BUS_DIR);
+	strcat(bus_path, "/");
+	strcat(bus_path, bus_name);
+	strcat(bus_path, SYSFS_DEVICES_DIR);
+	strcat(bus_path, "/");
+	strcat(bus_path, device);
+	/*
+	 * We now are at /sys/bus/"bus_name"/devices/"device" which is a link.
+	 * Now read this link to reach to the device.
+	 */ 
+	if ((sysfs_get_link(bus_path, path, SYSFS_PATH_MAX)) != 0) {
+		dprintf("Error getting to device %s\n", device);
+		return -1;
+	}
+	return 0;
+}
+
+/**
  * sysfs_write_device_attr: modify a "writable" attribute for the given device
  * @dev: device bus_id for which attribute has to be changed
  * @attrib: attribute to change
@@ -398,38 +443,96 @@ struct sysfs_device *sysfs_open_device_by_id(const unsigned char *bus_id,
 int sysfs_write_device_attr(unsigned char *dev, unsigned char *attrib,
 					unsigned char *value, size_t len)
 {
-	struct sysfs_device *device = NULL;
 	struct sysfs_attribute *attribute = NULL;
-	unsigned char bus_name[SYSFS_NAME_LEN];
+	unsigned char devpath[SYSFS_PATH_MAX];
 
 	if (dev == NULL || attrib == NULL || value == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 	
-	memset(bus_name, 0, SYSFS_NAME_LEN);
-	if ((sysfs_find_device_bus(dev, bus_name, SYSFS_NAME_LEN)) != 0) {
-		dprintf("Device %s not found\n", dev);
+	memset(devpath, 0, SYSFS_PATH_MAX);
+	if ((get_device_absolute_path(dev, devpath, SYSFS_PATH_MAX)) != 0) {
+		dprintf("Error finding absolute path to device %s\n", dev);
 		return -1;
 	}
-	device = sysfs_open_device_by_id(dev, bus_name, SYSFS_NAME_LEN);
-	if (device == NULL) {
-		dprintf("Error opening device %s\n", dev);
-		return -1;
-	}
-	attribute = sysfs_get_directory_attribute(device->directory, attrib);
+	strcat(devpath, "/");
+	strcat(devpath, attrib);
+	attribute = sysfs_open_attribute(devpath);
 	if (attribute == NULL) {
-		dprintf("Attribute %s not defined for device %s\n",
+		dprintf("Attribute %s could not be retrieved for device %s\n",
 				attrib, dev);
-		sysfs_close_device(device);
 		return -1;
+	}
+	if (attribute->method & SYSFS_METHOD_SHOW) {
+		if ((sysfs_read_attribute(attribute)) != 0) {
+			dprintf("Error reading attribute %s for device %s\n",
+					attrib, dev);
+			sysfs_close_attribute(attribute);
+			return -1;
+		}
 	}
 	if ((sysfs_write_attribute(attribute, value, len)) < 0) {
 		dprintf("Error setting %s to %s\n", attrib, value);
-		sysfs_close_device(device);
+		sysfs_close_attribute(attribute);
 		return -1;
 	}
-	sysfs_close_device(device);
+	sysfs_close_attribute(attribute);
 	return 0;
 }
+
+/**
+ * sysfs_read_device_attr: read an attribute of the given device
+ * @dev: device bus_id for which attribute has to be changed
+ * @attrib: attribute to read
+ * @value: buffer to return value in
+ * @len: size of buffer available
+ * Returns 0 on success -1 on error
+ */ 
+int sysfs_read_device_attr(unsigned char *dev, unsigned char *attrib,
+					unsigned char *value, size_t len)
+{
+	struct sysfs_attribute *attribute = NULL;
+	unsigned char devpath[SYSFS_PATH_MAX];
+
+	if (dev == NULL || attrib == NULL || value == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
 	
+	memset(devpath, 0, SYSFS_PATH_MAX);
+	if ((get_device_absolute_path(dev, devpath, SYSFS_PATH_MAX)) != 0) {
+		dprintf("Error finding absolute path to device %s\n", dev);
+		return -1;
+	}
+	strcat(devpath, "/");
+	strcat(devpath, attrib);
+	attribute = sysfs_open_attribute(devpath);
+	if (attribute == NULL) {
+		dprintf("Error opening attribute %s for device %s\n",
+				attrib, dev);
+		return -1;
+	}
+	if (!(attribute->method & SYSFS_METHOD_SHOW)) {
+		dprintf("Show method not supported for attribute %s\n",
+				attrib);
+		sysfs_close_attribute(attribute);
+		return -1;
+	}
+	if ((sysfs_read_attribute(attribute)) != 0) {
+		dprintf("Error reading attribute %s for device %s\n",
+				attrib, dev);
+		sysfs_close_attribute(attribute);
+		return -1;
+	}
+	if (attribute->len > len) {
+		dprintf("Value length %d is larger than supplied buffer %d\n",
+				attribute->len, len);
+		sysfs_close_attribute(attribute);
+		return -1;
+	}
+	strncpy(value, attribute->value, attribute->len);
+	value[(attribute->len)+1] = 0;
+	sysfs_close_attribute(attribute);
+	return 0;
+}
