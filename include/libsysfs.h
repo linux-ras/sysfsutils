@@ -40,6 +40,7 @@
 #define SYSFS_DRIVERS_NAME	"drivers"
 #define SYSFS_NAME_ATTRIBUTE	"name"
 #define SYSFS_UNKNOWN		"unknown"
+#define SYSFS_PATH_ENV		"SYSFS_PATH"
 
 #define SYSFS_PATH_MAX		255
 #define	SYSFS_NAME_LEN		50
@@ -114,6 +115,7 @@ struct sysfs_class_device {
 	struct sysfs_device *sysdevice;		/* NULL if virtual */
 	struct sysfs_driver *driver;		/* NULL if not implemented */
 	unsigned char name[SYSFS_NAME_LEN];
+	unsigned char classname[SYSFS_NAME_LEN];
 	unsigned char path[SYSFS_PATH_MAX];
 
 	/* for internal use only */

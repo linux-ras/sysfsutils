@@ -134,6 +134,39 @@ static struct sysfs_directory *open_class_dir(const unsigned char *name)
 	return classdir;
 }
 
+/** 
+ * set_classdev_classname: Grabs classname from path
+ * @cdev: class device to set
+ * Returns nothing
+ */
+static void set_classdev_classname(struct sysfs_class_device *cdev)
+{
+	unsigned char *c = NULL, *e = NULL;
+	int count = 0;
+
+	c = strstr(cdev->path, SYSFS_CLASS_DIR);
+	if (c == NULL) 
+		c = strstr(cdev->path, SYSFS_BLOCK_DIR);
+	else {
+		c++;
+		while (c != NULL && *c != '/') 
+			c++;
+	}
+
+	if (c == NULL)
+		strcpy(cdev->classname, SYSFS_UNKNOWN);
+
+	else {
+		c++;
+		e = c;
+		while (e != NULL && *e != '/') {
+			e++;
+			count++;
+		}
+		strncpy(cdev->classname, c, count);
+	}
+}
+
 /**
  * sysfs_open_class_device: Opens and populates class device
  * @path: path to class device.
@@ -178,6 +211,7 @@ struct sysfs_class_device *sysfs_open_class_device(const unsigned char *path)
 	sysfs_read_all_subdirs(dir);
 	cdev->directory = dir;
 	strcpy(cdev->path, dir->path);
+	set_classdev_classname(cdev);
 
 	/* get driver and device, if implemented */
 	if (cdev->directory->links != NULL) {

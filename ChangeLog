@@ -1,4 +1,11 @@
 
+10/27/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Fixed bug in sysfs_get_name_from_path()
+		* Added code to check if SYSFS_PATH environment variable
+			is set
+		* Modified sysfs_get_link()
+		* Added "classname" to struct sysfs_class_device
+
 10/22/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Removed "block" subsystem support
 

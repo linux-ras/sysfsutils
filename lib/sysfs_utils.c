@@ -76,12 +76,18 @@ static int sysfs_get_fs_mnt_path(const unsigned char *fs_type,
  */
 int sysfs_get_mnt_path(unsigned char *mnt_path, size_t len)
 {
-	int ret = -1;
+	char *sysfs_path = NULL;
+	int ret = 0;
 
-	if (mnt_path != NULL)
-		ret = sysfs_get_fs_mnt_path(SYSFS_FSTYPE_NAME, mnt_path, len);
-	else
+	if (mnt_path == NULL) {
 		errno = EINVAL;
+		return -1;
+	}
+	sysfs_path = getenv(SYSFS_PATH_ENV);
+	if (sysfs_path != NULL) 
+		strncpy(mnt_path, sysfs_path, len);
+	else
+		ret = sysfs_get_fs_mnt_path(SYSFS_FSTYPE_NAME, mnt_path, len);
 
 	return ret;
 }
@@ -95,13 +101,19 @@ int sysfs_get_mnt_path(unsigned char *mnt_path, size_t len)
 int sysfs_get_name_from_path(const unsigned char *path, unsigned char *name, 
 								size_t len)
 {
+	unsigned char tmp[SYSFS_PATH_MAX];
 	unsigned char *n = NULL;
                                                                                 
 	if (path == NULL || name == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
-	n = strrchr(path, '/');
+	memset(tmp, 0, SYSFS_PATH_MAX);
+	strcpy(tmp, path);
+	n = &tmp[strlen(tmp)-1];
+	if (strncmp(n, "/", 1) == 0)
+		*n = '\0';	
+	n = strrchr(tmp, '/');
 	if (n == NULL) {
 		errno = EINVAL;
 		return -1;
@@ -122,7 +134,8 @@ int sysfs_get_link(const unsigned char *path, unsigned char *target, size_t len)
 {
 	unsigned char devdir[SYSFS_PATH_MAX];
 	unsigned char linkpath[SYSFS_PATH_MAX];
-	unsigned char *d = NULL;
+	unsigned char *d = NULL, *s = NULL;
+	int slashes = 0, count = 0;
 
 	if (path == NULL || target == NULL) {
 		errno = EINVAL;
@@ -131,12 +144,8 @@ int sysfs_get_link(const unsigned char *path, unsigned char *target, size_t len)
 
 	memset(devdir, 0, SYSFS_PATH_MAX);
 	memset(linkpath, 0, SYSFS_PATH_MAX);
+	strncpy(devdir, path, SYSFS_PATH_MAX);
 
-	if ((sysfs_get_mnt_path(devdir, SYSFS_PATH_MAX)) != 0) {
-		dprintf("Sysfs not supported on this system\n");
-		return -1;
-	}
-								        
 	if ((readlink(path, linkpath, SYSFS_PATH_MAX)) < 0) {
 		return -1;
 	}
@@ -144,12 +153,22 @@ int sysfs_get_link(const unsigned char *path, unsigned char *target, size_t len)
 	d = linkpath;
 
 	/* getting rid of leading "../.." */	
-	while (*d == '/' || *d == '.')
+	while (*d == '/' || *d == '.') {
+		if (*d == '/')
+			slashes++;
 		d++;
+	}
 
 	d--;
+
+	s = &devdir[strlen(devdir)-1];
+	while (s != NULL && count != (slashes+1)) {
+		s--;
+		if (*s == '/')
+			count++;
+	}
 	
-	strcat(devdir, d);
+	strncpy(s, d, (SYSFS_PATH_MAX-strlen(devdir)));
 	strncpy(target, devdir, len);
 
 	return 0;
