@@ -33,12 +33,17 @@
 #define SYSFS_PROC_MNTS		"/proc/mounts"
 #define SYSFS_BUS_DIR		"/bus"
 #define SYSFS_CLASS_DIR		"/class"
+#define SYSFS_BLOCK_DIR		"/block"
 #define SYSFS_DEVICES_DIR	"/devices"
 #define SYSFS_DEVICES_NAME	"devices"
 #define SYSFS_DRIVERS_DIR	"/drivers"
 #define SYSFS_DRIVERS_NAME	"drivers"
 #define SYSFS_NAME_ATTRIBUTE	"name"
 #define SYSFS_UNKNOWN		"unknown"
+
+/* Some "block" subsystem specific #defines */
+#define SYSFS_QUEUE_NAME	"queue"
+#define SYSFS_IOSCHED_NAME	"iosched"
 
 #define SYSFS_PATH_MAX		255
 #define	SYSFS_NAME_LEN		50
@@ -125,6 +130,23 @@ struct sysfs_class {
 
 	/* for internal use only */
 	struct sysfs_directory *directory;	
+};
+
+struct sysfs_block_device {
+	struct sysfs_device *device;	/* the physical device */
+	struct dlist *partitions;	/* struct sysfs_block_partition */
+	unsigned char name[SYSFS_NAME_LEN];
+	unsigned char path[SYSFS_PATH_MAX];
+
+	/* for internal use only */
+	struct sysfs_directory *directory;
+};
+
+struct sysfs_block_partition {
+	unsigned char name[SYSFS_NAME_LEN];
+
+	/* for internal use only */
+	struct sysfs_directory *directory;
 };
 
 #ifdef __cplusplus
@@ -225,6 +247,20 @@ extern int sysfs_find_device_class_name(unsigned char *bus_id,
 		unsigned char *classname, size_t bsize);
 extern int sysfs_write_classdev_attr(unsigned char *dev,
 		unsigned char *attrib, unsigned char *value);
+
+/* generic sysfs block access */
+extern void sysfs_close_block_partition
+			(struct sysfs_block_partition *partition);
+extern void sysfs_close_block_device(struct sysfs_block_device *block);
+extern struct sysfs_block_device *sysfs_open_block_device(unsigned char *name);
+extern struct dlist *sysfs_get_blockdev_attributes
+					(struct sysfs_block_device *block);
+extern struct dlist *sysfs_get_partition_attributes
+					(struct sysfs_block_partition *part);
+extern struct dlist *sysfs_get_queue_attributes
+					(struct sysfs_block_device *block);
+extern struct dlist *sysfs_get_iosched_attributes
+					(struct sysfs_block_device *block);
 
 #ifdef __cplusplus
 }

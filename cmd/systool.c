@@ -45,7 +45,7 @@ static unsigned char *device_to_show = NULL;	/* show only this bus device */
                                                                                 
 #define SHOW_ALL		0xff
 
-static unsigned char cmd_options[] = "aA:b:c:dDhr:v";
+static unsigned char cmd_options[] = "aA:b:B:c:dDhr:v";
 
 /*
  * binary_files - defines existing sysfs binary files. These files will be
@@ -73,6 +73,7 @@ void usage(void)
 		"\t-r <root_device>\tShow a specific root device tree\n");
 	fprintf(stdout, "\t-v\t\t\tShow all attributes with values\n");
 	fprintf(stdout, "\t-A <attribute_name>\tShow attribute value\n");
+	fprintf(stdout, "\t-B <block_name>\t Show specific block device\n");
 	fprintf(stdout, "\t-D\t\t\tShow only drivers\n");
 }
 
@@ -456,7 +457,8 @@ int show_sysfs_class(unsigned char *classname)
  */
 int show_sysfs_root(unsigned char *rootname)
 {
-	struct sysfs_device *root = NULL;
+	struct sysfs_root_device *root = NULL;
+	struct sysfs_device *device = NULL;
 	unsigned char path[SYSFS_PATH_MAX];
 
 	if (rootname == NULL) {
@@ -472,18 +474,103 @@ int show_sysfs_root(unsigned char *rootname)
 	strcat(path, SYSFS_DEVICES_DIR);
 	strcat(path, "/");
 	strcat(path, rootname);
-	root = sysfs_open_device_tree(path);
+
+	root = sysfs_open_root_device(rootname);
 	if (root == NULL) {
 		fprintf(stderr, "Error opening root device %s\n", rootname);
 		return 1;
 	}
-	fprintf(stdout, "Root Device Tree: %s\n", rootname);
-	show_device_tree(root, 2);
-	sysfs_close_device_tree(root);
 
+	fprintf(stdout, "Root Device Tree: %s\n", rootname);
+	
+	if (root->devices) {
+		dlist_for_each_data(root->devices, device,
+				struct sysfs_device) {
+			show_device_tree(device, 2);
+		}
+	}
+	sysfs_close_root_device(root);
+	
 	return 0;
 }
 
+/**
+ * show_block_partitions: show partition details
+ * @partitions: dlist of partitions
+ * returns nothing
+ */
+void show_block_partitions(struct dlist *partitions, int level)
+{
+	struct sysfs_block_partition *part = NULL;
+	struct dlist *attributes = NULL;
+
+	if (partitions == NULL)
+		return;
+	indent(level);
+	fprintf(stdout, "Partitions:\n");
+	dlist_for_each_data(partitions, part, struct sysfs_block_partition) {
+		indent(level+4);
+		fprintf(stdout, "%s\n", part->name);
+		if (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
+				    | SHOW_ALL_ATTRIB_VALUES)) {
+			attributes = sysfs_get_partition_attributes(part);
+			if (attributes != NULL)
+				show_attributes(attributes, level+8);
+		}
+	}
+}
+
+/**
+ * show_sysfs_block: prints out details of the given block device
+ * @blockname: name of the block device to show
+ * returns 0 on success, 1 on error
+ */
+int show_sysfs_block(unsigned char *blockname)
+{
+	struct sysfs_block_device *block = NULL;
+	struct dlist *attributes = NULL;
+
+	if (blockname == NULL) {
+		errno = EINVAL;
+		return 1;
+	}
+	
+	block = sysfs_open_block_device(blockname);
+	if (block == NULL) {
+		fprintf(stderr, "Error opening block device %s\n", blockname);
+		return 1;
+	}
+
+	fprintf(stdout, "Block: %s\n", blockname);
+	if (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
+			    | SHOW_ALL_ATTRIB_VALUES)) {
+		attributes = sysfs_get_blockdev_attributes(block);
+		if (attributes != NULL) 
+			show_attributes(attributes, 4);
+		attributes = sysfs_get_queue_attributes(block);
+		if (attributes != NULL) {
+			indent(4);
+			fprintf(stdout, "queue:\n");
+			show_attributes(attributes, 8);
+		}
+		attributes = sysfs_get_iosched_attributes(block);
+		if (attributes != NULL) {
+			indent(8);
+			fprintf(stdout, "iosched:\n");
+			show_attributes(attributes, 12);
+		}
+	}
+	if (block->partitions != NULL)
+		show_block_partitions(block->partitions, 4);
+	if (block->device != NULL) {
+		indent(4);
+		fprintf(stdout, "Physical device:");
+		show_device(block->device, 4);
+	}
+	sysfs_close_block_device(block);
+	
+	return 0;
+}
 
 /**
  * show_default_info: prints current buses, classes, and root devices
@@ -524,6 +611,15 @@ int show_default_info(void)
 	}
 	sysfs_close_list(list);
 			
+	strcpy(subsys, SYSFS_BLOCK_DIR);
+	list = sysfs_open_subsystem_list(subsys);
+	if (list != NULL) {
+		fprintf(stdout, "Supported sysfs block devices:\n");
+		dlist_for_each_data(list, cur, char)
+			fprintf(stdout, "\t%s\n", cur);
+	}
+	sysfs_close_list(list);
+	
 	return retval;
 }
 	
@@ -533,6 +629,7 @@ int main(int argc, char *argv[])
 	unsigned char *show_bus = NULL;
 	unsigned char *show_class = NULL;
 	unsigned char *show_root = NULL;
+	unsigned char *show_block = NULL;
 	int retval = 0;
 	int opt;
 	extern int optind;
@@ -555,6 +652,9 @@ int main(int argc, char *argv[])
 			break;	
 		case 'b':
 			show_bus = optarg;	
+			break;
+		case 'B':
+			show_block = optarg;
 			break;
 		case 'c':
 			show_class = optarg;	
@@ -602,9 +702,11 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if ((show_bus == NULL && show_class == NULL && show_root == NULL) 
-	    && (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE 
-	    | SHOW_DEVICES | SHOW_DRIVERS | SHOW_ALL_ATTRIB_VALUES))) {
+	if ((show_bus == NULL && show_class == NULL && 
+		show_root == NULL && show_block == NULL) && 
+			(show_options & (SHOW_ATTRIBUTES | 
+				SHOW_ATTRIBUTE_VALUE | SHOW_DEVICES | 
+				SHOW_DRIVERS | SHOW_ALL_ATTRIB_VALUES))) {
 		fprintf(stderr, 
 			"Please specify a bus, class, or root device\n");
 		usage();
@@ -620,8 +722,11 @@ int main(int argc, char *argv[])
 		retval = show_sysfs_class(show_class);
 	if (show_root != NULL)
 		retval = show_sysfs_root(show_root);
+	if (show_block != NULL)
+		retval = show_sysfs_block(show_block);
 
-	if (show_bus == NULL && show_class == NULL && show_root == NULL) 
+	if (show_bus == NULL && show_class == NULL && 
+			show_root == NULL && show_block == NULL) 
 		retval = show_default_info();
 
 	exit(retval);

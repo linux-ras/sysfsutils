@@ -1,4 +1,8 @@
 
+09/29/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added "block" subsystem support
+		* Modified systool to use sysfs_root_device
+
 09/24/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added "write" attribute functions specific to device,
 			driver and class device.

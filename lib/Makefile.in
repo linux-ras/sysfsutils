@@ -77,7 +77,7 @@ am__quote = @am__quote@
 install_sh = @install_sh@
 lib_LIBRARIES = libsysfs.a
 libsysfs_a_SOURCES = sysfs_utils.c sysfs_dir.c sysfs_bus.c sysfs_class.c \
-	sysfs_device.c sysfs_driver.c sysfs.h dlist.c
+	sysfs_device.c sysfs_driver.c sysfs_block.c sysfs.h dlist.c
 
 INCLUDES = -I../include
 subdir = lib
@@ -90,7 +90,8 @@ libsysfs_a_AR = $(AR) cru
 libsysfs_a_LIBADD =
 am_libsysfs_a_OBJECTS = sysfs_utils.$(OBJEXT) sysfs_dir.$(OBJEXT) \
 	sysfs_bus.$(OBJEXT) sysfs_class.$(OBJEXT) \
-	sysfs_device.$(OBJEXT) sysfs_driver.$(OBJEXT) dlist.$(OBJEXT)
+	sysfs_device.$(OBJEXT) sysfs_driver.$(OBJEXT) \
+	sysfs_block.$(OBJEXT) dlist.$(OBJEXT)
 libsysfs_a_OBJECTS = $(am_libsysfs_a_OBJECTS)
 
 DEFS = @DEFS@
@@ -100,8 +101,8 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/dlist.Po ./$(DEPDIR)/sysfs_bus.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sysfs_class.Po \
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/dlist.Po ./$(DEPDIR)/sysfs_block.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sysfs_bus.Po ./$(DEPDIR)/sysfs_class.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sysfs_device.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sysfs_dir.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sysfs_driver.Po \
@@ -168,6 +169,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysfs_block.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysfs_bus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysfs_class.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysfs_device.Po@am__quote@

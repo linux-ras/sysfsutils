@@ -264,7 +264,7 @@ struct sysfs_class *sysfs_open_class(const unsigned char *name)
 
 	cls = alloc_class();
 	if (cls == NULL) {
-		perror("malloc");
+		perror("calloc");
 		return NULL;
 	}
 	strcpy(cls->name, name);	

@@ -525,10 +525,11 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 				}
 			}
 			                        
-			if (sysdir->attributes == NULL)
+			if (sysdir->attributes == NULL) {
 				sysdir->attributes = dlist_new_with_delete
 					(sizeof(struct sysfs_attribute),
 					 		sysfs_del_attribute);
+			}
 			dlist_unshift(sysdir->attributes, attr);
 		} else if (S_ISDIR(astats.st_mode)) {
 			subdir = sysfs_open_directory(file_path);
