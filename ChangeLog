@@ -1,4 +1,10 @@
 
+09/15/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added sysfs_open_device_by_name() to open a device
+			given the device name
+		* Modified "name" field of sysfs_device to contain same
+			data as the "bus_id" field
+
 09/11/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added sysfs_open_driver_by_name() to open a driver and
 			its device, given the driver name

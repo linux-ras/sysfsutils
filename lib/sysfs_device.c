@@ -127,15 +127,12 @@ struct sysfs_device *sysfs_open_device(const unsigned char *path)
 	dev->directory = sdir;
 	strcpy(dev->bus_id, sdir->name);
 
-	/* get device name */
-	p = sysfs_get_value_from_attributes(sdir->attributes,	
-							SYSFS_NAME_ATTRIBUTE);
-	if (p != NULL) {
-		strncpy(dev->name, p, SYSFS_NAME_LEN);
-		p = dev->name + strlen(dev->name) - 1;
-		if ((strlen(dev->name) > 0) && *p == '\n')
-			*p = '\0';
-	}
+	/* 
+	 * The "name" attribute no longer exists... return the device's
+	 * sysfs representation instead, in the "dev->name" field, which
+	 * implies that the dev->name and dev->bus_id contain same data.
+	 */
+	strncpy(dev->name, sdir->name, SYSFS_NAME_LEN);
 
 	return dev;
 }
@@ -342,4 +339,57 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 		return NULL;
 
 	return (device->directory->attributes);
-}	
+}
+
+/**
+ * sysfs_open_device_by_id: open a device by id (use the "bus" subsystem)
+ * @dev_name: name of the device to open - has to be the name in 
+ * 		/sys/bus/xxx/devices
+ * @bus: bus the device belongs to
+ * @bsize: size of the bus buffer
+ * returns struct sysfs_device if found, NULL otherwise
+ * NOTE: Use sysfs_close_device to close the device
+ */
+struct sysfs_device *sysfs_open_device_by_name(char *dev_name, char *bus,
+							size_t bsize)
+{
+	char sysfs_path[SYSFS_PATH_MAX], device_path[SYSFS_PATH_MAX];
+	struct sysfs_device *device = NULL;
+	struct stat astats;
+
+	if (dev_name == NULL || bus == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+	
+	if ((sysfs_find_device_bus_name(dev_name, bus, bsize)) != 0) {
+		dprintf("Device %s not found\n", dev_name);
+		errno = EINVAL;
+		return NULL;
+	}
+	
+	memset(sysfs_path, 0, SYSFS_PATH_MAX);
+	if ((sysfs_get_mnt_path(sysfs_path, SYSFS_PATH_MAX)) != 0) {
+		dprintf("Error getting sysfs mount path\n");
+		return NULL;
+	}
+	strcat(sysfs_path, SYSFS_BUS_DIR);
+	strcat(sysfs_path, "/");
+	strncat(sysfs_path, bus, bsize);
+	strcat(sysfs_path, "/devices/");	/* sysfs_path = "/sys/bus/xxx/devices/" */
+	strcat(sysfs_path, dev_name);
+
+	/* devices under /sys/bus/xxx/devices are links to devices subsystem */
+	if ((sysfs_get_link(sysfs_path, device_path, SYSFS_PATH_MAX)) < 0) {
+		dprintf("Error getting device path\n");
+		return NULL;
+	}
+	
+	device = sysfs_open_device(device_path);
+	if (device == NULL) {
+		dprintf("Error opening device %s\n", dev_name);
+		return NULL;
+	}
+
+	return device;
+}

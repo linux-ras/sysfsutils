@@ -188,6 +188,8 @@ extern struct sysfs_device *sysfs_open_device_tree(const unsigned char *path);
 extern struct sysfs_attribute *sysfs_get_device_attr
 			(struct sysfs_device *dev, const unsigned char *name);
 extern struct dlist *sysfs_get_device_attributes(struct sysfs_device *device);
+extern struct sysfs_driver *sysfs_open_driver_by_name
+		(unsigned char *dev_name, unsigned char *bus, size_t bsize);
 
 /* generic sysfs bus access */
 extern void sysfs_close_bus(struct sysfs_bus *bus);
