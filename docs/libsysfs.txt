@@ -32,7 +32,9 @@ Contents
    6.5 Class Functions
    6.6 Device Functions
    6.7 Driver Functions
-7. Navigating a dlist
+7. Dlists
+   7.1 Navigating a dlist
+   7.2 Custom sorting using dlist_sort_custom()
 8. Usage
 9. Testsuite
 10. Conclusion
@@ -121,6 +123,11 @@ and files that lie underneath it. To query a device on a PCI bus, one would
 "open" the bus to scan or read devices and "close" the bus when 
 completed. Besides supplying functions to retrieve devices, the library
 will also provide some utility functions like getting sysfs mount point.
+
+A paper on Libsysfs was presented at Linux.Conf.Au 2004 (Adelaide, January
+2004). The paper is available online at:
+
+http://oss.software.ibm.com/linux/papers/libsysfs/libsysfs-linuxconfau2004.pdf
 
 
 5. Data Structures
@@ -1824,10 +1831,14 @@ Prototype:	struct sysfs_attribute *sysfs_open_driver_attr
 -------------------------------------------------------------------------------
 
 
-7. Navigating a dlist
----------------------
+7 Dlists
+--------
 
 Libsysfs uses (yet another) list implementation thanks to Eric J Bohm.
+
+
+7.1 Navigating a dlist
+----------------------
 
 Some library functions return a dlist of devices/drivers/attributes, etc.
 To navigate the list returned the macro "dlist_for_each_data" is to be used.
@@ -1866,6 +1877,24 @@ Usage example:          The function sysfs_get_classdev_attributes() returns a
 				}
 			}
 -------------------------------------------------------------------------------
+
+
+7.2 Custom sorting using dlist_sort_custom()
+--------------------------------------------
+
+As of release 1.2.0, libsysfs provides a new interface for custom sorting
+of dlists. The API dlist_sort_custom() has been added for this purpose.
+Applications that would like to define their own sorter function can now
+make use of this API.
+
+The sorter function must conform to the following prototype:
+
+	int compare(void *a, void*b)
+
+dlist_sort_custom() expects that the compare function will:
+	return >0 for a before b
+	return <0 for b before a
+	return  0 for a == b
 
 
 8. Usage
