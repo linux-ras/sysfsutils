@@ -1,4 +1,8 @@
 
+08/29/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Removed "bus_name" from struct sysfs_device
+		* Updated NEWS, TODO and docs/libsysfs.txt files
+
 08/28/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
                 * Added more utility functions to sysfsutils
                 * Modified commands to make use of the new functions

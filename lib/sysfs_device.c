@@ -126,7 +126,6 @@ struct sysfs_device *sysfs_open_device(const unsigned char *path)
 	}
 	dev->directory = sdir;
 	strcpy(dev->bus_id, sdir->name);
-	sysfs_find_device_bus_name(dev->bus_id, dev->bus_name, SYSFS_NAME_LEN);
 
 	/* get device name */
 	p = sysfs_get_value_from_attributes(sdir->attributes,	

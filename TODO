@@ -1,14 +1,10 @@
 Library:
 --------
-- Implement a better device tree, so we can eventually walk the tree.
-- Add write attribute write commands:
-	sysfs_write_attribute()
-	sysfs_write_attribute_value()
-- Possibly add abstract data list to make device tree easier and to
-	give calling applications a means to easily manage large lists
-	of devices.
 - Make bus lists of devices using topology.
+- Rework debugging error messages and look into better logging on error.
 - Need to properly set errno. 
+- Add more "find"/utility functions.
+- Add subsystem specific support for PCI, SCSI, USB, etc
 
 Commands:
 ---------
@@ -16,3 +12,16 @@ Commands:
 - Add topology tree view.
 - Need to clean up error messages.
 - Clean up how attribute values are printed.
+- Add capability to use of attribute "write" functions.
+- Use sysfs_root_device as the base structure for listing from the 
+	devices subsystem.
+- Add subsystem specific support. Commands can, for example, do PCI id lookup.
+
+Docs:
+-----
+- Update libsysfs.txt with changes/additions to the library.
+- Create man pages for commands and for library.
+
+Test:
+-----
+- Design and implement test suites for the library.

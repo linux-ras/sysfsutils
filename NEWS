@@ -1,8 +1,15 @@
 Version History:
 ---------------
 
- 0.2.0 - Current Development Branch
-	* ADded autoconf configuration support
+ 0.2.0 - Released August 28, 2003
+	* Added autoconf configuration support.
+	* Added Eric J Bohm's dlist patch.
+	* Changed the library structures and routines to use dlists.
+	* Added Guo Min's sysfs_write_attribute patch
+	* Added sysfs_root_device for use with /sys/devices subsystem
+	* Added lots of "find"/utility functions.
+	* Modified commands to make use of new API.
+	* Added functions to get lists of specific subsystems.
  
  0.1.1 - Released August 1, 2003
 	* Created NEWS file for Version History.

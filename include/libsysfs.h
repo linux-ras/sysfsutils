@@ -83,7 +83,6 @@ struct sysfs_device {
 	struct dlist *children;	
 	unsigned char name[SYSFS_NAME_LEN];
 	unsigned char bus_id[SYSFS_NAME_LEN];
-	unsigned char bus_name[SYSFS_NAME_LEN];
 	unsigned char driver_name[SYSFS_NAME_LEN];
 
 	/* for internal use only */

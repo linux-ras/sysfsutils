@@ -2,8 +2,8 @@
 	System Utilities sysfs Library - libsysfs
 	=========================================
 
-Version: 0.1.0 
-June 30, 2003
+Version: 0.2.0 
+August 29, 2003
 
 Contents
 --------
@@ -18,8 +18,9 @@ Contents
        5.1.3 Directory Structure
    5.2 Bus Data Structure
    5.3 Class Data Structures
-   5.4 Device Data Structure
-   5.5 Driver Data Structure
+   5.4 Root Device Data Structure
+   5.5 Device Data Structure
+   5.6 Driver Data Structure
 6. Functions
    6.1 Utility Functions
    6.2 Filesystem Functions
@@ -157,16 +158,17 @@ read only, write only, or read and write. File data can be ASCII and
 binary. The library has the following structure to represent files:
 
 struct sysfs_attribute {
-        struct sysfs_attribute *next;
-        char path[SYSFS_PATH_MAX];
-        char *value;
-        int method;             /* show and store */
+        unsigned char *value;
+        unsigned short len;             /* value length */
+        unsigned short method;          /* show and store */
+        unsigned char name[SYSFS_NAME_LEN];
+        unsigned char path[SYSFS_PATH_MAX];
 };
 
-The library links attributes together using the "next" pointer. Path
-represents the file/attribute's full path. Value is used when reading
-from or writing to an attribute. Method is a bitmask for defining if 
-the attribute supports show(read) and/or store(write). 
+Path represents the file/attribute's full path. Value is used when reading
+from or writing to an attribute. Len is the length of data in "value". Method 
+is a bitmask for defining if the attribute supports show(read) and/or 
+store(write). 
 
 
 5.1.2 Link Structure
@@ -176,13 +178,13 @@ Symbolic links are used in sysfs to link bus or class views with
 particular devices. 
 
 struct sysfs_link {
-        struct sysfs_link *next;
-        char name[SYSFS_NAME_LEN];
-        char target[SYSFS_NAME_LEN];
+        unsigned char name[SYSFS_NAME_LEN];
+        unsigned char path[SYSFS_PATH_MAX];
+        unsigned char target[SYSFS_PATH_MAX];
 };
 
-The "next" pointer is for linking links together. Link's name is stored
-in name and it's target stored in target.
+Link's name is stored in name and it's target stored in target. Absolute path
+to the link is stored in path.
 
 
 5.1.3 Directory Structure
@@ -191,16 +193,18 @@ in name and it's target stored in target.
 The directory structure represents a sysfs directory:
 
 struct sysfs_directory {
-        struct sysfs_directory *next;
-        char path[SYSFS_PATH_MAX];
-        struct sysfs_directory *subdirs;
-        struct sysfs_link *links;
-        struct sysfs_attribute *attributes;
+        struct dlist *subdirs;
+        struct dlist *links;
+        struct dlist *attributes;
+        unsigned char name[SYSFS_NAME_LEN];
+        unsigned char path[SYSFS_PATH_MAX];
 };
 
-The directory structure includes a "next" pointer for linking directories
-together. It also includes the directory's full path and links to 
-subdirectories, links, and attributes.
+The sysfs_directory structure includes the list of subdirectories, links and
+attributes. The "name" and absolute "path" are also stored in the structure.
+The sysfs_directory structure is intended for use internal to the library.
+Applications needing access to attributes and links from the directory
+will need to make appropriate calls (described below) to get the same.
 
 
 5.2 Bus Data Structure
@@ -210,19 +214,26 @@ All buses look similar in sysfs including lists of devices and drivers,
 therefore we use the following structure to represent all sysfs buses:
 
 struct sysfs_bus {
-        struct sysfs_bus *next;
-        char name[SYSFS_NAME_LEN];
+        struct dlist *drivers;
+        struct dlist *devices;
+        unsigned char name[SYSFS_NAME_LEN];
+        unsigned char path[SYSFS_PATH_MAX];
+
+        /* internal use only */
         struct sysfs_directory *directory;
-        struct sysfs_driver *drivers;
-        struct sysfs_device *devices;
 };
 
-The "next" pointer, as with other structures, is used for linking buses
-together. The bus name, like "pci" or "usb", is stored in the name field.
-The bus' directory is represented by the sysfs_directory structure and
-it contains references to all the subdirectories, links, and attributes
-associated with the bus. Finally, the bus contains lists of those
-devices on the bus and their drivers.
+The sysfs_bus structure contains lists of those devices on the bus and their
+drivers. The bus name, like "pci" or "usb", is stored in the name field, while
+the "path" to bus directory is also stored. The bus' directory is represented 
+by the sysfs_directory structure and it contains references to all the 
+subdirectories, links, and attributes. The sysfs_directory structure is for
+internal use only. The following functions may be used by applications to
+retrieve data from the sysfs_directory structure:
+
+struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus)
+struct sysfs_attribute *sysfs_get_bus_attribute(struct sysfs_bus *bus,
+						unsigned char *attrname)
 
 
 5.3 Class Data Structures
@@ -233,67 +244,111 @@ classes contains a class directory like "net" or "scsi_host" and then
 class devices like "eth0", "lo", or "eth1" for the "net" class.
 
 struct sysfs_class {
-        struct sysfs_class *next;
-        char name[SYSFS_NAME_LEN];
+        struct dlist *devices;
+        unsigned char name[SYSFS_NAME_LEN];
+        unsigned char path[SYSFS_PATH_MAX];
+
+        /* for internal use only */
         struct sysfs_directory *directory;
-        struct sysfs_class_device *devices;
 };
 
-The sysfs_class represents device classes in sysfs like "net". It contains
-a "next" pointer for list management, the class name, and the directory
-representation. Finally, it contains a linked list of class devices.
+The sysfs_class represents device classes in sysfs like "net". It contains a 
+list of class devices, the class name, "path" to the class and the directory 
+representation (for internal use only). 
 
 struct sysfs_class_device {
-        struct sysfs_class_device *next;
-        char name[SYSFS_NAME_LEN];
-        struct sysfs_directory *directory;
         struct sysfs_device *sysdevice;         /* NULL if virtual */
         struct sysfs_driver *driver;            /* NULL if not implemented */
+        unsigned char name[SYSFS_NAME_LEN];
+        unsigned char path[SYSFS_PATH_MAX];
+
+        /* for internal use only */
+        struct sysfs_directory *directory;
 };
 
-A class device isn't the same as a sysfs_device, it's specific to the 
-class in which it belongs. The class device structure contains a "next" 
-pointer for list management, the name of the class device - like "eth0",
-its sysfs directory information including links and attributes, and
-finally the sysfs_device reference and that device's driver reference.
+A class device isn't the same as a sysfs_device, it's specific to the class 
+in which it belongs. The class device structure contains the sysfs_device 
+reference and that device's driver reference (if any). It also contains 
+the name of the class device - like "eth0", its sysfs directory information 
+including links and attributes (for internal use only). The following 
+function may be used by applications to retrieve data from the 
+sysfs_directory structure:
+
+struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev);
 
 
-5.4 Device Data Structure
+5.4 Root Device Data Structure
+------------------------------
+
+Device heirarchies in sysfs are represented under the /sys/devices directory 
+structure. Sysfs devices typically spawn off from base devices which are 
+represented by a sysfs_root_device. 
+
+struct sysfs_root_device {
+        struct dlist *devices;
+        unsigned char name[SYSFS_NAME_LEN];
+        unsigned char path[SYSFS_PATH_MAX];
+
+        /* for internal use only */
+        struct sysfs_directory *directory;
+};
+
+The sysfs_root_device structure contains a list of "devices" that spawn off it.
+The name of the root device as represented under /sys/devices is read into 
+"name" and the absolute path into "path" and its sysfs_directory information 
+intended to be used internal to the library. 
+
+
+5.5 Device Data Structure
 -------------------------
 
 The sysfs_device structure represents a system device that's exposed
 in sysfs under the /sys/devices directory structure.
 
 struct sysfs_device {
-        struct sysfs_device *next;
-        char name[SYSFS_NAME_LEN];
-        char bus_id[SYSFS_NAME_LEN];
-        struct sysfs_driver *driver;
+        struct sysfs_device *parent;
+        struct dlist *children;
+        unsigned char name[SYSFS_NAME_LEN];
+        unsigned char bus_id[SYSFS_NAME_LEN];
+        unsigned char driver_name[SYSFS_NAME_LEN];
+
+        /* for internal use only */
         struct sysfs_directory *directory;
-        struct sysfs_device *children;
 };
 
-The sysfs_device structure contains a "next" pointer for linking a list
-of devices together, its name as read from the "name" attribute in the
-device's directory, its bus id - which is the name of device's directory, 
-and a reference to its driver. The device structure also contains a 
-directory structure, which contains a list of the device's attributes,
-and a list of its child devices, if it has any.
+The sysfs_device structure contains a "parent" pointer, a list of child
+devices, if any, device's directory, its bus id - which is the name of 
+device's directory, and a its driver name. The device structure also 
+contains a directory structure, which contains a list of the device's 
+attributes (for internal use only). The following functions may be 
+used to obtain information from sysfs_directory structure:
+
+struct sysfs_attribute *sysfs_get_device_attribute(struct sysfs_device *dev,
+						const unsigned char *name)
+struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 
 
-5.5 Driver Data Structure
+5.6 Driver Data Structure
 -------------------------
 
 The sysfs_driver structure represents a device driver.
 
 struct sysfs_driver {
-        struct sysfs_driver *next;
-        char name[SYSFS_NAME_LEN];
+        struct dlist *devices;
+        unsigned char name[SYSFS_NAME_LEN];
+        unsigned char path[SYSFS_PATH_MAX];
+
+        /* for internal use only */
         struct sysfs_directory *directory;
 };
 
-It contains a "next" pointer, the name of the driver, and its directory
-information, which includes the driver's attributes. 
+The sysfs_driver structure contains a list of devices that use this driver,
+the name of the driver, its path, and its directory information, which 
+includes the driver's attributes (for internal use only). The following
+function may be used to retrieve driver attribute information from the
+sysfs_directory structure:
+
+struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver)
 
 
 6. Functions
@@ -315,14 +370,14 @@ Name:		sysfs_get_mnt_path
 
 Description:	Function finds the mount path for filesystem type "sysfs".
 
-Arguments:	chat *mnt_path		Mount path buffer
-		size_t len		Size of mount path buffer	
+Arguments:	unsigned char *mnt_path		Mount path buffer
+		size_t len			Size of mount path buffer	
 
 Returns:	Zero with success.
 		-1 with error. Errno will be set with error:
 			- EINVAL for invalid argument, if buffer is NULL.
 
-Prototype:	sysfs_get_mnt_path(char *mnt_path, size_t len);
+Prototype:	sysfs_get_mnt_path(unsigned char *mnt_path, size_t len);
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -331,16 +386,16 @@ Name:		sysfs_get_name_from_path
 Description:	Function returns the last directory or file name from the
 		included path.
 
-Arguments:	char *path		Path to parse name from
-		char *name		Buffer to put parsed name into
-		size_t *len		Size of name buffer
+Arguments:	const unsigned char *path	Path to parse name from
+		unsigned char *name		Buffer to put parsed name into
+		size_t *len			Size of name buffer
 
 Returns:	0 with success.
 		-1 on Error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	int sysfs_get_name_from_path(char *path, char *name,
-			size_t *len)
+Prototype:	int sysfs_get_name_from_path(const unsigned char *path, 
+					unsigned char *name, size_t *len)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -349,15 +404,16 @@ Name:		sysfs_get_link
 Description:	Sysfs realink function, reads the link at supplied path
 		and returns its target path.
 
-Arguments:	const char *path	Link's path
-		char *target		Buffer to place link's target path
-		size_t len		Size of target buffer
+Arguments:	const unsigned char *path	Link's path
+		unsigned char *target		Buffer to place link's target path
+		size_t len			Size of target buffer
 
 Returns:	0 with success 
 		-1 with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	int sysfs_get_link(const char *path, char *target, size_t len)
+Prototype:	int sysfs_get_link(const unsigned char *path, 
+					unsigned char *target, size_t len)
 -------------------------------------------------------------------------------
 
 
@@ -382,13 +438,14 @@ Name:		sysfs_open_attribute
 Description:	Opens up a file in sysfs and creates a sysfs_attribute
 		structure. File isn't read with this function.
 
-Arguments:	char *path		File/Attribute's path
+Arguments:	const unsigned char *path	File/Attribute's path
 
 Returns:	struct sysfs_attribute * with success.
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	 struct sysfs_attribute *sysfs_open_attribute(char *path)
+Prototype:	 struct sysfs_attribute *sysfs_open_attribute
+					(const unsigned char *path)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -424,16 +481,16 @@ Name:		sysfs_read_attribute_value
 Description:	Given a path to a specific attribute, function reads and
 		returns its value to the supplied value buffer.
 
-Arguments:	char *attrpath		Attribute path to read
-		char *value		Buffer to place attribute's value
-		size_t vsize		Size of buffer
+Arguments:	const unsigned char *attrpath	Attribute path to read
+		unsigned char *value		Buffer to place attribute's value
+		size_t vsize			Size of buffer
 
 Returns:	0 with success.
 		-1 with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	int sysfs_read_attribute_value(char *attrpath, char *value,
-			size_t vsize)
+Prototype:	int sysfs_read_attribute_value(const unsigned char *attrpath, 
+					unsigned char *value, size_t vsize)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -444,15 +501,15 @@ Description:	Function takes a single or linked list of sysfs attribute
 		name.
 
 Arguments:	struct sysfs_attribute *attr 
-					Attribute list to search through
-		char *name		Name of attribute to return value
+					  Attribute list to search through
+		const unsigned char *name Name of attribute to return value
 
-Returns:	char * attribute value with success.
+Returns:	unsigned char * attribute value with success.
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	char *sysfs_get_value_from_attributes
-			(struct sysfs_attribute *attr, char * name)
+Prototype:	unsigned char *sysfs_get_value_from_attributes
+		(struct sysfs_attribute *attr, const unsigned char * name)
 -------------------------------------------------------------------------------
 
 
@@ -470,13 +527,14 @@ Name:		sysfs_open_link
 
 Description:	Opens a directory link. 
 
-Arguments:	char *linkpath		Path to link
+Arguments:	const unsigned char *linkpath		Path to link
 
 Returns:	struct sysfs_link * with success.
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_link *sysfs_open_link(char *linkpath)
+Prototype:	struct sysfs_link *sysfs_open_link
+					(const unsigned char *linkpath)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -505,13 +563,14 @@ Name:		sysfs_open_directory
 
 Description:	Opens a sysfs directory at a specific path
 
-Arguments:	char *path		Directory path to open
+Arguments:	const unsigned char *path	Directory path to open
 
 Returns:	struct sysfs_directory * with success.
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_directory *sysfs_open_directory(char *path)
+Prototype:	struct sysfs_directory *sysfs_open_directory
+				(const unsigned char *path)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -557,13 +616,13 @@ Description:	Function opens up one of the buses represented in sysfs in
 		the /sys/bus directory. It returns a sysfs_bus structure
 		that includes a list of bus devices and drivers.
 
-Arguments:	char *name		Bus name to open, like "pci"....
+Arguments:	const unsigned char *name	Bus name to open, like "pci"...
 
 Returns:	struct sysfs_bus * with success 
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_bus *sysfs_open_bus(char *name)
+Prototype:	struct sysfs_bus *sysfs_open_bus(const unsigned char *name)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -592,13 +651,13 @@ Description:	Function opens up one of the classes represented in sysfs in
 		the /sys/class directory. It returns a sysfs_class structure
 		that includes a list of class devices.
 
-Arguments:	char *name		Class name to open, like "net"....
+Arguments:	const unsigned char *name	Class name to open, like "net"..
 
 Returns:	struct sysfs_class * with success 
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_class *sysfs_open_class(char *name)
+Prototype:	struct sysfs_class *sysfs_open_class(const unsigned char *name)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -619,13 +678,14 @@ Description:	Function opens up one of the class devices represented in
 		sysfs in sysfs/class/"class"/ directory. It retunrs a
 		sysfs_class_device structure.
 
-Arguments:	char *path		Path to class device
+Arguments:	const unsigned char *path	Path to class device
 
 Returns:	struct sysfs_class_device * with success 
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_class_device *sysfs_open_class_device(char *path)
+Prototype:	struct sysfs_class_device *sysfs_open_class_device
+					(const unsigned char *path)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -655,13 +715,14 @@ Description:	Opens up a device at a specific path. It opens the device's
 		directory, reads the directory, and returns a sysfs_device
 		structure.
 
-Arguments:	char *path		Path to device
+Arguments:	const unsigned char *path	Path to device
 
 Returns:	struct sysfs_device * with success 
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_device *sysfs_open_device(char *path)
+Prototype:	struct sysfs_device *sysfs_open_device
+				(const unsigned char *path)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -669,7 +730,7 @@ Name:		sysfs_close_device
 
 Description:	Function closes up the sysfs_device structure.
 
-Arguments:	sysfs_device *dev	Device structure to close
+Arguments:	sysfs_device *dev		Device structure to close
 
 Prototype:	void sysfs_close_device(struct sysfs_device *dev)
 -------------------------------------------------------------------------------
@@ -681,13 +742,14 @@ Description:	Same as sysfs_open_device except it recursively opens
 		children devices and adds them to the tree. Returns root
 		tree.
 
-Arguments:	char *path		Path to device
+Arguments:	const unsigned char *path	Path to device
 
 Returns:	struct sysfs_device * with success 
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_device *sysfs_open_device_tree(char *path)
+Prototype:	struct sysfs_device *sysfs_open_device_tree
+				(const unsigned char *path)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -708,14 +770,14 @@ Description:	Searches supplied device's attributes by name and returns
 		the attribute.
 
 Arguments:	struct sysfs_device *dev	Device to search
-		char *name			Attribute name to find
+		const unsigned char *name	Attribute name to find
 
 Returns:	struct sysfs_attribute * with success 
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
 Prototype:	struct sysfs_attribute *sysfs_get_device_attr
-			(struct sysfs_device *dev, char *name)
+			(struct sysfs_device *dev, const unsigned char *name)
 -------------------------------------------------------------------------------
 
 
@@ -729,13 +791,14 @@ Name:		sysfs_open_driver
 
 Description:	Opens driver at specific path.
 
-Arguments:	char *path		Path to driver
+Arguments:	const unsigned char *path	Path to driver
 
 Returns:	struct sysfs_driver * with success 
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_driver *sysfs_open_driver(char *path)
+Prototype:	struct sysfs_driver *sysfs_open_driver
+				(const unsigned char *path)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
