@@ -62,22 +62,22 @@ struct sysfs_driver *sysfs_open_driver(const char *path)
 	}
 	sdir = sysfs_open_directory(path);
 	if (sdir == NULL) {
-		dprintf (stderr, "Error opening directory %s\n", path);
+		dprintf("Error opening directory %s\n", path);
 		return NULL;
 	}
 	if ((sysfs_read_directory(sdir)) != 0) {
-		dprintf (stderr, "Error reading directory %s\n", path);
+		dprintf("Error reading directory %s\n", path);
 		sysfs_close_directory(sdir);
 		return NULL;
 	}
 	driver = alloc_driver();
 	if (driver == NULL) {
-		dprintf(stderr, "Error allocating driver at %s\n", path);
+		dprintf("Error allocating driver at %s\n", path);
 		sysfs_close_directory(sdir);
 		return NULL;
 	}
 	if ((sysfs_get_name_from_path(path, devname, SYSFS_NAME_LEN)) != 0) {
-		dprintf (stderr, "Error reading directory %s\n", path);
+		dprintf("Error reading directory %s\n", path);
 		sysfs_close_directory(sdir);
 		free(driver);
 		return NULL;

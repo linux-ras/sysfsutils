@@ -74,7 +74,7 @@ static struct sysfs_directory *open_bus_dir(const char *name)
 
 	memset(buspath, 0, SYSFS_PATH_MAX);
 	if ((sysfs_get_mnt_path(buspath, SYSFS_PATH_MAX)) != 0) {
-		dprintf(stderr, "Sysfs not supported on this system\n");
+		dprintf("Sysfs not supported on this system\n");
 		return NULL;
 	}
 
@@ -84,12 +84,12 @@ static struct sysfs_directory *open_bus_dir(const char *name)
 	busdir = sysfs_open_directory(buspath);
 	if (busdir == NULL) {
 		errno = EINVAL;
-		dprintf(stderr,"Bus %s not supported on this system\n",
+		dprintf("Bus %s not supported on this system\n",
 			name);
 		return NULL;
 	}
 	if ((sysfs_read_directory(busdir)) != 0) {
-		dprintf(stderr, "Error reading %s bus dir %s\n", name, 
+		dprintf("Error reading %s bus dir %s\n", name, 
 			buspath);
 		sysfs_close_directory(busdir);
 		return NULL;
@@ -158,7 +158,7 @@ static int get_all_bus_devices(struct sysfs_bus *bus)
 			nextl = curl->next;
 			bdev = sysfs_open_device(curl->target);
 			if (bdev == NULL) {
-				dprintf(stderr, "Error opening device at %s\n",
+				dprintf("Error opening device at %s\n",
 					curl->target);
 				continue;
 			}
@@ -197,7 +197,7 @@ static int get_all_bus_drivers(struct sysfs_bus *bus)
 			nextsub = cursub->next;
 			driver = sysfs_open_driver(cursub->path);
 			if (driver == NULL) {
-				dprintf(stderr, "Error opening driver at %s\n",
+				dprintf("Error opening driver at %s\n",
 					cursub->path);
 				continue;
 			}
@@ -279,19 +279,19 @@ struct sysfs_bus *sysfs_open_bus(const char *name)
 	strcpy(bus->name, name);	
 	busdir = open_bus_dir(name);
 	if (busdir == NULL) {
-		dprintf(stderr,"Invalid bus, %s not supported on this system\n",
+		dprintf("Invalid bus, %s not supported on this system\n",
 			name);
 		sysfs_close_bus(bus);
 		return NULL;
 	}
 	bus->directory = busdir;
 	if ((get_all_bus_devices(bus)) != 0) {
-		dprintf(stderr, "Error reading %s bus devices\n", name);
+		dprintf("Error reading %s bus devices\n", name);
 		sysfs_close_bus(bus);
 		return NULL;
 	}
 	if ((get_all_bus_drivers(bus)) != 0) {
-		dprintf(stderr, "Error reading %s bus drivers\n", name);
+		dprintf("Error reading %s bus drivers\n", name);
 		sysfs_close_bus(bus);
 		return NULL;
 	}

@@ -1,4 +1,7 @@
 
+08/06/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Patch to correct dprintf usage
+
 08/01/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added autoconf configuration support
 		* Modified IBM Copyright information

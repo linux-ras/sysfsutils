@@ -62,7 +62,7 @@ struct sysfs_attribute *sysfs_open_attribute(const char *path)
 	}
 	sysattr = alloc_attribute();
 	if (sysattr == NULL) {
-		dprintf(stderr, "Error allocating attribute at %s\n", path);
+		dprintf("Error allocating attribute at %s\n", path);
 		return NULL;
 	}
 	strncpy(sysattr->path, path, sizeof(sysattr->path));
@@ -97,7 +97,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 		return -1;
 	}
 	if (!(sysattr->method & SYSFS_METHOD_SHOW)) {
-		dprintf (stderr, "Show method not supported for attribute %s\n",
+		dprintf("Show method not supported for attribute %s\n",
 			sysattr->path);
 		return -1;
 	}
@@ -108,14 +108,13 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 		return -1;
 	}
 	if ((fd = open(sysattr->path, O_RDONLY)) < 0) {
-		dprintf (stderr, "Error reading attribute %s\n", sysattr->path);
+		dprintf("Error reading attribute %s\n", sysattr->path);
 		free(fbuf);
 		return -1;
 	}
 	length = read(fd, fbuf, pgsize);
 	if (length < 0) {
-		dprintf (stderr, "Error reading from attribute %s\n",
-			sysattr->path);
+		dprintf("Error reading from attribute %s\n", sysattr->path);
 		close(fd);
 		free(fbuf);
 		return -1;
@@ -154,19 +153,18 @@ int sysfs_read_attribute_value(const char *attrpath, char *value, size_t vsize)
 
 	attr = sysfs_open_attribute(attrpath);
 	if (attr == NULL) {
-		dprintf(stderr, "Invalid attribute path %s\n", attrpath);
+		dprintf("Invalid attribute path %s\n", attrpath);
 		errno = EINVAL;
 		return -1;
 	}
 	if((sysfs_read_attribute(attr)) != 0 || attr->value == NULL) {
-		dprintf(stderr, "Error reading from attribute %s\n", attrpath);
+		dprintf("Error reading from attribute %s\n", attrpath);
 		sysfs_close_attribute(attr);
 		return -1;
 	}
 	length = strlen(attr->value);
 	if (length > vsize) 
-		dprintf(stderr, 
-			"Value length %d is larger than supplied buffer %d\n",
+		dprintf("Value length %d is larger than supplied buffer %d\n",
 			length, vsize);
 	strncpy(value, attr->value, vsize);
 	sysfs_close_attribute(attr);
@@ -334,7 +332,7 @@ struct sysfs_directory *sysfs_open_directory(const char *path)
 	}
 	sdir = alloc_directory();
 	if (sdir == NULL) {
-		dprintf(stderr, "Error allocating directory %s\n", path);
+		dprintf("Error allocating directory %s\n", path);
 		return NULL;
 	}
 	strncpy(sdir->path, path, sizeof(sdir->path));
@@ -358,14 +356,13 @@ struct sysfs_link *sysfs_open_link(const char *linkpath)
 
 	ln = alloc_link();
 	if (ln == NULL) {
-		dprintf(stderr, 
-			"Error allocating link %s\n", linkpath);
+		dprintf("Error allocating link %s\n", linkpath);
 		return NULL;
 	}
 	if ((sysfs_get_name_from_path(linkpath, ln->name, SYSFS_NAME_LEN)) != 0
 	    || (sysfs_get_link(linkpath, ln->target, SYSFS_PATH_MAX)) != 0) {
 		errno = EINVAL;
-		dprintf(stderr, "Invalid link path %s\n", linkpath);
+		dprintf("Invalid link path %s\n", linkpath);
 		return NULL;
 	}
 
@@ -413,15 +410,14 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 		if (S_ISREG(astats.st_mode)) {	
 			attr = sysfs_open_attribute(file_path);
 			if (attr == NULL) {
-				dprintf (stderr, "Error opening attribute %s\n",
+				dprintf("Error opening attribute %s\n",
 					file_path);
 				retval = -1;
 				break;
 			}
 			if (attr->method & SYSFS_METHOD_SHOW) {
 				if ((sysfs_read_attribute(attr)) != 0) {
-					dprintf (stderr, 
-						"Error reading attribute %s\n",
+					dprintf("Error reading attribute %s\n",
 						file_path);
 					sysfs_close_attribute(attr);
 					continue;
@@ -431,7 +427,7 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 		} else if (S_ISDIR(astats.st_mode)) {
 			subdir = sysfs_open_directory(file_path);
 			if (subdir == NULL) {
-				dprintf (stderr, "Error opening directory %s\n",
+				dprintf("Error opening directory %s\n",
 					file_path);
 				retval = -1;
 				break;
@@ -440,8 +436,7 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 		} else if (S_ISLNK(astats.st_mode)) {
 			ln = sysfs_open_link(file_path);
 			if (ln == NULL) {
-				dprintf(stderr, "Error opening link %s\n",
-					file_path);
+				dprintf("Error opening link %s\n", file_path);
 				retval = -1;
 				break;
 			}

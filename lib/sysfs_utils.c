@@ -45,7 +45,7 @@ static int sysfs_get_fs_mnt_path(const char *fs_type, char *mnt_path,
 	}
 
 	if ((mnt = setmntent(SYSFS_PROC_MNTS, "r")) == NULL) {
-		dprintf(stderr, "Error getting mount information\n");
+		dprintf("Error getting mount information\n");
 		return -1;
 	}
 	while (ret == 0 && dirlen == 0 && (mntent = getmntent(mnt)) != NULL) {
@@ -54,15 +54,14 @@ static int sysfs_get_fs_mnt_path(const char *fs_type, char *mnt_path,
 			if (dirlen <= (len - 1)) {
 				strcpy(mnt_path, mntent->mnt_dir);
 			} else {
-				dprintf(stderr, 
-					"Error - mount path too long\n");
+				dprintf("Error - mount path too long\n");
 				ret = -1;
 			}
 		}
 	}
 	endmntent(mnt);
 	if (dirlen == 0 && ret == 0) {
-		dprintf(stderr, "Filesystem %s not found!\n", fs_type);
+		dprintf("Filesystem %s not found!\n", fs_type);
 		errno = EINVAL;
 		ret = -1;
 	}
@@ -133,7 +132,7 @@ int sysfs_get_link(const char *path, char *target, size_t len)
 	memset(linkpath, 0, SYSFS_PATH_MAX);
 
 	if ((sysfs_get_mnt_path(devdir, SYSFS_PATH_MAX)) != 0) {
-		dprintf(stderr, "Sysfs not supported on this system\n");
+		dprintf("Sysfs not supported on this system\n");
 		return -1;
 	}
 								        

@@ -94,7 +94,7 @@ static struct sysfs_directory *open_class_dir(const char *name)
 
 	memset(classpath, 0, SYSFS_PATH_MAX);
 	if ((sysfs_get_mnt_path(classpath, SYSFS_PATH_MAX)) != 0) {
-		dprintf(stderr, "Sysfs not supported on this system\n");
+		dprintf("Sysfs not supported on this system\n");
 		return NULL;
 	}
 
@@ -104,13 +104,11 @@ static struct sysfs_directory *open_class_dir(const char *name)
 	classdir = sysfs_open_directory(classpath);
 	if (classdir == NULL) {
 		errno = EINVAL;
-		dprintf(stderr,"Class %s not supported on this system\n",
-			name);
+		dprintf("Class %s not supported on this system\n", name);
 		return NULL;
 	}
 	if ((sysfs_read_directory(classdir)) != 0) {
-		dprintf(stderr, "Error reading %s class dir %s\n", name, 
-			classpath);
+		dprintf("Error reading %s class dir %s\n", name, classpath);
 		sysfs_close_directory(classdir);
 		return NULL;
 	}
@@ -142,19 +140,19 @@ struct sysfs_class_device *sysfs_open_class_device(const char *path)
 	}
 	if ((sysfs_get_name_from_path(path, cdev->name, SYSFS_NAME_LEN)) != 0) {
 		errno = EINVAL;
-		dprintf(stderr, "Invalid class device path %s\n", path);
+		dprintf("Invalid class device path %s\n", path);
 		sysfs_close_class_device(cdev);
 		return NULL;
 	}
 
 	dir = sysfs_open_directory(path);
 	if (dir == NULL) {
-		dprintf(stderr, "Error opening class device at %s\n", path);
+		dprintf("Error opening class device at %s\n", path);
 		sysfs_close_class_device(cdev);
 		return NULL;
 	}
 	if ((sysfs_read_directory(dir)) != 0) {
-		dprintf(stderr, "Error reading class device at %s\n", path);
+		dprintf("Error reading class device at %s\n", path);
 		sysfs_close_directory(dir);
 		sysfs_close_class_device(cdev);
 		return NULL;
@@ -221,8 +219,7 @@ static int get_all_class_devices(struct sysfs_class *cls)
 		next = cur->next;
 		dev = sysfs_open_class_device(cur->path);
 		if (dev == NULL) {
-			dprintf(stderr, "Error opening device at %s\n",
-				cur->path);
+			dprintf("Error opening device at %s\n",	cur->path);
 			continue;
 		}
 		add_dev_to_class(cls, dev);
@@ -253,15 +250,14 @@ struct sysfs_class *sysfs_open_class(const char *name)
 	strcpy(cls->name, name);	
 	classdir = open_class_dir(name);
 	if (classdir == NULL) {
-		dprintf(stderr,
-			"Invalid class, %s not supported on this system\n",
+		dprintf("Invalid class, %s not supported on this system\n",
 			name);
 		sysfs_close_class(cls);
 		return NULL;
 	}
 	cls->directory = classdir;
 	if ((get_all_class_devices(cls)) != 0) {
-		dprintf(stderr, "Error reading %s class devices\n", name);
+		dprintf("Error reading %s class devices\n", name);
 		sysfs_close_class(cls);
 		return NULL;
 	}

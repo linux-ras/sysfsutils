@@ -94,18 +94,18 @@ struct sysfs_device *sysfs_open_device(const char *path)
 	}
 	dev = alloc_device();	
 	if (dev == NULL) {
-		dprintf(stderr, "Error allocating device at %s\n", path);
+		dprintf("Error allocating device at %s\n", path);
 		return NULL;
 	}
 	sdir = sysfs_open_directory(path);
 	if (sdir == NULL) {
-		dprintf(stderr, "Invalid device at %s\n", path);
+		dprintf("Invalid device at %s\n", path);
 		errno = EINVAL;
 		sysfs_close_device(dev);
 		return NULL;
 	}
 	if ((sysfs_read_directory(sdir)) != 0) {
-		dprintf(stderr, "Error reading device directory at %s\n", path);
+		dprintf("Error reading device directory at %s\n", path);
 		sysfs_close_directory(sdir);
 		sysfs_close_device(dev);
 		return NULL;
@@ -179,14 +179,14 @@ struct sysfs_device *sysfs_open_device_tree(const char *path)
 	}
 	rootdev = sysfs_open_device(path);
 	if (rootdev == NULL) {
-		dprintf(stderr, "Error opening root device at %s\n", path);
+		dprintf("Error opening root device at %s\n", path);
 		return NULL;
 	}
 	cur = rootdev->directory->subdirs;
 	while (cur != NULL) {
 		new = sysfs_open_device_tree(cur->path);
 		if (new == NULL) {
-			dprintf(stderr, "Error opening device tree at %s\n",
+			dprintf("Error opening device tree at %s\n",
 				cur->path);
 			sysfs_close_device_tree(rootdev);
 			return NULL;
