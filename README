@@ -1,0 +1,61 @@
+
+	System Utilities Package - Includes Libsysfs(v. 0.1.1)
+	======================================================
+
+Contents
+--------
+ 1. Introduction
+ 2. How to Install
+ 3. Licenses
+ 4. Reporting Bugs
+
+
+1. Introduction
+---------------
+
+This package's purpose is to provide a set of utilities for interfacing
+with sysfs, a virtual filesystem in Linux kernel versions 2.5+ that
+provides a tree of system devices. While a filesystem is a very useful
+interface, we've decided to provide a stable programming interface
+that will hopefully make it easier for applications to query system devices
+and their attributes.
+
+This package currently includes:
+
+- libsysfs: a library for accessing system devices.
+- lsbus: a small application to query system bus information.
+- systool: an application to view system device information by bus, class,
+	and topology.
+
+
+2. How to Install
+-----------------
+
+Use make to create the library and the commands. 
+
+
+3. Licenses
+-----------
+
+The commands are licensed under the GNU Public License (GPL) Version2,
+June 1991. The full text of the GPL is located in this package's "cmd"
+directory:
+
+sysutils/cmd/GPL
+
+The library is licensed under the GNU Lesser Public License (LGPL) 
+Version 2.1, February 1999. The full text of the LGPL is located in
+this package's "lib" directory:
+
+sysutils/lib/LGPL
+
+
+4. Reporting Bugs
+-----------------
+
+Please direct all bugs to either the linux-diag mailing list - 
+linux-diag@lists.sourceforge.net - or to the authors:
+
+Ananth Mavinakayanahalli <ananth@in.ibm.com>
+Daniel Stekloff <dsteklof@us.ibm.com>
+

@@ -1,0 +1,18 @@
+Library:
+--------
+- Implement a better device tree, so we can eventually walk the tree.
+- Add write attribute write commands:
+	sysfs_write_attribute()
+	sysfs_write_attribute_value()
+- Possibly add abstract data list to make device tree easier and to
+	give calling applications a means to easily manage large lists
+	of devices.
+- Make bus lists of devices using topology.
+- Need to properly set errno. 
+
+Commands:
+---------
+- Add capability to just take a device as an argument.
+- Add topology tree view.
+- Need to clean up error messages.
+- Clean up how attribute values are printed.

@@ -1,0 +1,8 @@
+
+The authors of sysutils would like to thank the following people who
+have made contributions:
+
+	o Lev Makhlis <mlev@despammed.com>:
+		- Supplied libsysfs code cleanup including code
+			simplification, read-only strings, and
+			C++ compatibility.

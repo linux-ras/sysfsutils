@@ -1,0 +1,15 @@
+Version History:
+---------------
+
+ 0.1.1 - Current Development Branch
+	* Created NEWS file for Version History.
+	* Added device reference in sysfs_driver.
+	* Added parent reference in sysfs_device.
+	* Applied Lev Makhlis' code cleanup patch.
+	* Removed "-t" option.
+	* Added binary attribute support.
+	* Changed sysfs_dlink to generic sysfs_link and
+		removed sysfs_read_dlinks function.
+	* Changed sysutils to sysfsutils
+
+ 0.1.0 - Released June 30, 2003

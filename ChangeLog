@@ -1,0 +1,37 @@
+
+07/24/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Changed sysutils name to sysfsutils
+
+07/23/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Changed sysfs_dlink to sysfs_link, got rid of
+			sysfs_directory link for target char path. 
+
+07/18/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Changed default systool and lsbus to just print
+			device info. Device info already prints drivers.
+
+07/10/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+	     Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added printing binary attribute support to systool
+			and lsbus
+
+07/09/2003 - Lev Makhlis <mlev@despammed.com>
+		* Libsysfs code cleanup including:
+			- code simplification
+			- read-only strings
+			- C++ compatibility
+	   - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Removed "-t" option
+
+07/08/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+	* Created NEWS file listing version history
+
+07/07/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+	* Merged version 0.1.0 into main tree
+	* Tagged new branch - version 0.1.1
+
+07/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+	* Added parent reference to sysfs_device
+	* Added device reference to sysfs_driver
+
+06/30/2003 - Initial Version Released

@@ -1,0 +1,769 @@
+
+	System Utilities sysfs Library - libsysfs
+	=========================================
+
+Version: 0.1.0 
+June 30, 2003
+
+Contents
+--------
+1. Introduction
+2. Requirements
+3. Definitions
+4. Overview
+5. Data Structures
+   5.1 Directory and Attribute Data Structures
+       5.1.1 Attribute Structure
+       5.1.2 Link Structure
+       5.1.3 Directory Structure
+   5.2 Bus Data Structure
+   5.3 Class Data Structures
+   5.4 Device Data Structure
+   5.5 Driver Data Structure
+6. Functions
+   6.1 Utility Functions
+   6.2 Filesystem Functions
+       6.2.1 Attribute Functions
+       6.2.2 Directory Link Functions
+       6.2.3 Directory Functions
+   6.3 Bus Functions
+   6.4 Class Functions
+   6.5 Device Functions
+   6.6 Driver Functions
+7. Usage
+8. Conclusion
+
+
+1. Introduction
+---------------
+
+Libsysfs' purpose is to provide a consistant and stable interface for
+querying system device information exposed through the sysfs filesystem.
+The library implements functions for querying filesystem information, 
+such as reading directories and files. It also contains routines for
+working with buses, classes, and the device tree. 
+
+
+2. Requirements
+---------------
+
+The library must satisfy the following requirements:
+
+- It must provide a stable programming interfaces that applications can
+  be built upon. 
+
+- It must provide functions to retrieve device Vital Product Data (VPD)
+  information for Error Log Analysis (ELA) support. ELA will provide
+  device driver and device bus address information.
+
+- It must provide access to all system devices and information exposed
+  by sysfs.
+
+- It must provide a function to find sysfs' current mount point.
+
+- It must provide a function for udev to retrieve a device's major and
+  minor numbers.
+
+
+3. Definitions
+--------------
+
+- sysfs: Sysfs is a virtual filesystem in 2.5+ Linux kernels that 
+  presents a hierarchical representation of all system physical and
+  virtual devices. It presents system devices by bus, by class, and
+  by topology. Callbacks to device drivers are exposed as files in
+  device directories. Sysfs, for all purposes, is our tree of system
+  devices. For more information, please see:
+
+	http://www.kernel.org/pub/linux/kernel/people/mochel/doc/
+
+- udev: Udev is Greg Kroah-Hartman's User Space implementation of devfs.
+  Udev creates /dev nodes for devices upon Hotplug events. The Hotplug
+  event provides udev with a sysfs directory location of the device. Udev
+  must use that directory to grab device's major and minor number, which it
+  will use to create the /dev node. For more information, please see:
+
+	http://www.kernel.org/pub/linux/utils/kernel/hotplug/
+
+
+4. Overview
+-----------
+
+Libsysfs grew from a common need. There are several applications under
+development that need access to sysfs and system devices. Udev, on a
+hotplug event, must take a sysfs device path and create a /dev node. Our
+diagnostic client needs to list all system devices. Finally, our Error
+Log Analysis piece is required to retrieve VPD information for a 
+failing device. We devided to create a single library interface rather 
+than having these separate applications create their own accesses to 
+sysfs involving reading directories and files.
+
+Libsysfs will also provide stability for applications to be built upon. Sysfs
+currently doesn't enforce any standards for callback or file names. File
+names change depending on bus or class. Sysfs is also changing, it is
+currently being developed. Libsysfs will provide a stable interface to
+applications while allowing sysfs to change underneath it.
+
+Like sysfs, the library will provide devices to applications by bus, by
+class, and by topology. The library will function similar to directories
+and files that lie underneath it. To query a device on a PCI bus, one would
+"open" the bus to scan or read devices and "close" the bus when 
+completed. Besides supplying functions to retrieve devices, the library
+will also provide some utility functions like getting sysfs mount point.
+
+
+5. Data Structures
+------------------
+
+Libsysfs will classify system devices following sysfs' example, dividing 
+them by bus, class, and devices. The library presents this information
+generically. It doesn't, for example, differentiate between PCI and USB 
+buses. Device attributes are presented with values as they are exposed
+by sysfs, the values are not formatted.
+
+The library will provide standard definitions for working with sysfs
+and devices, here's some examples:
+
+#define SYSFS_FSTYPE_NAME       "sysfs"
+#define SYSFS_PROC_MNTS         "/proc/mounts"
+#define SYSFS_BUS_DIR           "/bus"
+#define SYSFS_CLASS_DIR         "/class"
+#define SYSFS_DEVICES_DIR       "/devices"
+#define SYSFS_DEVICES_NAME      "devices"
+#define SYSFS_DRIVERS_DIR       "/drivers"
+#define SYSFS_DRIVERS_NAME      "drivers"
+#define SYSFS_NAME_ATTRIBUTE    "name"
+
+The library uses some definitions to mark maximum size of a sysfs name or
+path length:
+
+#define SYSFS_PATH_MAX          255
+#define SYSFS_NAME_LEN          50
+#define SYSFS_BUS_ID_SIZE       20
+
+
+5.1 Directory and Attribute Data Structures
+-------------------------------------------
+
+The library implements structures to represent sysfs directories, links, 
+and files. 
+
+
+5.1.1 Attribute Structure
+-------------------------
+
+A file in sysfs represents a device or driver attribute. Attributes can be
+read only, write only, or read and write. File data can be ASCII and 
+binary. The library has the following structure to represent files:
+
+struct sysfs_attribute {
+        struct sysfs_attribute *next;
+        char path[SYSFS_PATH_MAX];
+        char *value;
+        int method;             /* show and store */
+};
+
+The library links attributes together using the "next" pointer. Path
+represents the file/attribute's full path. Value is used when reading
+from or writing to an attribute. Method is a bitmask for defining if 
+the attribute supports show(read) and/or store(write). 
+
+
+5.1.2 Link Structure
+--------------------
+
+Symbolic links are used in sysfs to link bus or class views with 
+particular devices. 
+
+struct sysfs_link {
+        struct sysfs_link *next;
+        char name[SYSFS_NAME_LEN];
+        char target[SYSFS_NAME_LEN];
+};
+
+The "next" pointer is for linking links together. Link's name is stored
+in name and it's target stored in target.
+
+
+5.1.3 Directory Structure
+-------------------------
+
+The directory structure represents a sysfs directory:
+
+struct sysfs_directory {
+        struct sysfs_directory *next;
+        char path[SYSFS_PATH_MAX];
+        struct sysfs_directory *subdirs;
+        struct sysfs_link *links;
+        struct sysfs_attribute *attributes;
+};
+
+The directory structure includes a "next" pointer for linking directories
+together. It also includes the directory's full path and links to 
+subdirectories, links, and attributes.
+
+
+5.2 Bus Data Structure
+----------------------
+
+All buses look similar in sysfs including lists of devices and drivers,
+therefore we use the following structure to represent all sysfs buses:
+
+struct sysfs_bus {
+        struct sysfs_bus *next;
+        char name[SYSFS_NAME_LEN];
+        struct sysfs_directory *directory;
+        struct sysfs_driver *drivers;
+        struct sysfs_device *devices;
+};
+
+The "next" pointer, as with other structures, is used for linking buses
+together. The bus name, like "pci" or "usb", is stored in the name field.
+The bus' directory is represented by the sysfs_directory structure and
+it contains references to all the subdirectories, links, and attributes
+associated with the bus. Finally, the bus contains lists of those
+devices on the bus and their drivers.
+
+
+5.3 Class Data Structures
+-------------------------
+
+The library uses two data structures to represent classes in sysfs. Sysfs
+classes contains a class directory like "net" or "scsi_host" and then
+class devices like "eth0", "lo", or "eth1" for the "net" class.
+
+struct sysfs_class {
+        struct sysfs_class *next;
+        char name[SYSFS_NAME_LEN];
+        struct sysfs_directory *directory;
+        struct sysfs_class_device *devices;
+};
+
+The sysfs_class represents device classes in sysfs like "net". It contains
+a "next" pointer for list management, the class name, and the directory
+representation. Finally, it contains a linked list of class devices.
+
+struct sysfs_class_device {
+        struct sysfs_class_device *next;
+        char name[SYSFS_NAME_LEN];
+        struct sysfs_directory *directory;
+        struct sysfs_device *sysdevice;         /* NULL if virtual */
+        struct sysfs_driver *driver;            /* NULL if not implemented */
+};
+
+A class device isn't the same as a sysfs_device, it's specific to the 
+class in which it belongs. The class device structure contains a "next" 
+pointer for list management, the name of the class device - like "eth0",
+its sysfs directory information including links and attributes, and
+finally the sysfs_device reference and that device's driver reference.
+
+
+5.4 Device Data Structure
+-------------------------
+
+The sysfs_device structure represents a system device that's exposed
+in sysfs under the /sys/devices directory structure.
+
+struct sysfs_device {
+        struct sysfs_device *next;
+        char name[SYSFS_NAME_LEN];
+        char bus_id[SYSFS_NAME_LEN];
+        struct sysfs_driver *driver;
+        struct sysfs_directory *directory;
+        struct sysfs_device *children;
+};
+
+The sysfs_device structure contains a "next" pointer for linking a list
+of devices together, its name as read from the "name" attribute in the
+device's directory, its bus id - which is the name of device's directory, 
+and a reference to its driver. The device structure also contains a 
+directory structure, which contains a list of the device's attributes,
+and a list of its child devices, if it has any.
+
+
+5.5 Driver Data Structure
+-------------------------
+
+The sysfs_driver structure represents a device driver.
+
+struct sysfs_driver {
+        struct sysfs_driver *next;
+        char name[SYSFS_NAME_LEN];
+        struct sysfs_directory *directory;
+};
+
+It contains a "next" pointer, the name of the driver, and its directory
+information, which includes the driver's attributes. 
+
+
+6. Functions
+------------
+
+Libsysfs will provide functions to access system devices by bus, by class,
+and by device. Functions will act like accessing directories and files, 
+using "open" and "close". Open returns a structure and close is used
+to clean that structure up.
+
+
+6.1 Utility Functions
+---------------------
+
+The library will provide a few utility functions for working with sysfs.
+
+-------------------------------------------------------------------------------
+Name:		sysfs_get_mnt_path
+
+Description:	Function finds the mount path for filesystem type "sysfs".
+
+Arguments:	chat *mnt_path		Mount path buffer
+		size_t len		Size of mount path buffer	
+
+Returns:	Zero with success.
+		-1 with error. Errno will be set with error:
+			- EINVAL for invalid argument, if buffer is NULL.
+
+Prototype:	sysfs_get_mnt_path(char *mnt_path, size_t len);
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_get_name_from_path
+
+Description:	Function returns the last directory or file name from the
+		included path.
+
+Arguments:	char *path		Path to parse name from
+		char *name		Buffer to put parsed name into
+		size_t *len		Size of name buffer
+
+Returns:	0 with success.
+		-1 on Error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	int sysfs_get_name_from_path(char *path, char *name,
+			size_t *len)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_get_link
+
+Description:	Sysfs realink function, reads the link at supplied path
+		and returns its target path.
+
+Arguments:	const char *path	Link's path
+		char *target		Buffer to place link's target path
+		size_t len		Size of target buffer
+
+Returns:	0 with success 
+		-1 with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	int sysfs_get_link(const char *path, char *target, size_t len)
+-------------------------------------------------------------------------------
+
+
+6.2 Filesystem Functions
+------------------------
+
+Libsysfs provides a set of functions to open, read, and close directories
+and attributes/files in sysfs. These functions mirror their filesystem
+function counterparts. 
+
+6.2.1 Attribute Functions
+-------------------------
+
+Along with the usual open, read, and close functions, libsysfs provides
+a couple other functions for accessing attribute values. Specific
+functions to write attributes or attribute values will be added in the
+near future.
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_attribute
+
+Description:	Opens up a file in sysfs and creates a sysfs_attribute
+		structure. File isn't read with this function.
+
+Arguments:	char *path		File/Attribute's path
+
+Returns:	struct sysfs_attribute * with success.
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	 struct sysfs_attribute *sysfs_open_attribute(char *path)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_close_attribute
+
+Description:	Cleans up and closes sysfs_attribute structure.
+
+Arguments:	struct sysfs_attribute *sysattr	Attribute to close
+
+Prototype:	void sysfs_close_attribute(struct sysfs_attribute *sysattr)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_read_attribute
+
+Description:	Reads the supplied attribute. Since the maximum transfer
+		from a sysfs attribute is a pagesize, function reads in
+		up to a page from the file and stores it in the "value"
+		field in the attribute.
+
+Arguments:	struct sysfs_attribute *sysattr	Attribute to read
+
+Returns:	0 with success.
+		-1 with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	int sysfs_read_attribute(struct sysfs_attribute *sysattr)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_read_attribute_value
+
+Description:	Given a path to a specific attribute, function reads and
+		returns its value to the supplied value buffer.
+
+Arguments:	char *attrpath		Attribute path to read
+		char *value		Buffer to place attribute's value
+		size_t vsize		Size of buffer
+
+Returns:	0 with success.
+		-1 with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	int sysfs_read_attribute_value(char *attrpath, char *value,
+			size_t vsize)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_get_value_from_attributes
+
+Description:	Function takes a single or linked list of sysfs attribute
+		structures and returns the value of the specified attribute
+		name.
+
+Arguments:	struct sysfs_attribute *attr 
+					Attribute list to search through
+		char *name		Name of attribute to return value
+
+Returns:	char * attribute value with success.
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	char *sysfs_get_value_from_attributes
+			(struct sysfs_attribute *attr, char * name)
+-------------------------------------------------------------------------------
+
+
+6.2.2 Link Functions
+--------------------
+
+Sysfs contains many symbolic links, like bus links to bus devices. Libsysfs
+treats links differently than directories due to processing differences. A
+link in the /sys/bus/"busname"/devices/ directory indicates a device in the
+/sys/devices directory. Through links we give the functionality to know
+what is and what isn't a link and the ability to query the links target.
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_link
+
+Description:	Opens a directory link. 
+
+Arguments:	char *linkpath		Path to link
+
+Returns:	struct sysfs_link * with success.
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct sysfs_link *sysfs_open_link(char *linkpath)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_close_link
+
+Description:	Closes a directory link structure.
+
+Arguments:	struct sysfs_link *ln	Link to close
+
+Prototype:	void sysfs_close_link(struct sysfs_link *ln)
+-------------------------------------------------------------------------------
+
+
+6.2.3 Directory Functions
+-------------------------
+
+Sysfs directories can represent every directory under sysfs. The structures
+keep track of subdirectories, links, and files. Like opendir, readdir, and
+closedir, libsysfs provides open, read, and close functions for working with
+sysfs directories. Open creates the sysfs_directory structure. Read reads in
+its contents - like subdirectories, links, and files. Close cleans it all
+up.
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_directory
+
+Description:	Opens a sysfs directory at a specific path
+
+Arguments:	char *path		Directory path to open
+
+Returns:	struct sysfs_directory * with success.
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct sysfs_directory *sysfs_open_directory(char *path)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_close_directory
+
+Description:	Closes specific directory, its subdirectories, links, and
+		files.
+
+Arguments:	struct sysfs_directory *sysdir	Directory to close
+
+Prototype:	void sysfs_close_directory(struct sysfs_directory *sysdir)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_read_directory
+
+Description:	Read the supplied directory. Reading fills in the directory's
+		contents like subdirectories, links, and attributes.
+
+Arguments:	struct sysfs_directory *sysdir	Directory to read
+
+Returns:	0 with success.
+		-1 with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	int sysfs_read_directory(struct sysfs_directory *sysdir)
+-------------------------------------------------------------------------------
+
+
+6.3 Bus Functions
+-----------------
+
+The library provides a couple functions for viewing buses represented in
+sysfs. The sysfs_open_bus opens a bus in the /sys/bus directory, such as
+"pci", "usb", or "scsi". The open command returns a sysfs_bus structure 
+that contains a list of the bus' devices. The sysfs_close_bus function
+is used to clean up the bus structure.
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_bus
+
+Description:	Function opens up one of the buses represented in sysfs in
+		the /sys/bus directory. It returns a sysfs_bus structure
+		that includes a list of bus devices and drivers.
+
+Arguments:	char *name		Bus name to open, like "pci"....
+
+Returns:	struct sysfs_bus * with success 
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct sysfs_bus *sysfs_open_bus(char *name)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_close_bus
+
+Description:	Function closes up the sysfs_bus structure including its
+		devices, drivers, and directory.
+
+Arguments:	sysfs_bus *bus		Bus structure to close
+
+Prototype:	void sysfs_close_bus(struct sysfs_bus *bus);
+-------------------------------------------------------------------------------
+
+
+6.4 Class Functions
+-------------------
+
+Libsysfs provides functions to open sysfs classes and their class devices.
+These functions too operate with open and close, close must be called to
+clean up the class structures.
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_class
+
+Description:	Function opens up one of the classes represented in sysfs in
+		the /sys/class directory. It returns a sysfs_class structure
+		that includes a list of class devices.
+
+Arguments:	char *name		Class name to open, like "net"....
+
+Returns:	struct sysfs_class * with success 
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct sysfs_class *sysfs_open_class(char *name)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_close_class
+
+Description:	Function closes up the sysfs_class structure including its
+		class devices.
+
+Arguments:	sysfs_class *class	Class structure to close
+
+Prototype:	void sysfs_close_class(struct sysfs_class *class);
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_class_device
+
+Description:	Function opens up one of the class devices represented in 
+		sysfs in sysfs/class/"class"/ directory. It retunrs a
+		sysfs_class_device structure.
+
+Arguments:	char *path		Path to class device
+
+Returns:	struct sysfs_class_device * with success 
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct sysfs_class_device *sysfs_open_class_device(char *path)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_close_class_device
+
+Description:	Function closes up the sysfs_class_device structure.
+
+Arguments:	sysfs_class_device *dev	Class device structure to close
+
+Prototype:	void sysfs_close_class_device(struct sysfs_class_device *dev)
+-------------------------------------------------------------------------------
+
+
+6.5 Device Functions
+--------------------
+
+Devices represent everything in sysfs under /sys/devices, which is a
+hierarchical view of system devices. Besides the expected open and 
+close functions, libsysfs provides open and close tree functions. The
+tree functions recursively open or close a device and all of its 
+children. 
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_device
+
+Description:	Opens up a device at a specific path. It opens the device's
+		directory, reads the directory, and returns a sysfs_device
+		structure.
+
+Arguments:	char *path		Path to device
+
+Returns:	struct sysfs_device * with success 
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct sysfs_device *sysfs_open_device(char *path)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_close_device
+
+Description:	Function closes up the sysfs_device structure.
+
+Arguments:	sysfs_device *dev	Device structure to close
+
+Prototype:	void sysfs_close_device(struct sysfs_device *dev)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_device_tree
+
+Description:	Same as sysfs_open_device except it recursively opens
+		children devices and adds them to the tree. Returns root
+		tree.
+
+Arguments:	char *path		Path to device
+
+Returns:	struct sysfs_device * with success 
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct sysfs_device *sysfs_open_device_tree(char *path)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_close_device_tree
+
+Description:	Same as sysfs_close_device except it recursively closes
+		all child devices.
+
+Arguments:	sysfs_device *dev	Root device structure to close
+
+Prototype:	void sysfs_close_device_tree(struct sysfs_device *dev)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_get_device_attr
+
+Description:	Searches supplied device's attributes by name and returns
+		the attribute.
+
+Arguments:	struct sysfs_device *dev	Device to search
+		char *name			Attribute name to find
+
+Returns:	struct sysfs_attribute * with success 
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct sysfs_attribute *sysfs_get_device_attr
+			(struct sysfs_device *dev, char *name)
+-------------------------------------------------------------------------------
+
+
+6.6 Driver Functions
+--------------------
+
+Libsysfs includes two functions - open and close - for drivers.
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_driver
+
+Description:	Opens driver at specific path.
+
+Arguments:	char *path		Path to driver
+
+Returns:	struct sysfs_driver * with success 
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct sysfs_driver *sysfs_open_driver(char *path)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_close_driver
+
+Description:	Closes and cleans up sysfs_driver structure.
+
+Arguments:	sysfs_driver *driver	Driver structure to close
+
+Prototype:	void sysfs_close_driver(struct sysfs_driver *driver)
+-------------------------------------------------------------------------------
+
+
+7. Usage
+--------
+
+Accessing devices through libsysfs is supposed to mirror accessing devices
+in the filesystem it represents. Here's a typical order of operation:
+
+	- get sysfs mount point
+	- "open" sysfs category, ie. bus, class, or device
+	- work with category
+	- "close" sysfs category
+
+
+8. Conclusion
+-------------
+
+Libsysfs is meant to provide a stable application programming interface to
+sysfs. Applications can depend upon the library to access system devices
+and functions exposed through sysfs.
