@@ -668,7 +668,8 @@ int main(int argc, char *argv[])
 		show_options |= SHOW_DEVICES;
 
 	if (show_bus != NULL) {
-		if (!(strcmp(show_bus, "pci"))) {
+		if ((!(strcmp(show_bus, "pci"))) && 
+				(show_options & SHOW_DEVICES)) {
 			pacc = (struct pci_access *)
 				calloc(1, sizeof(struct pci_access));
 			pacc->pci_id_file_name = pci_id_file;
@@ -684,8 +685,13 @@ int main(int argc, char *argv[])
 	if (show_bus == NULL && show_class == NULL && show_root == NULL) 
 		retval = show_default_info();
 
-	if (show_bus != NULL)
-		if (!(strcmp(show_bus, "pci")))
+	if (show_bus != NULL) {
+		if ((!(strcmp(show_bus, "pci"))) &&
+				(show_options & SHOW_DEVICES)) {
 			pci_free_name_list(pacc);
+			free (pacc);
+			pacc = NULL;
+		}
+	}
 	exit(retval);
 }

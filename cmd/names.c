@@ -220,8 +220,23 @@ load_name_list(struct pci_access *a)
 void
 pci_free_name_list(struct pci_access *a)
 {
+  int i = 0;
+  struct nl_entry *n = NULL, *temp = NULL;
+	
   free(a->nl_list);
   a->nl_list = NULL;
+  if (a->nl_hash != NULL) {
+    for (i = 0; i < HASH_SIZE; i++) {
+      if (a->nl_hash[i] != NULL) {
+        n = a->nl_hash[i];
+        do {
+          temp = n->next;
+	  free (n);
+	  n = temp;
+        } while (temp != NULL);
+      }
+    }
+  }
   free(a->nl_hash);
   a->nl_hash = NULL;
 }

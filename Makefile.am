@@ -1,4 +1,5 @@
-EXTRA_DIST = docs include
+man_MANS = lsbus.1 systool.1
+EXTRA_DIST = docs include $(man_MANS)
 SUBDIRS = lib cmd test
 include_HEADERS = include/libsysfs.h include/dlist.h
 

@@ -2,17 +2,12 @@ Library:
 --------
 - Rework debugging error messages and look into better logging on error.
 - Need to properly set errno. 
-- Code optimization: open()/read()/close() only when required.
 
 Commands:
 ---------
 - Add topology tree view.
 - Need to clean up error messages.
 - Clean up how attribute values are printed.
-
-Docs:
------
-- Create man pages for commands and for library.
 
 Test:
 -----

@@ -127,6 +127,8 @@ static void sysfs_close_dev_tree(void *dev)
 void sysfs_close_device(struct sysfs_device *dev)
 {
 	if (dev != NULL) {
+		if (dev->parent != NULL)
+			sysfs_close_device(dev->parent);
 		if (dev->directory != NULL)
 			sysfs_close_directory(dev->directory);
 		if (dev->children != NULL && dev->children->count == 0)
@@ -164,7 +166,7 @@ static struct sysfs_directory *open_device_dir(const unsigned char *path)
 		dprintf ("Device %s not supported on this system\n", path);
 		return NULL;
 	}
-	if ((sysfs_read_directory(rdir)) != 0) {
+	if ((sysfs_read_dir_subdirs(rdir)) != 0) {
 		dprintf ("Error reading device at dir %s\n", path);
 		sysfs_close_directory(rdir);
 		return NULL;
@@ -255,7 +257,7 @@ static struct sysfs_device *sysfs_open_device_tree(const unsigned char *path)
 			if (rootdev->children == NULL)
 				rootdev->children = dlist_new_with_delete
 					(sizeof(struct sysfs_device),
-					sysfs_del_device);
+					sysfs_close_dev_tree);
 			dlist_unshift(rootdev->children, new);
 		}
 	}
@@ -355,6 +357,7 @@ struct sysfs_root_device *sysfs_open_root_device(const unsigned char *name)
 		dprintf("calloc failure\n");
 		return NULL;
 	}
+	strcpy(root->name, name);
 	strcpy(root->path, rootpath);
 	return root;
 }
@@ -497,6 +500,60 @@ struct sysfs_device *sysfs_open_device(const unsigned char *bus_id,
 	}
 
 	return device;
+}
+
+/**
+ * sysfs_get_device_parent: opens up given device's parent and returns a 
+ * 	reference to its sysfs_device
+ * @dev: sysfs_device whose parent is requested
+ * Returns sysfs_device of the parent on success and NULL on failure
+ */
+struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev)
+{
+	unsigned char ppath[SYSFS_PATH_MAX], *tmp = NULL;
+
+	if (dev == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (dev->parent != NULL)
+		return (dev->parent);
+
+	memset(ppath, 0, SYSFS_PATH_MAX);
+	strcpy(ppath, dev->path);
+	tmp = strrchr(ppath, '/');
+	if (tmp == NULL) {
+		dprintf("Invalid path to device %s\n", ppath);
+		return NULL;
+	}
+	if (*(tmp +1) == '\0') {
+		*tmp = '\0';
+		tmp = strrchr(tmp, '/');
+		if (tmp == NULL) {
+			dprintf("Invalid path to device %s\n", ppath);
+			return NULL;
+		}
+	}
+	*tmp = '\0';
+	
+	/*
+	 * All "devices" have the "detach_state" attribute - validate here
+	 */
+	strcat(ppath, "/detach_state");
+	if ((sysfs_path_is_file(ppath)) != 0) {
+		dprintf("Device at %s does not have a parent\n", dev->path);
+		return NULL;
+	}
+	tmp = strrchr(ppath, '/');
+	*tmp = '\0';
+	dev->parent = sysfs_open_device_path(ppath);
+	if (dev->parent == NULL) {
+		dprintf("Error opening device %s's parent at %s\n", 
+					dev->bus_id, ppath);
+		return NULL;
+	}
+	return (dev->parent);
 }
 
 /*

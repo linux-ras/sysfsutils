@@ -1,4 +1,17 @@
 
+12/16/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Added sysfs_get_device_parent() function
+
+12/15/2003 - Martin Pitt <mpitt@debian.org>
+		* Added initial version of manpages for lsbus and systool
+
+12/15/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Updated autotools for 0.4.0 - shared library will now
+			have version-info
+		* Fixed miscllaneous issues with library files
+		* Fixed names.c, systool.c and lsbus.c to free all allocated
+			memory
+
 12/12/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Miscllaneous changes - added new function definitions,
 			general code cleanup

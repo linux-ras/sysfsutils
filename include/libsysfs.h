@@ -204,6 +204,7 @@ extern struct dlist *sysfs_get_root_devices(struct sysfs_root_device *root);
 extern void sysfs_close_device(struct sysfs_device *dev);
 extern struct sysfs_device *sysfs_open_device
 		(const unsigned char *bus_id, const unsigned char *bus);
+extern struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev);
 extern struct sysfs_device *sysfs_open_device_path(const unsigned char *path);
 extern struct sysfs_attribute *sysfs_get_device_attr
 			(struct sysfs_device *dev, const unsigned char *name);

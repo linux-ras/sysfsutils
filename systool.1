@@ -1,0 +1,65 @@
+.TH SYSTOOL 1 "October 12, 2003" "Martin Pitt"
+.SH NAME
+systool \- view system device information by bus, class, and topology
+
+.SH SYNOPSIS
+.B systool
+[\fIoptions \fR[\fIdevice\fR]]
+
+.SH DESCRIPTION
+Calling
+.B systool
+without parameters will present all available bus types, device
+classes, and root devices.
+.P
+When
+.I device
+is supplied, the information reqested by
+.I options
+is shown only for the specified device, otherwise all present devices
+are displayed.
+
+.SH OPTIONS
+.TP
+.B \-a
+Show attributes
+.TP
+.B \-b \fIbus
+Show a specific bus
+.TP
+.B \-c \fIclass
+Show a specific class
+.TP
+.B \-d
+Show only devices
+.TP
+.B \-h
+Show usage
+.TP
+.B \-r \fIroot_device
+Show a specific root device tree
+.TP
+.B \-v
+Show all attributes with values
+.TP
+.B \-A \fI attribute
+Show attribute value
+.TP
+.B \-D
+Show only drivers
+
+.SH SEE ALSO
+.B lsbus
+(1)
+.P
+The web page of
+.B libsysfs
+at http://linux\-diag.sourceforge.net/Sysfsutils.html
+
+.SH AUTHOR
+.B systool
+was written by Ananth Mavinakayanahalli <ananth@in.ibm.com> and
+Daniel Stekloff <dsteklof@us.ibm.com>.
+.P
+This man page was contributed by Martin Pitt <mpitt@debian.org> for
+the Debian GNU/Linux system (but may be used by others).

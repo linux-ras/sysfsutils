@@ -66,29 +66,6 @@ static int open_driver_dir(struct sysfs_driver *driver)
 }
 
 /**
- * read_driver_dir: Read driver directory's subdirs and links
- * @driver: Driver to read
- * Returns 0 on success and 1 on failure
- */
-static int read_driver_dir(struct sysfs_driver *driver)
-{
-	if (driver == NULL) {
-		errno = EINVAL;
-		return 1;
-	}
-	if (driver->directory == NULL) {
-		if ((open_driver_dir(driver)) == 1)
-			return 1;
-	}
-	if ((sysfs_read_directory(driver->directory)) != 0) {
-		dprintf("Error reading driver directory at %s\n", 
-				driver->path);
-		return 1;
-	}
-	return 0;
-}
-
-/**
  * alloc_driver: allocates and initializes driver
  * returns struct sysfs_driver with success and NULL with error.
  */
@@ -209,7 +186,7 @@ struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver)
 	if (driver->directory == NULL) {
 		if ((open_driver_dir(driver)) == 1)
 			return NULL;
-		if ((read_driver_dir(driver)) != 0) 
+		if ((sysfs_read_dir_links(driver->directory)) != 0) 
 			return NULL;
 	}
 	return(driver->directory->links);
@@ -236,7 +213,7 @@ struct dlist *sysfs_get_driver_devices(struct sysfs_driver *driver)
 	if (driver->directory == NULL) {
 		if ((open_driver_dir(driver)) == 1) 
 			return NULL;
-		if ((read_driver_dir(driver)) != 0) 
+		if ((sysfs_read_dir_links(driver->directory)) != 0) 
 			return NULL;
 	}
 	if (driver->directory->links != NULL) {

@@ -1,0 +1,58 @@
+.TH LSBUS 1 "October 12, 2003" "Martin Pitt"
+.SH NAME
+lsbus \- query system bus information
+
+.SH SYNOPSIS
+.B lsbus
+[
+.I options
+.I bus
+[
+.I device
+] ]
+
+.SH DESCRIPTION
+When 
+.B lsbus
+is called without arguments, it shows the available bus types (usb,
+pci, etc.).
+.P
+When \fIbus\fR is supplied, then a tree of all devices (without
+further arguments) or a specific device (when \fIdevice\fR is
+given) on this bus is displayed.
+
+.SH OPTIONS
+.TP
+.B \-a
+Show attributes
+.TP
+.B \-d
+Show only devices
+.TP
+.B \-v
+Show all attributes with values
+.TP
+.B \-A \fIattribute
+Show attribute value
+.TP
+.B \-D
+Show only drivers
+.TP
+.B \-h
+Show usage
+
+.SH SEE ALSO
+.B systool
+(1)
+.P
+The web page of
+.B libsysfs
+at http://linux\-diag.sourceforge.net/Sysfsutils.html
+
+.SH AUTHOR
+.B lsbus
+was written by Ananth Mavinakayanahalli <ananth@in.ibm.com> and
+Daniel Stekloff <dsteklof@us.ibm.com>.
+.P
+This man page was contributed by Martin Pitt <mpitt@debian.org> for
+the Debian GNU/Linux system (but may be used by others).

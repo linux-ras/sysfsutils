@@ -84,7 +84,7 @@ am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
 bin_PROGRAMS = dlist_test get_class_dev get_device get_driver \
-		get_bus_devices_list write_attr
+		get_bus_devices_list write_attr get_classdev_parent
 
 dlist_test_SOURCES = dlist_test.c
 get_class_dev_SOURCES = get_class_dev.c
@@ -92,6 +92,7 @@ get_device_SOURCES = get_device.c
 get_driver_SOURCES = get_driver.c
 get_bus_devices_list_SOURCES = get_bus_devices_list.c
 write_attr_SOURCES = write_attr.c
+get_classdev_parent_SOURCES = get_classdev_parent.c
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
 subdir = test
@@ -100,7 +101,8 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 bin_PROGRAMS = dlist_test$(EXEEXT) get_class_dev$(EXEEXT) \
 	get_device$(EXEEXT) get_driver$(EXEEXT) \
-	get_bus_devices_list$(EXEEXT) write_attr$(EXEEXT)
+	get_bus_devices_list$(EXEEXT) write_attr$(EXEEXT) \
+	get_classdev_parent$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_dlist_test_OBJECTS = dlist_test.$(OBJEXT)
@@ -118,6 +120,11 @@ get_class_dev_OBJECTS = $(am_get_class_dev_OBJECTS)
 get_class_dev_LDADD = $(LDADD)
 get_class_dev_DEPENDENCIES = ../lib/libsysfs.la
 get_class_dev_LDFLAGS =
+am_get_classdev_parent_OBJECTS = get_classdev_parent.$(OBJEXT)
+get_classdev_parent_OBJECTS = $(am_get_classdev_parent_OBJECTS)
+get_classdev_parent_LDADD = $(LDADD)
+get_classdev_parent_DEPENDENCIES = ../lib/libsysfs.la
+get_classdev_parent_LDFLAGS =
 am_get_device_OBJECTS = get_device.$(OBJEXT)
 get_device_OBJECTS = $(am_get_device_OBJECTS)
 get_device_LDADD = $(LDADD)
@@ -144,6 +151,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/dlist_test.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/get_bus_devices_list.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/get_class_dev.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/get_classdev_parent.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/get_device.Po ./$(DEPDIR)/get_driver.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/write_attr.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -155,10 +163,11 @@ LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
 DIST_SOURCES = $(dlist_test_SOURCES) $(get_bus_devices_list_SOURCES) \
-	$(get_class_dev_SOURCES) $(get_device_SOURCES) \
-	$(get_driver_SOURCES) $(write_attr_SOURCES)
+	$(get_class_dev_SOURCES) $(get_classdev_parent_SOURCES) \
+	$(get_device_SOURCES) $(get_driver_SOURCES) \
+	$(write_attr_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(dlist_test_SOURCES) $(get_bus_devices_list_SOURCES) $(get_class_dev_SOURCES) $(get_device_SOURCES) $(get_driver_SOURCES) $(write_attr_SOURCES)
+SOURCES = $(dlist_test_SOURCES) $(get_bus_devices_list_SOURCES) $(get_class_dev_SOURCES) $(get_classdev_parent_SOURCES) $(get_device_SOURCES) $(get_driver_SOURCES) $(write_attr_SOURCES)
 
 all: all-am
 
@@ -207,6 +216,9 @@ get_bus_devices_list$(EXEEXT): $(get_bus_devices_list_OBJECTS) $(get_bus_devices
 get_class_dev$(EXEEXT): $(get_class_dev_OBJECTS) $(get_class_dev_DEPENDENCIES) 
 	@rm -f get_class_dev$(EXEEXT)
 	$(LINK) $(get_class_dev_LDFLAGS) $(get_class_dev_OBJECTS) $(get_class_dev_LDADD) $(LIBS)
+get_classdev_parent$(EXEEXT): $(get_classdev_parent_OBJECTS) $(get_classdev_parent_DEPENDENCIES) 
+	@rm -f get_classdev_parent$(EXEEXT)
+	$(LINK) $(get_classdev_parent_LDFLAGS) $(get_classdev_parent_OBJECTS) $(get_classdev_parent_LDADD) $(LIBS)
 get_device$(EXEEXT): $(get_device_OBJECTS) $(get_device_DEPENDENCIES) 
 	@rm -f get_device$(EXEEXT)
 	$(LINK) $(get_device_LDFLAGS) $(get_device_OBJECTS) $(get_device_LDADD) $(LIBS)
@@ -226,6 +238,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlist_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_bus_devices_list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_class_dev.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_classdev_parent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_device.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/write_attr.Po@am__quote@

@@ -14,3 +14,5 @@ have made contributions:
 	o Martin Mares <mj@ucw.cz>
 		- Author of pciutils. Reused the pci name decoding
 			from Martin's library.
+	o Martin Pitt <mpitt@debian.org>
+		- Supplied initial makefiles for lsbus and systool

@@ -88,13 +88,13 @@ libsysfs_la_SOURCES = sysfs_utils.c sysfs_dir.c sysfs_bus.c sysfs_class.c \
 	sysfs_device.c sysfs_driver.c sysfs.h dlist.c
 
 INCLUDES = -I../include
+libsysfs_la_LDFLAGS = -version-info 0:4:0
 subdir = lib
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
-libsysfs_la_LDFLAGS =
 libsysfs_la_LIBADD =
 am_libsysfs_la_OBJECTS = sysfs_utils.lo sysfs_dir.lo sysfs_bus.lo \
 	sysfs_class.lo sysfs_device.lo sysfs_driver.lo dlist.lo

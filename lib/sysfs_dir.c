@@ -1,5 +1,5 @@
 /*
- * syfs_dir.c
+ * sysfs_dir.c
  *
  * Directory utility functions for libsysfs
  *
@@ -260,7 +260,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 {
 	unsigned char *fbuf = NULL;
 	unsigned char *vbuf = NULL;
-	size_t length = 0;
+	ssize_t length = 0;
 	long pgsize = 0;
 	int fd;
 
@@ -442,7 +442,7 @@ int sysfs_read_all_subdirs(struct sysfs_directory *sysdir)
 	if (sysdir->subdirs != NULL) {
 		dlist_for_each_data(sysdir->subdirs, cursub, 
 						struct sysfs_directory) {
-			if ((sysfs_read_directory(cursub)) != 0) 
+			if ((sysfs_read_dir_subdirs(cursub)) != 0) 
 				dprintf ("Error reading subdirectory %s\n",
 						cursub->name);
 		}
@@ -835,8 +835,9 @@ struct sysfs_attribute *sysfs_get_directory_attribute
 		strcat(new_path, attrname);
 		if ((sysfs_path_is_file(new_path)) == 0) {
 		 	if ((add_attribute(dir, new_path)) == 0) {
-				attr = (struct sysfs_attribute *)dlist_find_custom
-					(dir->attributes, attrname, dir_attribute_name_equal);
+				attr = (struct sysfs_attribute *)
+					dlist_find_custom(dir->attributes, 
+					attrname, dir_attribute_name_equal);
 			}
 			return attr;
 		}

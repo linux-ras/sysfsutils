@@ -446,7 +446,8 @@ int main(int argc, char *argv[])
 		show_options |= SHOW_DEVICES;
 
 	if (bus_to_print != NULL) {
-		if (!(strcmp(bus_to_print, "pci"))) {
+		if ((!(strcmp(bus_to_print, "pci"))) && 
+				(show_options & SHOW_DEVICES)) {
 			pacc = (struct pci_access *)calloc(1, sizeof(struct pci_access));
 			pacc->pci_id_file_name = pci_id_file;
 			pacc->numeric_ids = 0;
@@ -455,8 +456,12 @@ int main(int argc, char *argv[])
 	} else
 		retval = print_sysfs_buses();
 
-	if (bus_to_print != NULL) 
-		if (!(strcmp(bus_to_print, "pci"))) 
+	if (bus_to_print != NULL) {
+		if ((!(strcmp(bus_to_print, "pci"))) &&
+				(show_options & SHOW_DEVICES)) {
 			pci_free_name_list(pacc);
+			free (pacc);
+		}
+	}
 	exit(retval);
 }

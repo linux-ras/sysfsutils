@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(sysfsutils, 0.3.0, linux-diag-devel@lists.sourceforge.net)
+AC_INIT(sysfsutils, 0.4.0, linux-diag-devel@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
@@ -8,8 +8,10 @@ AC_PROG_LIBTOOL
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
-AC_PROG_AWK
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
 AC_PROG_RANLIB
+AC_PROG_AWK
 
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lsysfs':
@@ -29,7 +31,7 @@ AC_TYPE_SIZE_T
 AC_FUNC_LSTAT
 AC_FUNC_MALLOC
 AC_FUNC_STAT
-AC_CHECK_FUNCS([bzero getmntent getpagesize isascii memset strerror strrchr])
+AC_CHECK_FUNCS([bzero getmntent isascii memset strchr strerror strrchr strstr])
 
 AC_CONFIG_FILES([Makefile
                  cmd/Makefile
