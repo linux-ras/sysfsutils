@@ -272,7 +272,7 @@ void print_driver(struct sysfs_driver *driver)
 		if (devlist != NULL) {
 			struct sysfs_device *dev = NULL;
 			fprintf(stdout, "\tDevices:\n");
-			dlist_for_each_data(driver->devices, dev,
+			dlist_for_each_data(devlist, dev,
 					struct sysfs_device)
 				fprintf(stdout, "\t\t%s\n", dev->bus_id);
 		}
@@ -311,7 +311,7 @@ int print_sysfs_bus(unsigned char *busname)
 		if (devlist != NULL) {
 			if (bus_device == NULL)
 				fprintf(stdout, "Devices:\n");
-			dlist_for_each_data(bus->devices, curdev,
+			dlist_for_each_data(devlist, curdev,
 					struct sysfs_device) {
 				if (bus_device == NULL || (strcmp(bus_device,
 							curdev->bus_id) == 0)) 
@@ -323,7 +323,7 @@ int print_sysfs_bus(unsigned char *busname)
 		drvlist = sysfs_get_bus_drivers(bus);
 		if (drvlist != NULL) {
 			fprintf(stdout, "Drivers:\n");
-			dlist_for_each_data(bus->drivers, curdrv, 
+			dlist_for_each_data(drvlist, curdrv, 
 					struct sysfs_driver) {
 				print_driver(curdrv);
 			}

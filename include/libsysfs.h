@@ -160,9 +160,12 @@ extern int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 		const unsigned char *new_value, size_t len);
 extern unsigned char *sysfs_get_value_from_attributes(struct dlist *attr, 
 						const unsigned char * name);
+extern int sysfs_refresh_attributes(struct dlist *attrlist);
 extern void sysfs_close_directory(struct sysfs_directory *sysdir);
 extern struct sysfs_directory *sysfs_open_directory(const unsigned char *path);
 extern int sysfs_read_dir_attributes(struct sysfs_directory *sysdir);
+extern int sysfs_read_dir_links(struct sysfs_directory *sysdir);
+extern int sysfs_read_dir_subdirs(struct sysfs_directory *sysdir);
 extern int sysfs_read_directory(struct sysfs_directory *sysdir);
 extern int sysfs_read_all_subdirs(struct sysfs_directory *sysdir);
 extern struct sysfs_directory *sysfs_get_subdirectory

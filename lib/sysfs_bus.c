@@ -121,16 +121,20 @@ struct dlist *sysfs_get_bus_devices(struct sysfs_bus *bus)
 		return NULL;
 	}
 
-	dlist_for_each_data(devdir->links, curl, struct sysfs_link) {
-		bdev = sysfs_open_device_path(curl->target);
-		if (bdev == NULL) {
-			dprintf("Error opening device at %s\n",	curl->target);
-			continue;
+	if (devdir->links != 0) {
+		dlist_for_each_data(devdir->links, curl, struct sysfs_link) {
+			bdev = sysfs_open_device_path(curl->target);
+			if (bdev == NULL) {
+				dprintf("Error opening device at %s\n",	
+								curl->target);
+				continue;
+			}
+			if (bus->devices == NULL)
+				bus->devices = dlist_new_with_delete
+					(sizeof(struct sysfs_device), 
+					 		sysfs_close_dev);
+			dlist_unshift(bus->devices, bdev);
 		}
-		if (bus->devices == NULL)
-			bus->devices = dlist_new_with_delete
-				(sizeof(struct sysfs_device), sysfs_close_dev);
-		dlist_unshift(bus->devices, bdev);
 	}
 	sysfs_close_directory(devdir);
 
@@ -165,76 +169,24 @@ struct dlist *sysfs_get_bus_drivers(struct sysfs_bus *bus)
 		sysfs_close_directory(drvdir);
 		return NULL;
 	}
-	dlist_for_each_data(drvdir->subdirs, cursub, struct sysfs_directory) {
-		driver = sysfs_open_driver_path(cursub->path);
-		if (driver == NULL) {
-			dprintf("Error opening driver at %s\n",	cursub->path);
-			continue;
+	if (drvdir->subdirs != NULL) {
+		dlist_for_each_data(drvdir->subdirs, cursub, 
+						struct sysfs_directory) {
+			driver = sysfs_open_driver_path(cursub->path);
+			if (driver == NULL) {
+				dprintf("Error opening driver at %s\n",	
+								cursub->path);
+				continue;
+			}
+			if (bus->drivers == NULL)
+				bus->drivers = dlist_new_with_delete
+					(sizeof(struct sysfs_driver), 
+					 		sysfs_close_drv);
+			dlist_unshift(bus->drivers, driver);
 		}
-		if (bus->drivers == NULL)
-			bus->drivers = dlist_new_with_delete
-				(sizeof(struct sysfs_driver), sysfs_close_drv);
-		dlist_unshift(bus->drivers, driver);
 	}
 	sysfs_close_directory(drvdir);
 	return (bus->drivers);
-}
-
-/**
- * match_bus_device_to_driver: returns 1 if device is bound to driver
- * @driver: driver to match
- * @busid: busid of device to match
- * returns 1 if found and 0 if not found
- */
-static int match_bus_device_to_driver(struct sysfs_driver *driver, 
-							unsigned char *busid)
-{
-	struct sysfs_link *cur = NULL;
-	struct dlist *links = NULL;
-	int found = 0;
-
-	if (driver == NULL || busid == NULL) {
-		errno = EINVAL;
-		return found;
-	}
-	
-	links = sysfs_get_driver_links(driver);
-	if (links != NULL) {
-		dlist_for_each_data(links, cur,
-				struct sysfs_link) {
-			if ((strcmp(cur->name, busid)) == 0)
-				found++;
-		}
-	}
-	return found;
-}
-
-/**
- * link_bus_devices_to_drivers: goes through and links devices to drivers
- * @bus: bus to link
- */
-static void link_bus_devices_to_drivers(struct sysfs_bus *bus)
-{
-	struct sysfs_device *dev = NULL;
-	struct sysfs_driver *drv = NULL;
-	
-	if (bus != NULL && bus->devices != NULL && bus->drivers != NULL) {
-		dlist_for_each_data(bus->devices, dev, struct sysfs_device) {
-			dlist_for_each_data(bus->drivers, drv,
-					struct sysfs_driver) {
-				if ((match_bus_device_to_driver(drv, 
-						dev->bus_id)) != 0) {
-					strncpy(dev->driver_name, drv->name,
-							SYSFS_NAME_LEN);
-					if (drv->devices == NULL)
-						drv->devices = dlist_new
-							(sizeof(struct 
-								sysfs_device));
-					dlist_unshift(drv->devices, dev);
-				}
-			}
-		}
-	}
 }
 
 /**
@@ -285,8 +237,6 @@ struct sysfs_bus *sysfs_open_bus(const unsigned char *name)
 struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus, 
 							unsigned char *id)
 {
-	struct dlist *devlist = NULL;
-	
 	if (bus == NULL || id == NULL) {
 		errno = EINVAL;
 		return NULL;

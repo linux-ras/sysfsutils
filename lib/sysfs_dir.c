@@ -437,13 +437,15 @@ int sysfs_read_all_subdirs(struct sysfs_directory *sysdir)
 		return -1;
 	}
 	if (sysdir->subdirs == NULL) 
-		if ((sysfs_read_dir_subdirs(sysdir) != 0) 
-		    || sysdir->subdirs == NULL)
+		if ((sysfs_read_dir_subdirs(sysdir)) != 0) 
 			return 0;
-	dlist_for_each_data(sysdir->subdirs, cursub, struct sysfs_directory) {
-		if ((sysfs_read_directory(cursub)) != 0) 
-			dprintf ("Error reading subdirectory %s\n",
-				cursub->name);
+	if (sysdir->subdirs != NULL) {
+		dlist_for_each_data(sysdir->subdirs, cursub, 
+						struct sysfs_directory) {
+			if ((sysfs_read_directory(cursub)) != 0) 
+				dprintf ("Error reading subdirectory %s\n",
+						cursub->name);
+		}
 	}
 	return 0;
 }
@@ -523,7 +525,8 @@ int sysfs_refresh_attributes(struct dlist *attrlist)
 	dlist_for_each_data(attrlist, attr, struct sysfs_attribute) {
 		if (attr->method & SYSFS_METHOD_SHOW) {
 			if ((sysfs_read_attribute(attr)) != 0) {
-				dprintf("Error reading attribute %s\n", path);
+				dprintf("Error reading attribute %s\n", 
+								attr->path);
 				if ((sysfs_path_is_file(attr->path)) != 0) {
 					dprintf("Attr %s no longer exists\n", 
 								attr->name);
@@ -535,12 +538,6 @@ int sysfs_refresh_attributes(struct dlist *attrlist)
 								attr->name);
 			}
 		}
-	}
-	if (attrlist->count == 0) {
-		dprintf("No attributes in the list, destroying list now\n");
-		dlist_destroy(attrlist);
-		attrlist = NULL;
-		return 1;
 	}
 	return 0;
 }
@@ -762,7 +759,6 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 	DIR *dir = NULL;
 	struct dirent *dirent = NULL;
 	struct stat astats;
-	struct sysfs_link *ln = NULL;
 	unsigned char file_path[SYSFS_PATH_MAX];
 	int retval = 0;
 

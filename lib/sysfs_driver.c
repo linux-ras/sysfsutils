@@ -105,7 +105,6 @@ static struct sysfs_driver *alloc_driver(void)
 struct sysfs_driver *sysfs_open_driver_path(const unsigned char *path)
 {
 	struct sysfs_driver *driver = NULL;
-	struct sysfs_directory *sdir = NULL;
 
 	if (path == NULL) {
 		errno = EINVAL;

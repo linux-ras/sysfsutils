@@ -1,4 +1,8 @@
 
+12/12/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Miscllaneous changes - added new function definitions,
+			general code cleanup
+
 12/12/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Changed function prototypes for sysfs_open_* calls that
 			accept absolute path to have _path suffix

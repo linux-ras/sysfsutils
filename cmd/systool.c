@@ -406,7 +406,7 @@ int show_sysfs_bus(unsigned char *busname)
 		if (devlist != NULL) {
 			if (device_to_show == NULL)
 				fprintf(stdout, "Devices:\n");
-			dlist_for_each_data(bus->devices, curdev, 
+			dlist_for_each_data(devlist, curdev, 
 						struct sysfs_device) {
 				if (device_to_show == NULL || 
 						(strcmp(device_to_show,
@@ -419,7 +419,7 @@ int show_sysfs_bus(unsigned char *busname)
 		drvlist = sysfs_get_bus_drivers(bus);
 		if (drvlist != NULL) {
 			fprintf(stdout, "Drivers:\n");
-			dlist_for_each_data(bus->drivers, curdrv, 
+			dlist_for_each_data(drvlist, curdrv, 
 					struct sysfs_driver) {
 				show_driver(curdrv, 2);
 			}

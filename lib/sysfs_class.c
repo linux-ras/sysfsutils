@@ -185,22 +185,24 @@ struct dlist *sysfs_get_class_devices(struct sysfs_class *cls)
 			return NULL;
 	}
 
-	if ((sysfs_read_dir_subdirs(cls->directory) != 0) 
-	    || cls->directory->subdirs == NULL)
+	if ((sysfs_read_dir_subdirs(cls->directory)) != 0) 
 		return NULL;
 
-	dlist_for_each_data(cls->directory->subdirs, cur, 
-			struct sysfs_directory) {
-		dev = sysfs_open_class_device_path(cur->path);
-		if (dev == NULL) {
-			dprintf("Error opening device at %s\n",	cur->path);
-			continue;
-		}
-		if (cls->devices == NULL)
-			cls->devices = dlist_new_with_delete
+	if (cls->directory->subdirs != NULL) {
+		dlist_for_each_data(cls->directory->subdirs, cur, 
+						struct sysfs_directory) {
+			dev = sysfs_open_class_device_path(cur->path);
+			if (dev == NULL) {
+				dprintf("Error opening device at %s\n",	
+								cur->path);
+				continue;
+			}
+			if (cls->devices == NULL)
+				cls->devices = dlist_new_with_delete
 					(sizeof(struct sysfs_class_device),
 					 		sysfs_close_cls_dev);
-		dlist_unshift(cls->devices, dev);
+			dlist_unshift(cls->devices, dev);
+		}
 	}
 	return cls->devices;
 }
@@ -588,12 +590,14 @@ struct sysfs_attribute *sysfs_get_classdev_attr
 		    clsdev->directory->subdirs == NULL) 
 			return NULL;
 
-	dlist_for_each_data(clsdev->directory->subdirs, sdir,
-				struct sysfs_directory) {
-		cur = sysfs_get_directory_attribute(sdir, 
+	if (clsdev->directory->subdirs != NULL) {
+		dlist_for_each_data(clsdev->directory->subdirs, sdir,
+						struct sysfs_directory) {
+			cur = sysfs_get_directory_attribute(sdir, 
 						(unsigned char *)name);
-		if (cur != NULL)
-			return cur;
+			if (cur != NULL)
+				return cur;
+		}
 	}
 		
 	return NULL;
