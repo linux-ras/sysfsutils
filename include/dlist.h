@@ -77,7 +77,7 @@ void dlist_end(Dlist *);
 
 void *dlist_insert(Dlist *,void *,int) ;
 
-void *dlist_insert_sorted(struct dlist *list, void *new, int (*sorter)(void *, void *));
+void *dlist_insert_sorted(struct dlist *list, void *new_elem, int (*sorter)(void *, void *));
 
 void dlist_delete(Dlist *,int);
 

@@ -1,4 +1,7 @@
 
+03/08/2004 - Lev Makhlis <mlev@despammed.com>
+		* Changes for C++ compatibility
+
 03/08/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Changed version number in configure.ac to 1.1.0
 

@@ -66,7 +66,7 @@ void sysfs_close_class_device(struct sysfs_class_device *dev)
 
 /**
  * sysfs_close_class: close single class
- * @class: class structure
+ * @cls: class structure
  */
 void sysfs_close_class(struct sysfs_class *cls)
 {
@@ -172,7 +172,7 @@ struct sysfs_class_device *sysfs_open_class_device_path
 
 /**
  * sysfs_get_class_devices: gets all devices for class
- * @class: class to get devices for
+ * @cls: class to get devices for
  * returns dlist of class_devices with success and NULL with error
  */
 struct dlist *sysfs_get_class_devices(struct sysfs_class *cls)
@@ -275,20 +275,20 @@ struct sysfs_class *sysfs_open_class(const unsigned char *name)
  * @class: class to find device on
  * @name: class name of the device
  */ 
-struct sysfs_class_device *sysfs_get_class_device(struct sysfs_class *class,
+struct sysfs_class_device *sysfs_get_class_device(struct sysfs_class *cls,
 					unsigned char *name)
 {
-	if (class == NULL || name == NULL) {
+	if (cls == NULL || name == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
 
-	if (class->devices == NULL) {
-		class->devices = sysfs_get_class_devices(class);
-		if (class->devices == NULL) 
+	if (cls->devices == NULL) {
+		cls->devices = sysfs_get_class_devices(cls);
+		if (cls->devices == NULL) 
 			return NULL;
 	}
-	return (struct sysfs_class_device *)dlist_find_custom(class->devices,
+	return (struct sysfs_class_device *)dlist_find_custom(cls->devices,
 			name, class_name_equal);
 }
 

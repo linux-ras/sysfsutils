@@ -253,7 +253,7 @@ extern void sysfs_close_class_device(struct sysfs_class_device *dev);
 extern struct sysfs_class_device *sysfs_open_class_device_path
 					(const unsigned char *path);
 extern struct sysfs_class_device *sysfs_open_class_device
-	(const unsigned char *class, const unsigned char *name);
+	(const unsigned char *classname, const unsigned char *name);
 extern struct sysfs_device *sysfs_get_classdev_device
 				(struct sysfs_class_device *clsdev);
 extern struct sysfs_driver *sysfs_get_classdev_driver
@@ -264,7 +264,7 @@ extern void sysfs_close_class(struct sysfs_class *cls);
 extern struct sysfs_class *sysfs_open_class(const unsigned char *name);
 extern struct dlist *sysfs_get_class_devices(struct sysfs_class *cls);
 extern struct sysfs_class_device *sysfs_get_class_device
-	(struct sysfs_class *class, unsigned char *name);
+	(struct sysfs_class *cls, unsigned char *name);
 extern struct dlist *sysfs_get_classdev_attributes
 	(struct sysfs_class_device *cdev);
 extern struct dlist *sysfs_refresh_classdev_attributes
@@ -285,11 +285,11 @@ extern struct sysfs_attribute *sysfs_open_classdev_attr
  * 	lement of all libsysfs structures. Hence, this function will work 
  * 	AS IS for _ALL_ the lists that have to be sorted.
  */
-static inline int sort_list(void *new, void *old)
+static inline int sort_list(void *new_elem, void *old_elem)
 {
-        return ((strncmp(((struct sysfs_attribute *)new)->name,
-		((struct sysfs_attribute *)old)->name,
-		strlen(((struct sysfs_attribute *)new)->name))) < 0 ? 1 : 0);
+        return ((strncmp(((struct sysfs_attribute *)new_elem)->name,
+		((struct sysfs_attribute *)old_elem)->name,
+		strlen(((struct sysfs_attribute *)new_elem)->name))) < 0 ? 1 : 0);
 }
 
 
