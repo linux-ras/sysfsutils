@@ -1,4 +1,11 @@
 
+03/08/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Changed version number in configure.ac to 1.1.0
+
+03/08/2004 - Martin Schlemmer <azarah@gentoo.org>
+		* Don't check for installed libsysfs while building
+			sysfsutils from the source package
+
 02/24/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added validation code for test defines
 		* Updated the README, libsyfs.txt and NEWS files

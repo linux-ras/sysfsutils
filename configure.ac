@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(sysfsutils, 1.0.0, linux-diag-devel@lists.sourceforge.net)
+AC_INIT(sysfsutils, 1.1.0, linux-diag-devel@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
@@ -12,10 +12,6 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PROG_AWK
-
-# Checks for libraries.
-# FIXME: Replace `main' with a function in `-lsysfs':
-AC_CHECK_LIB([sysfs], [sysfs_read_directory])
 
 # Checks for header files.
 AC_HEADER_DIRENT
