@@ -1,7 +1,7 @@
 Version History:
 ---------------
 
- 0.2.0 - Released August 28, 2003
+ 0.2.0 - Released August 29, 2003
 	* Added autoconf configuration support.
 	* Added Eric J Bohm's dlist patch.
 	* Changed the library structures and routines to use dlists.
