@@ -36,10 +36,12 @@ static int confirm_device_bus(struct sysfs_device *dev,
         if (sysfs_get_mnt_path(devpath, SYSFS_PATH_MAX) != 0)
                 return -1;
 
-        strcat(devpath, SYSFS_BUS_DIR);
+	strcat(devpath, "/");
+        strcat(devpath, SYSFS_BUS_NAME);
         strcat(devpath, "/");
         strcat(devpath, busname);
-        strcat(devpath, SYSFS_DEVICES_DIR);
+	strcat(devpath, "/");
+        strcat(devpath, SYSFS_DEVICES_NAME);
         strcat(devpath, "/");
         strcat(devpath, bus_id);
 
@@ -69,7 +71,8 @@ static int get_device_bus(struct sysfs_device *dev)
 		return -1;
 	}
 
-	strcpy(subsys, SYSFS_BUS_DIR);  /* subsys = /bus */
+	strcat(subsys, "/");
+	strcpy(subsys, SYSFS_BUS_NAME);  /* subsys = /bus */
 	buslist = sysfs_open_subsystem_list(subsys);
 	if (buslist != NULL) {
 		dlist_for_each_data(buslist, bus, char) {
@@ -350,7 +353,8 @@ struct sysfs_root_device *sysfs_open_root_device(const unsigned char *name)
 		return NULL;
 	}
 
-	strcat(rootpath, SYSFS_DEVICES_DIR);
+	strcat(rootpath, "/");
+	strcat(rootpath, SYSFS_DEVICES_NAME);
 	strcat(rootpath, "/");
 	strcat(rootpath, name);
 	if ((sysfs_path_is_dir(rootpath)) != 0) {
@@ -446,10 +450,12 @@ static int get_device_absolute_path(const unsigned char *device,
 		dprintf ("Sysfs not supported on this system\n");
 		return -1;
 	}
-	strcat(bus_path, SYSFS_BUS_DIR);
+	strcat(bus_path, "/");
+	strcat(bus_path, SYSFS_BUS_NAME);
 	strcat(bus_path, "/");
 	strcat(bus_path, bus);
-	strcat(bus_path, SYSFS_DEVICES_DIR);
+	strcat(bus_path, "/");
+	strcat(bus_path, SYSFS_DEVICES_NAME);
 	strcat(bus_path, "/");
 	strcat(bus_path, device);
 	/*

@@ -55,10 +55,12 @@ int main(int argc, char *argv[])
 		fprintf(stdout, "Sysfs not mounted?\n");
 		return 1;
 	}
-	strcat(path, SYSFS_BUS_DIR);
+	strcat(path, "/");
+	strcat(path, SYSFS_BUS_NAME);
 	strcat(path, "/");
 	strcat(path, bus);
-	strcat(path, SYSFS_DRIVERS_DIR);
+	strcat(path, "/");
+	strcat(path, SYSFS_DRIVERS_NAME);
 	strcat(path, "/");
 	strcat(path, argv[1]);
 	driver = sysfs_open_driver(path);

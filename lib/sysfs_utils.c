@@ -218,6 +218,7 @@ struct dlist *sysfs_open_subsystem_list(unsigned char *name)
 		return NULL;
 	}
 
+	strcat(sysfs_path, "/");
 	strcat(sysfs_path, name);
 	dir = sysfs_open_directory(sysfs_path);
 	if (dir == NULL) {
@@ -253,7 +254,7 @@ struct dlist *sysfs_open_subsystem_list(unsigned char *name)
 	 * name requested here is "class", verify if "block" is supported on
 	 * this system and return the same.
 	 */ 
-	if (strcmp(name, SYSFS_CLASS_DIR) == 0) {
+	if (strcmp(name, SYSFS_CLASS_NAME) == 0) {
 		c = strstr(sysfs_path, SYSFS_CLASS_NAME);
 		if (c == NULL)
 			goto out;
@@ -293,10 +294,12 @@ struct dlist *sysfs_open_bus_devices_list(unsigned char *name)
 		return NULL;
 	}
 
-	strcat(sysfs_path, SYSFS_BUS_DIR);
+	strcat(sysfs_path, "/");
+	strcat(sysfs_path, SYSFS_BUS_NAME);
 	strcat(sysfs_path, "/");
 	strcat(sysfs_path, name);
-	strcat(sysfs_path, SYSFS_DEVICES_DIR);
+	strcat(sysfs_path, "/");
+	strcat(sysfs_path, SYSFS_DEVICES_NAME);
 	dir = sysfs_open_directory(sysfs_path);
 	if (dir == NULL) {
 		dprintf("Error opening sysfs_directory at %s\n", sysfs_path);

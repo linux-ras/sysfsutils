@@ -58,6 +58,8 @@ void sysfs_close_class_device(struct sysfs_class_device *dev)
 			sysfs_close_device(dev->sysdevice);
 		if (dev->driver != NULL)
 			sysfs_close_driver(dev->driver);
+		if (dev->parent != NULL)
+			sysfs_close_class_device(dev->parent);
 		free(dev);
 	}
 }
@@ -133,19 +135,18 @@ static void set_classdev_classname(struct sysfs_class_device *cdev)
 	unsigned char *c = NULL, *e = NULL;
 	int count = 0;
 
-	c = strstr(cdev->path, SYSFS_CLASS_DIR);
-	if (c == NULL) 
-		c = strstr(cdev->path, SYSFS_BLOCK_DIR);
-	else {
-		c++;
-		while (c != NULL && *c != '/') 
-			c++;
+	c = strstr(cdev->path, SYSFS_CLASS_NAME);
+	if (c == NULL) {
+		c = strstr(cdev->path, SYSFS_BLOCK_NAME);
+	} else {
+		c = strstr(c, "/");
 	}
 
 	if (c == NULL)
 		strcpy(cdev->classname, SYSFS_UNKNOWN);
 	else {
-		c++;
+		if (*c == '/')
+			c++;
 		e = c;
 		while (e != NULL && *e != '/' && *e != '\0') {
 			e++;
@@ -253,9 +254,11 @@ struct sysfs_class *sysfs_open_class(const unsigned char *name)
 	 * if "name" is "block" and proceed accordingly
 	 */
 	if (strcmp(name, SYSFS_BLOCK_NAME) == 0) {
-		strcat(classpath, SYSFS_BLOCK_DIR);
+		strcat(classpath, "/");
+		strcat(classpath, SYSFS_BLOCK_NAME);
 	} else {
-		strcat(classpath, SYSFS_CLASS_DIR);
+		strcat(classpath, "/");
+		strcat(classpath, SYSFS_CLASS_NAME);
 		strcat(classpath, "/");
 		strcat(classpath, name);
 	}
@@ -381,7 +384,101 @@ struct sysfs_driver *sysfs_get_classdev_driver
 	}
 	return (clsdev->driver);
 }
-				
+	
+/* 
+ * get_blockdev_parent: Get the parent class device for a "block" subsystem 
+ * 		device if present
+ * @clsdev: block subsystem class device whose parent needs to be found
+ * Returns 0 on success and 1 on error
+ */
+static int get_blockdev_parent(struct sysfs_class_device *clsdev)
+{
+	unsigned char parent_path[SYSFS_PATH_MAX], value[256], *c = NULL;
+	
+	memset(parent_path, 0, SYSFS_PATH_MAX);
+	strcpy(parent_path, clsdev->path);
+
+	c = strstr(parent_path, SYSFS_BLOCK_NAME);
+	if (c == NULL) {
+		dprintf("Class device %s does not belong to BLOCK subsystem",
+				clsdev->name);
+		return 1;
+	}
+	
+	c += strlen(SYSFS_BLOCK_NAME);
+	if (*c == '/')
+		c++;
+	else
+		goto errout;
+	
+	/* validate whether the given class device is a partition or not */ 
+	if ((strncmp(c, clsdev->name, strlen(clsdev->name))) == 0) {
+		dprintf("%s not a partition\n", clsdev->name);
+		return 1;
+	}
+	c = strchr(c, '/');
+	if (c == NULL) 
+		goto errout;
+	*c = '\0';
+	
+	/* Now validate if the parent has the "dev" attribute */
+	memset(value, 0, 256);
+	strcat(parent_path, "/dev");
+	if ((sysfs_read_attribute_value(parent_path, value, 256)) != 0) {
+		dprintf("Block device %s does not have a parent\n", 
+							clsdev->name);
+		return 1;
+	}
+		
+	c = strrchr(parent_path, '/');
+	if (c == NULL)
+		goto errout;
+
+	*c = '\0';
+	clsdev->parent = sysfs_open_class_device(parent_path);
+	if (clsdev->parent == NULL) {
+		dprintf("Error opening the parent class device at %s\n", 
+								parent_path);
+		return 1;
+	}
+	return 0;
+
+errout:
+	dprintf("Invalid path %s\n", clsdev->path);
+	return 1;
+}
+
+/**
+ * sysfs_get_classdev_parent: Retrieves the parent of a class device. 
+ * 	eg., when working with hda1, this function can be used to retrieve the
+ * 		sysfs_class_device for hda
+ * 		
+ * @clsdev: class device whose parent details are required.
+ * Returns sysfs_class_device of the parent on success, NULL on failure
+ */ 
+struct sysfs_class_device *sysfs_get_classdev_parent
+				(struct sysfs_class_device *clsdev)
+{
+	if (clsdev == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+	if (clsdev->parent != NULL)
+		return (clsdev->parent);
+	
+	/* 
+	 * As of now, only block devices have a parent child heirarchy in sysfs
+	 * We do not know, if, in the future, more classes will have a similar
+	 * structure. Hence, we now call a specialized function for block and
+	 * later we can add support functions for other subsystems as required.
+	 */ 
+	if (!(strcmp(clsdev->classname, SYSFS_BLOCK_NAME))) {
+		if ((get_blockdev_parent(clsdev)) == 0) 
+			return (clsdev->parent);
+	}
+	return NULL;
+}
+
 /**
  * get_classdev_path: given the class and a device in the class, return the
  * 		absolute path to the device
@@ -403,9 +500,11 @@ static int get_classdev_path(const unsigned char *classname,
                 return -1;
 	}
 	if (strcmp(classname, SYSFS_BLOCK_NAME) == 0) {
-		strcat(path, SYSFS_BLOCK_DIR);
+		strcat(path, "/");
+		strcat(path, SYSFS_BLOCK_NAME);
 	} else {
-		strcat(path, SYSFS_CLASS_DIR);
+		strcat(path, "/");
+		strcat(path, SYSFS_CLASS_NAME);
 		strcat(path, "/");
 		strcat(path, classname);
 	}

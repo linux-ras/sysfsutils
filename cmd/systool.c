@@ -548,7 +548,7 @@ int show_default_info(void)
 	unsigned char *cur = NULL;
 	int retval = 0, i;
 
-	strcpy(subsys, SYSFS_BUS_DIR);
+	strcpy(subsys, SYSFS_BUS_NAME);
 	list = sysfs_open_subsystem_list(subsys);
 	if (list != NULL) {
 		fprintf(stdout, "Supported sysfs buses:\n");
@@ -557,7 +557,7 @@ int show_default_info(void)
 	}
 	sysfs_close_list(list);
 
-	strcpy(subsys, SYSFS_CLASS_DIR);
+	strcpy(subsys, SYSFS_CLASS_NAME);
 	list = sysfs_open_subsystem_list(subsys);
 	if (list != NULL) {
 		fprintf(stdout, "Supported sysfs classes:\n");
@@ -566,7 +566,7 @@ int show_default_info(void)
 	}
 	sysfs_close_list(list);
 
-	strcpy(subsys, SYSFS_DEVICES_DIR);
+	strcpy(subsys, SYSFS_DEVICES_NAME);
 	list = sysfs_open_subsystem_list(subsys);
 	if (list != NULL) {
 		fprintf(stdout, "Supported sysfs devices:\n");

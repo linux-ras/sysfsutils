@@ -31,15 +31,10 @@
  */ 
 #define SYSFS_FSTYPE_NAME	"sysfs"
 #define SYSFS_PROC_MNTS		"/proc/mounts"
-#define SYSFS_BUS_DIR		"/bus"
 #define SYSFS_BUS_NAME		"bus"
-#define SYSFS_CLASS_DIR		"/class"
 #define SYSFS_CLASS_NAME	"class"
-#define SYSFS_BLOCK_DIR		"/block"
 #define SYSFS_BLOCK_NAME	"block"
-#define SYSFS_DEVICES_DIR	"/devices"
 #define SYSFS_DEVICES_NAME	"devices"
-#define SYSFS_DRIVERS_DIR	"/drivers"
 #define SYSFS_DRIVERS_NAME	"drivers"
 #define SYSFS_NAME_ATTRIBUTE	"name"
 #define SYSFS_UNKNOWN		"unknown"
@@ -121,6 +116,7 @@ struct sysfs_class_device {
 	unsigned char path[SYSFS_PATH_MAX];
 
 	/* for internal use only */
+	struct sysfs_class_device *parent;	
 	struct sysfs_device *sysdevice;		/* NULL if virtual */
 	struct sysfs_driver *driver;		/* NULL if not implemented */
 	struct sysfs_directory *directory;	
@@ -230,6 +226,8 @@ extern struct sysfs_class_device *sysfs_open_class_device
 extern struct sysfs_device *sysfs_get_classdev_device
 				(struct sysfs_class_device *clsdev);
 extern struct sysfs_driver *sysfs_get_classdev_driver
+				(struct sysfs_class_device *clsdev);
+extern struct sysfs_class_device *sysfs_get_classdev_parent
 				(struct sysfs_class_device *clsdev);
 extern void sysfs_close_class(struct sysfs_class *cls);
 extern struct sysfs_class *sysfs_open_class(const unsigned char *name);

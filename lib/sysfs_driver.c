@@ -301,10 +301,12 @@ static int get_driver_path(const unsigned char *bus,
 		dprintf("Error getting sysfs mount path\n");
 		return -1;
 	}
-	strcat(path, SYSFS_BUS_DIR);
+	strcat(path, "/");
+	strcat(path, SYSFS_BUS_NAME);
 	strcat(path, "/");
 	strcat(path, bus);
-	strcat(path, SYSFS_DRIVERS_DIR);
+	strcat(path, "/");
+	strcat(path, SYSFS_DRIVERS_NAME);
 	strcat(path, "/");
 	strcat(path, drv);
 	return 0;

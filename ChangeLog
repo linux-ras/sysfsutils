@@ -1,4 +1,10 @@
 
+12/01/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Removed usage of _DIR #defines
+		* Added functionality to obtain parent of a class device
+		* Added get_classdev_parent.c in test/. This file is not
+			built by default as of now
+
 11/27/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Updated library and utilities with the optimization patch
 

@@ -345,7 +345,8 @@ int print_sysfs_buses(void)
         unsigned char *cur = NULL;
         int ret = 0;
 
-        strcpy(subsys, SYSFS_BUS_DIR);
+	strcat(subsys, "/");
+        strcpy(subsys, SYSFS_BUS_NAME);
         list = sysfs_open_subsystem_list(subsys);
         if (list != NULL) {
 		fprintf(stdout, "Supported sysfs buses:\n");
