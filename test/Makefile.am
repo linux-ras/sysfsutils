@@ -7,4 +7,4 @@ get_device_SOURCES = get_device.c
 get_driver_SOURCES = get_driver.c
 get_devices_list_SOURCES = get_devices_list.c
 INCLUDES = -I../include
-LDADD = ../lib/libsysfs.a
+LDADD = ../lib/libsysfs.la
