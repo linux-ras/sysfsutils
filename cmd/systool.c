@@ -219,12 +219,12 @@ static void show_attribute(struct sysfs_attribute *attr, int level)
 	    & SHOW_ATTRIBUTE_VALUE) && (strcmp(attr->name, attribute_to_show) 
 	    == 0))) {
 		indent(level);
-		fprintf (stdout, "%-20s=", attr->name);
+		fprintf (stdout, "%-20s", attr->name);
 		if (show_options & SHOW_ATTRIBUTE_VALUE && attr->value 
-		    != NULL && (strcmp(attr->name, attribute_to_show)) == 0) 
+		    != NULL && (strcmp(attr->name, attribute_to_show)) == 0) {
+			fprintf(stdout, "= ");
 			show_attribute_value(attr, level);
-
-		else 
+		} else 
 			fprintf(stdout, "\n");
 	}
 }
