@@ -346,7 +346,6 @@ struct sysfs_class_device *sysfs_open_class_device_by_name
 	return rcdev;
 }
 
-
 /**
  * sysfs_get_classdev_attributes: returns a dlist of attributes for
  * 	the requested class_device
@@ -360,3 +359,51 @@ struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev)
 
 	return (cdev->directory->attributes);
 }
+
+/**
+ * sysfs_find_device_class: locates the device the device is on
+ * @bus_id: device to look for
+ * @classname: buffer to copy class name to
+ * @bsize: size of buffer
+ * returns 0 with success and -1 with error
+ */
+int sysfs_find_device_class_name(unsigned char *bus_id, 
+				unsigned char *classname, size_t bsize)
+{
+	unsigned char class[SYSFS_NAME_LEN], clspath[SYSFS_NAME_LEN];
+	unsigned char *cls = NULL, *clsdev = NULL;
+	struct dlist *clslist = NULL, *clsdev_list = NULL;
+
+	if (bus_id == NULL || classname == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	strcpy(class, SYSFS_CLASS_DIR);
+	clslist = sysfs_open_subsystem_list(class);
+	if (clslist != NULL) {
+		dlist_for_each_data(clslist, cls, char) {
+			memset(clspath, 0, SYSFS_NAME_LEN);
+			strcpy(clspath, SYSFS_CLASS_DIR);
+			strcat(clspath, "/");
+			strcat(clspath, cls);
+			clsdev_list = sysfs_open_subsystem_list(clspath);
+			if (clsdev_list != NULL) {
+				dlist_for_each_data(clsdev_list, 
+							clsdev, char) {
+					if (strcmp(bus_id, clsdev) == 0) {
+						strncpy(classname, 
+								cls, bsize);
+						sysfs_close_list(clsdev_list);
+						sysfs_close_list(clslist);
+						return 0;
+					}
+				}
+				sysfs_close_list(clsdev_list);
+			}
+		}
+		sysfs_close_list(clslist);
+	}
+	return -1;
+}
+						

@@ -1,4 +1,8 @@
 
+09/09/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added sysfs_find_device_class to find what class a
+			device is on
+
 09/05/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Add sysfs_open_bus_devices_list()
 		* Simplify sysfs_find_device_bus_name()
