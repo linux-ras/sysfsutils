@@ -1,4 +1,7 @@
 
+10/10/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Modified the way systool displayed block devices
+
 10/09/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Updated docs/libsysfs.txt
 		* Fixed warning in cmd/names.c
@@ -10,7 +13,7 @@
 10/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Miscellaneous changes - renaming of some
 			functions, etc
-			
+
 10/06/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Pruned "test" routines
 		* Corrected pci name decode in cmds
@@ -43,7 +46,7 @@
 		* Added sysfs_change_attribute_value() - a wrapper for
 			sysfs_write_attribute()
 		* Simplified sysfs_get_device_attr()
-		
+
 09/16/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Patch sysfs_close_driver() so as not to segfault when
 			during dlist shifting.

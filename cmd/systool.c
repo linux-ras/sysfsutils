@@ -620,8 +620,8 @@ int show_default_info(void)
 {
 	unsigned char subsys[SYSFS_NAME_LEN];
 	struct dlist *list = NULL;
-	char *cur = NULL;
-	int retval = 0;
+	unsigned char *cur = NULL;
+	int retval = 0, i;
 
 	strcpy(subsys, SYSFS_BUS_DIR);
 	list = sysfs_open_subsystem_list(subsys);
@@ -654,8 +654,13 @@ int show_default_info(void)
 	list = sysfs_open_subsystem_list(subsys);
 	if (list != NULL) {
 		fprintf(stdout, "Supported sysfs block devices:\n");
-		dlist_for_each_data(list, cur, char)
-			fprintf(stdout, "\t%s\n", cur);
+		i = 1;
+		dlist_for_each_data(list, cur, char) {
+			fprintf(stdout, "\t%s", cur);
+			if (!(i++ % 8))
+				fprintf(stdout, "\n");
+		}
+		fprintf(stdout, "\n");
 	}
 	sysfs_close_list(list);
 	
