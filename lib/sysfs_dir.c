@@ -184,6 +184,7 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 	if (!(sysattr->method & SYSFS_METHOD_STORE)) {
 		dprintf ("Store method not supported for attribute %s\n",
 			sysattr->path);
+		errno = EACCES;
 		return -1;
 	}
 	if (sysattr->method & SYSFS_METHOD_SHOW) {
@@ -271,6 +272,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 	if (!(sysattr->method & SYSFS_METHOD_SHOW)) {
 		dprintf("Show method not supported for attribute %s\n",
 			sysattr->path);
+		errno = EACCES;
 		return -1;
 	}
 	pgsize = sysconf(_SC_PAGESIZE);
@@ -431,6 +433,7 @@ static struct sysfs_link *alloc_link(void)
 int sysfs_read_all_subdirs(struct sysfs_directory *sysdir)
 {
 	struct sysfs_directory *cursub = NULL;
+	int retval = 0;
 
 	if (sysdir == NULL) {
 		errno = EINVAL;
@@ -442,12 +445,16 @@ int sysfs_read_all_subdirs(struct sysfs_directory *sysdir)
 	if (sysdir->subdirs != NULL) {
 		dlist_for_each_data(sysdir->subdirs, cursub, 
 						struct sysfs_directory) {
-			if ((sysfs_read_dir_subdirs(cursub)) != 0) 
+			if ((sysfs_read_dir_subdirs(cursub)) != 0) {
 				dprintf ("Error reading subdirectory %s\n",
 						cursub->name);
+				retval = -1;
+			}
 		}
 	}
-	return 0;
+	if (!retval)
+		errno = 0;
+	return retval;
 }
 
 /**
@@ -628,6 +635,8 @@ int sysfs_read_dir_attributes(struct sysfs_directory *sysdir)
 			retval = add_attribute(sysdir, file_path);
 	}
 	closedir(dir);
+	if (!retval)
+		errno = 0;
 	return(retval);
 }
 
@@ -668,6 +677,8 @@ int sysfs_read_dir_links(struct sysfs_directory *sysdir)
 		}
 	}
 	closedir(dir);
+	if (!retval)
+		errno = 0;
 	return(retval);
 }
 
@@ -705,6 +716,8 @@ int sysfs_read_dir_subdirs(struct sysfs_directory *sysdir)
 			retval = add_subdirectory(sysdir, file_path);
 	}
 	closedir(dir);
+	if (!retval)
+		errno = 0;
 	return(retval);
 }
 
@@ -753,6 +766,8 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 			retval = add_attribute(sysdir, file_path);
 	}
 	closedir(dir);
+	if (!retval)
+		errno = 0;
 	return(retval);
 }
 
@@ -781,6 +796,7 @@ int sysfs_refresh_dir_attributes(struct sysfs_directory *sysdir)
 							sysdir->path);
 		return 1;
 	}
+	errno = 0;
 	return 0;
 }
 
@@ -809,6 +825,7 @@ int sysfs_refresh_dir_links(struct sysfs_directory *sysdir)
 							sysdir->path);
 		return 1;
 	}
+	errno = 0;
 	return 0;
 }
 
@@ -837,6 +854,7 @@ int sysfs_refresh_dir_subdirs(struct sysfs_directory *sysdir)
 							sysdir->path);
 		return 1;
 	}
+	errno = 0;
 	return 0;
 }
 

@@ -86,6 +86,8 @@ install_sh = @install_sh@
 bin_PROGRAMS = dlist_test get_class_dev get_device get_driver write_attr \
 		get_bus_devices_list get_classdev_parent testlibsysfs
 
+BUILT_SOURCES = test.h
+CLEANFILES = test.h		
 dlist_test_SOURCES = dlist_test.c
 get_class_dev_SOURCES = get_class_dev.c
 get_device_SOURCES = get_device.c
@@ -93,8 +95,9 @@ get_driver_SOURCES = get_driver.c
 get_bus_devices_list_SOURCES = get_bus_devices_list.c
 write_attr_SOURCES = write_attr.c
 get_classdev_parent_SOURCES = get_classdev_parent.c
-testlibsysfs_SOURCES = test.c test_bus.c test_class.c test_dir.c \
-		test_driver.c test_root.c test_utils.c testout.c test.h
+testlibsysfs_SOURCES = test.c test_bus.c test_class.c test_dir.c test_driver.c \
+		       test_root.c test_utils.c testout.c test-defs.h \
+		       libsysfs.conf create-test
 
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
@@ -183,7 +186,8 @@ DIST_SOURCES = $(dlist_test_SOURCES) $(get_bus_devices_list_SOURCES) \
 DIST_COMMON = Makefile.am Makefile.in
 SOURCES = $(dlist_test_SOURCES) $(get_bus_devices_list_SOURCES) $(get_class_dev_SOURCES) $(get_classdev_parent_SOURCES) $(get_device_SOURCES) $(get_driver_SOURCES) $(testlibsysfs_SOURCES) $(write_attr_SOURCES)
 
-all: all-am
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -385,6 +389,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-rm -f Makefile $(CONFIG_CLEAN_FILES)
@@ -392,6 +397,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
@@ -442,6 +448,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 	mostlyclean-libtool tags uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-info-am
 
+test.h:
+	./create-test
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

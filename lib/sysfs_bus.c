@@ -121,7 +121,7 @@ struct dlist *sysfs_get_bus_devices(struct sysfs_bus *bus)
 		return NULL;
 	}
 
-	if (devdir->links != 0) {
+	if (devdir->links != NULL) {
 		dlist_for_each_data(devdir->links, curl, struct sysfs_link) {
 			bdev = sysfs_open_device_path(curl->target);
 			if (bdev == NULL) {

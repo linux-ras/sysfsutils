@@ -24,7 +24,7 @@
  * Display routines for test functions
  */ 
 
-#include <test.h>
+#include <test-defs.h>
 
 static void remove_end_newline(unsigned char *value)
 {

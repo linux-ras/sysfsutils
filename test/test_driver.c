@@ -48,7 +48,7 @@
  ******************************************************************************
  */
 
-#include "test.h"
+#include "test-defs.h"
 #include <errno.h>
 
 /**
@@ -302,10 +302,20 @@ int test_sysfs_get_driver_attr(int flag)
 	attr = sysfs_get_driver_attr(drv, attrname);
 	switch (flag) {
 	case 0:
-		if (attr == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (attr == NULL) {
+			if (errno == EACCES) 
+				dbg_print("%s: attribute %s does not support READ\n",
+						__FUNCTION__, attrname);
+			else if (errno == ENOENT)
+				dbg_print("%s: attribute %s not defined for driver at %s\n",
+						__FUNCTION__, attrname, name);
+			else if (errno == 0)
+				dbg_print("%s: driver at %s does not export attributes\n",
+						__FUNCTION__, val_drv_path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute(attr);
@@ -344,10 +354,12 @@ int test_sysfs_get_driver_attributes(int flag)
 {
 	struct sysfs_driver *driver = NULL;
 	struct dlist *list = NULL;
+	unsigned char *drv = NULL;
 
 	switch (flag) {
 	case 0:
-		driver = sysfs_open_driver_path(val_drv_path);
+		drv = val_drv_path;
+		driver = sysfs_open_driver_path(drv);
 		if (driver == NULL) {
 			dbg_print("%s: failed opening driver at %s\n",
 						__FUNCTION__, val_drv_path);
@@ -357,6 +369,15 @@ int test_sysfs_get_driver_attributes(int flag)
 	case 1:
 		driver = NULL;
 		break;
+	case 2:
+		drv = val_drv1_path;
+		driver = sysfs_open_driver_path(drv);
+		if (driver == NULL) {
+			dbg_print("%s: failed opening driver at %s\n",
+						__FUNCTION__, val_drv1_path);
+			return 0;
+		}
+		break;
 	default:
 		return -1;
 	}
@@ -364,10 +385,15 @@ int test_sysfs_get_driver_attributes(int flag)
 
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+	case 2:
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: No attributes are defined for the driver at %s\n",
+						__FUNCTION__, drv);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute_list(list);
@@ -401,10 +427,12 @@ int test_sysfs_get_driver_devices(int flag)
 {
 	struct sysfs_driver *driver = NULL;
 	struct dlist *list = NULL;
+	unsigned char *drv = NULL;
 
 	switch (flag) {
 	case 0:
-		driver = sysfs_open_driver_path(val_drv_path);
+		drv = val_drv_path;
+		driver = sysfs_open_driver_path(drv);
 		if (driver == NULL) {
 			dbg_print("%s: failed opening driver at %s\n",
 						__FUNCTION__, val_drv_path);
@@ -414,6 +442,15 @@ int test_sysfs_get_driver_devices(int flag)
 	case 1:
 		driver = NULL;
 		break;
+	case 2:
+		drv = val_drv1_path;
+		driver = sysfs_open_driver_path(drv);
+		if (driver == NULL) {
+			dbg_print("%s: failed opening driver at %s\n",
+						__FUNCTION__, val_drv1_path);
+			return 0;
+		}
+		break;
 	default:
 		return -1;
 	}
@@ -421,10 +458,15 @@ int test_sysfs_get_driver_devices(int flag)
 	
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+	case 2:
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: No devices are using the driver at %s\n",
+						__FUNCTION__, drv);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_device_list(list);
@@ -487,10 +529,14 @@ int test_sysfs_refresh_driver_devices(int flag)
 	
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: No devices are using the driver at %s\n",
+						__FUNCTION__, val_drv_path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_device_list(list);
@@ -545,10 +591,14 @@ int test_sysfs_get_driver_links(int flag)
 
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Driver at %s does not have any links\n",
+						__FUNCTION__, val_drv_path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_links_list(list);
@@ -637,10 +687,14 @@ int test_sysfs_get_driver_device(int flag)
 
 	switch (flag) {
 	case 0:
-		if (dev == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (dev == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Device with name %s does not use the driver at %s\n",
+						__FUNCTION__, name, val_drv_path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_device(dev);
@@ -699,10 +753,14 @@ int test_sysfs_refresh_driver_attributes(int flag)
 
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: driver at %s does not export attributes\n",
+						__FUNCTION__, val_drv_path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute_list(list);
@@ -787,7 +845,7 @@ int  test_sysfs_open_driver_attr(int flag)
 	case 3:
 		bus = val_drv_bus_name;
 		drv = inval_name;
-		attrib = val_attr_name;
+		attrib = val_drv_attr_name;
 		break;
 	case 4:
 		bus = val_drv_bus_name;
@@ -904,6 +962,11 @@ int  test_sysfs_open_driver_attr(int flag)
 		drv = NULL;
 		attrib = NULL;
 		break;
+	case 27:
+		bus = val_drv1_bus_name;
+		drv = val_drv1_name;
+		attrib = val_drv1_attr_name;
+		break;
 	default:
 		return -1;
 	}
@@ -911,10 +974,18 @@ int  test_sysfs_open_driver_attr(int flag)
 
 	switch (flag) {
 	case 0:
-		if (attr == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+	case 27:
+		if (attr == NULL) {
+			if (errno == EACCES) 
+				dbg_print("%s: attribute %s does not support READ\n",
+						__FUNCTION__, attrib);
+			else if (errno == ENOENT)
+				dbg_print("%s: attribute %s not defined for driver %s\n",
+						__FUNCTION__, attrib, drv);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute(attr);

@@ -41,7 +41,7 @@
  *****************************************************************************
  */
 
-#include "test.h"
+#include "test-defs.h"
 #include <errno.h>
 
 /**
@@ -575,7 +575,7 @@ int test_sysfs_open_bus_devices_list(int flag)
 
 	switch (flag) {
 	case 0:
-		name = val_bus;
+		name = val_bus_name;
 		break;
 	case 1:
 		name = inval_name;

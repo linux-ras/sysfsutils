@@ -24,7 +24,7 @@
  * this doesn't do much, just loops throug to call each function.
  */
 
-#include "test.h"
+#include "test-defs.h"
 #include <errno.h>
 
 /*************************************************/

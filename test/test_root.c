@@ -49,7 +49,7 @@
  ******************************************************************************
  */
 
-#include "test.h"
+#include "test-defs.h"
 #include <errno.h>
 
 /**
@@ -183,14 +183,19 @@ int test_sysfs_get_root_devices(int flag)
 
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Root device %s does not have any devices under it\n", 
+						__FUNCTION__, root_name);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else 
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_device_list(list);
 			dbg_print("\n");
+		}
 		break;
 	case 1:
 		if (list != NULL)
@@ -378,10 +383,14 @@ int test_sysfs_get_device_parent(int flag)
 
 	switch (flag) {
 	case 0:
-		if (pdev == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (pdev == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Device at %s does not have a parent\n", 
+						__FUNCTION__, dev_path);
+			else 
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_device(pdev);
@@ -502,7 +511,7 @@ int test_sysfs_get_device_attr(int flag)
 		break;
 	case 3:
 		dev = NULL;
-		name = val_attr_name;
+		name = val_dev_attr;
 		break;
 	case 4:
 		dev = NULL;
@@ -519,10 +528,21 @@ int test_sysfs_get_device_attr(int flag)
 
 	switch (flag) {
 	case 0:
-		if (attr == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (attr == NULL) {
+			if (errno == EACCES)
+				dbg_print("%s: attribute %s does not support READ\n",
+						__FUNCTION__, name);
+			else if (errno == ENOENT)
+				dbg_print("%s: attribute %s not defined for device at %s\n",
+						__FUNCTION__, name, path);
+			else if (errno == 0)
+				dbg_print("%s: device at %s does not export attributes\n",
+						__FUNCTION__, path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+						
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute(attr);
@@ -588,10 +608,14 @@ int test_sysfs_get_device_attributes(int flag)
 
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: device at %s does not export attributes\n",
+						__FUNCTION__, path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute_list(list);
@@ -655,10 +679,14 @@ int test_sysfs_refresh_device_attributes(int flag)
 
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: device at %s does not export attributes\n",
+						__FUNCTION__, path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute_list(list);
@@ -871,10 +899,21 @@ int  test_sysfs_open_device_attr(int flag)
 
 	switch (flag) {
 	case 0:
-		if (attr == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (attr == NULL) {
+			if (errno == EACCES)
+				dbg_print("%s: attribute %s does not support READ\n",
+						__FUNCTION__, attrib);
+			else if (errno == ENOENT)
+				dbg_print("%s: attribute %s not defined for device %s\n",
+						__FUNCTION__, attrib, bus_id);
+			else if (errno == 0)
+				dbg_print("%s: device %s does not export attributes\n",
+						__FUNCTION__, bus_id);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+						
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute(attr);

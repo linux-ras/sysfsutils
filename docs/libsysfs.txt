@@ -1891,11 +1891,16 @@ c. Detailed output is provided for the correct case.
 d. Facility to redirect output of the tests to a normal file.
 e. Number of iterations of tests can be specified.
 
+The testsuite comes with its own configuration file "libsysfs.conf" in the
+"test" directory. This file is used to generate a header file at the time
+the tests are built. 
+
 To use the testsuite:
 
-a. Modify the #defines in test/test.h file to appropriate values. For example,
-   the tests could be run on a system with only ide drives, in which case, 
-   the value of "val_block_class_dev_path" has to be appropriately modified.
+a. Modify the variables libsysfs.conf file to appropriate values for your
+system. (The libsysfs.conf file contains comments describing what each variable
+stands for and, in some cases, how to determine an appropriate value for the
+system under test).
 
 b. Build and install the testsuite.
 

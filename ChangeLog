@@ -1,4 +1,10 @@
 
+02/19/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Set errnos correctly in the library
+		* Provided libsysfs.conf - the config file for the testsuite
+			and a script to create a test.h on the fly
+		* Added numerous testsuite updates
+
 02/13/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Patched code to fill sysfs_device->driver_name correctly
 

@@ -42,7 +42,7 @@
  ******************************************************************************
  */
 
-#include "test.h"
+#include "test-defs.h"
 #include <errno.h>
 
 /**
@@ -202,10 +202,14 @@ int test_sysfs_get_bus_device(int flag)
 
 	switch (flag) {
 	case 0:
-		if (dev == NULL) 
-			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
+		if (dev == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Device %s not on bus %s\n",
+						__FUNCTION__, id, bus_name);
+			else 
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 					__FUNCTION__, flag);
 			show_device(dev);
@@ -300,10 +304,14 @@ int test_sysfs_get_bus_driver(int flag)
 	
 	switch (flag) {
 	case 0:
-		if (drv == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
+		if (drv == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Driver %s not on bus %s\n",
+						__FUNCTION__, drvname, bus_name);
+			else 
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n", 
 					__FUNCTION__, flag);
 			show_driver(drv);
@@ -364,10 +372,14 @@ int  test_sysfs_get_bus_drivers(int flag)
 
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: No drivers registered with bus %s\n",
+						__FUNCTION__, bus_name);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n", 
 					__FUNCTION__, flag);
 			show_driver_list(list);
@@ -423,10 +435,14 @@ int  test_sysfs_get_bus_devices(int flag)
 
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: No devices registered with bus %s\n",
+						__FUNCTION__, bus_name);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 					__FUNCTION__, flag);
 			show_device_list(list);
@@ -483,11 +499,13 @@ int test_sysfs_get_bus_attributes(int flag)
 	switch (flag) {
 	case 0:
 		if (list == NULL) {
-/*			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
-						__FUNCTION__, flag, errno);*/
-			dbg_print("%s: SUCCEEDED with flag = %d\n",
+			if (errno == 0) {
+				dbg_print("%s: SUCCEEDED with flag = %d\n",
 					__FUNCTION__, flag);
-			dbg_print("since no buses have attribs as of now\n");
+				dbg_print("since no buses have attribs as of now\n");
+			} else 
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
+						__FUNCTION__, flag, errno);
 		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
 					__FUNCTION__, flag);
@@ -544,11 +562,13 @@ int test_sysfs_refresh_bus_attributes(int flag)
 	switch (flag) {
 	case 0:
 		if (list == NULL) {
-			/*dbg_print("%s: FAILED with flag = %d errno = %d\n", 
-						__FUNCTION__, flag, errno);*/
-			dbg_print("%s: SUCCEEDED with flag = %d\n",
+			if (errno == 0) {
+				dbg_print("%s: SUCCEEDED with flag = %d\n",
 					__FUNCTION__, flag);
-			dbg_print("since no buses have attribs as of now\n");
+				dbg_print("since no buses have attribs as of now\n");
+			} else 
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
+						__FUNCTION__, flag, errno);
 		} else {
 			dbg_print("%s: SUCCEEDED with flag %d\n",
 					__FUNCTION__, flag);
@@ -640,11 +660,14 @@ int test_sysfs_get_bus_attribute(int flag)
 	switch (flag) {
 	case 0:
 		if (attr == NULL) {
-/*			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
-						__FUNCTION__, flag, errno); */
-			dbg_print("%s: SUCCEEDED with flag = %d\n",
+			if (errno == 0) {
+				dbg_print("%s: SUCCEEDED with flag = %d\n",
 					__FUNCTION__, flag);
-			dbg_print("since no buses have attribs as of now\n");
+			
+				dbg_print("since no buses have attribs as of now\n");
+			} else 
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
+						__FUNCTION__, flag, errno); 
 		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n", 
 					__FUNCTION__, flag);

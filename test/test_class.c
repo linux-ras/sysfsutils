@@ -53,7 +53,7 @@
  *****************************************************************************
  */
 
-#include "test.h"
+#include "test-defs.h"
 #include <errno.h>
 
 /** 
@@ -283,10 +283,14 @@ int test_sysfs_get_classdev_device(int flag)
 
 	switch (flag) {
 	case 0:
-		if (dev == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (dev == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Class device at %s does not have a device symlink\n",
+						__FUNCTION__, path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_device(dev);
@@ -345,10 +349,14 @@ int test_sysfs_get_classdev_driver(int flag)
 
 	switch (flag) {
 	case 0:
-		if (drv == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (drv == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Class device at %s does not have a driver symlink\n",
+						__FUNCTION__, path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_driver(drv);
@@ -405,10 +413,14 @@ int test_sysfs_get_classdev_parent(int flag)
 
 	switch (flag) {
 	case 0:
-		if (parent == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (parent == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Class device at %s does not have a parent\n",
+						__FUNCTION__, path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_class_device(parent);
@@ -558,10 +570,14 @@ int test_sysfs_get_class_devices(int flag)
 	
 	switch(flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Class %s does not have devices\n",
+						__FUNCTION__, val_class);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_class_device_list(list);
@@ -650,10 +666,14 @@ int test_sysfs_get_class_device(int flag)
 	
 	switch(flag) {
 	case 0:
-		if (clsdev == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (clsdev == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Class device %s does not belong to the %s class\n",
+						__FUNCTION__, val_class_dev, val_class);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_class_device(clsdev);
@@ -713,10 +733,14 @@ int test_sysfs_get_classdev_attributes(int flag)
 
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Class device at %s does not export attributes\n",
+						__FUNCTION__, path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute_list(list);
@@ -773,10 +797,14 @@ int test_sysfs_refresh_classdev_attributes(int flag)
 	
 	switch (flag) {
 	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (list == NULL) {
+			if (errno == 0)
+				dbg_print("%s: Class device at %s does not export attributes\n",
+						__FUNCTION__, path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute_list(list);
@@ -869,10 +897,20 @@ int test_sysfs_get_classdev_attr(int flag)
 
 	switch (flag) {
 	case 0:
-		if (attr == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (attr == NULL) {
+			if (errno == EACCES)
+				dbg_print("%s: attribute %s does not support READ\n",
+						__FUNCTION__, name);
+			else if (errno == ENOENT)
+				dbg_print("%s: attribute %s not defined for class device at %s\n",
+						__FUNCTION__, name, path);
+			else if (errno == 0)
+				dbg_print("%s: class device at %s does not export attributes\n",
+						__FUNCTION__, path);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute(attr);
@@ -1084,10 +1122,20 @@ int  test_sysfs_open_classdev_attr(int flag)
 
 	switch (flag) {
 	case 0:
-		if (attr == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (attr == NULL) {
+			if (errno == EACCES)
+				dbg_print("%s: attribute %s does not support READ\n",
+						__FUNCTION__, attrib);
+			else if (errno == ENOENT)
+				dbg_print("%s: attribute %s not defined for class device %s\n",
+						__FUNCTION__, attrib, dev);
+			else if (errno == 0)
+				dbg_print("%s: class device %s does not export attributes\n",
+						__FUNCTION__, dev);
+			else
+				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else {
+		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute(attr);

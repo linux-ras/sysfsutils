@@ -35,38 +35,8 @@
 
 #include "libsysfs.h"
 #include "dlist.h"
+#include "test.h"
 
-/* 
- * FIXME: Change the following #defines appropriately for the system that you 
- * run the tests on.
- */ 
-#define val_dir_path		"/sys/bus/pci"
-#define val_link_path		"/sys/block/sda/device"
-#define val_file_path		"/sys/block/sda/dev"
-#define val_link_name		"device"
-#define val_subdir_link_name	"0000:00:00.0"
-#define val_subdir_name		"0000:00:00.0"
-#define val_bus_id		"0000:00:00.0"
-#define val_bus			"pci"
-#define val_subsys		"bus"
-#define val_bus_name		"pci"
-#define val_class		"net"
-#define val_class_dev		"eth0"
-#define val_class_dev_path 	"/sys/class/net/eth0"
-#define val_class_dev_attr	"type"
-#define val_block_class_dev_path	"/sys/block/sda/sda1"
-#define val_root_name		"pci0000:00"
-#define val_root_dev_path   	"/sys/devices/pci0000:00"
-#define val_drv_name 		"scsi_debug"
-#define val_drv_bus_name	"pseudo"
-#define val_drv_dev_name	"adapter0"
-#define val_drv_path 		"/sys/bus/pseudo/drivers/scsi_debug"
-#define val_dev_path 		"/sys/devices/pci0000:00/0000:00:00.0"
-#define val_dev_attr		"vendor"
-#define val_drv_attr_name 	"opts"
-#define val_write_attr_path 	"/sys/class/net/eth0/tx_queue_len"
-#define val_attr_name 		"online"
-#define val_bus_attr 		"online"
 #define inval_name 		"invalid_name"
 #define inval_path 		"/sys/invalid/path"
 #define FUNC_TABLE_SIZE  	81
