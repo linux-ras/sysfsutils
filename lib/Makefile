@@ -1,5 +1,5 @@
 # Makefile for libsysfs.a
-# Copyright (c) International Business Machines Corp., 2003
+# Copyright (C) IBM Corp. 2003
 
 CC=gcc
 
