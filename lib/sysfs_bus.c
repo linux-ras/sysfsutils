@@ -109,9 +109,9 @@ struct dlist *sysfs_get_bus_devices(struct sysfs_bus *bus)
 		return NULL;
 	}
 	memset(path, 0, SYSFS_PATH_MAX);
-	strcpy(path, bus->path);
-	strcat(path, "/");
-	strcat(path, SYSFS_DEVICES_NAME);
+	safestrcpy(path, bus->path);
+	safestrcat(path, "/");
+	safestrcat(path, SYSFS_DEVICES_NAME);
 	devdir = sysfs_open_directory(path);
 	if (devdir == NULL) 
 		return NULL;
@@ -158,9 +158,9 @@ struct dlist *sysfs_get_bus_drivers(struct sysfs_bus *bus)
 		return NULL;
 	}
 	memset(path, 0, SYSFS_PATH_MAX);
-	strcpy(path, bus->path);
-	strcat(path, "/");
-	strcat(path, SYSFS_DRIVERS_NAME);
+	safestrcpy(path, bus->path);
+	safestrcat(path, "/");
+	safestrcat(path, SYSFS_DRIVERS_NAME);
 	drvdir = sysfs_open_directory(path);
 	if (drvdir == NULL) 
 		return NULL;
@@ -209,10 +209,10 @@ struct sysfs_bus *sysfs_open_bus(const char *name)
 		return NULL;
 	}
 
-	strcat(buspath, "/");
-	strcat(buspath, SYSFS_BUS_NAME);
-	strcat(buspath, "/");
-	strcat(buspath, name);
+	safestrcat(buspath, "/");
+	safestrcat(buspath, SYSFS_BUS_NAME);
+	safestrcat(buspath, "/");
+	safestrcat(buspath, name);
 	if ((sysfs_path_is_dir(buspath)) != 0) {
 		dprintf("Invalid path to bus: %s\n", buspath);
 		return NULL;
@@ -222,8 +222,8 @@ struct sysfs_bus *sysfs_open_bus(const char *name)
 		dprintf("calloc failed\n");
 		return NULL;
 	}
-	strcpy(bus->name, name);	
-	strcpy(bus->path, buspath);
+	safestrcpy(bus->name, name);	
+	safestrcpy(bus->path, buspath);
 	if ((sysfs_remove_trailing_slash(bus->path)) != 0) {
 		dprintf("Incorrect path to bus %s\n", bus->path);
 		sysfs_close_bus(bus);
@@ -370,23 +370,22 @@ int sysfs_find_driver_bus(const char *driver, char *busname, size_t bsize)
 	}
 
 	memset(subsys, 0, SYSFS_PATH_MAX);
-	strcat(subsys, "/");
-	strcpy(subsys, SYSFS_BUS_NAME);
+	safestrcpy(subsys, SYSFS_BUS_NAME);
 	buslist = sysfs_open_subsystem_list(subsys);
 	if (buslist != NULL) {
 		dlist_for_each_data(buslist, bus, char) {
 			memset(subsys, 0, SYSFS_PATH_MAX);
-			strcat(subsys, "/");
-			strcpy(subsys, SYSFS_BUS_NAME);
-			strcat(subsys, "/");
-			strcat(subsys, bus);
-			strcat(subsys, "/");
-			strcat(subsys, SYSFS_DRIVERS_NAME);
+			safestrcpy(subsys, SYSFS_BUS_NAME);
+			safestrcat(subsys, "/");
+			safestrcat(subsys, bus);
+			safestrcat(subsys, "/");
+			safestrcat(subsys, SYSFS_DRIVERS_NAME);
 			drivers = sysfs_open_subsystem_list(subsys);
 			if (drivers != NULL) {
 				dlist_for_each_data(drivers, curdrv, char) {
 					if (strcmp(driver, curdrv) == 0) {
-						strncpy(busname, bus, bsize);
+						safestrcpymax(busname, 
+								bus, bsize);
 						sysfs_close_list(drivers);
 						sysfs_close_list(buslist);
 						return 0;

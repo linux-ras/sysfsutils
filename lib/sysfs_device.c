@@ -42,29 +42,29 @@ static int get_dev_driver(struct sysfs_device *dev)
 		return 1;
 	memset(path, 0, SYSFS_PATH_MAX);
 	memset(devpath, 0, SYSFS_PATH_MAX);
-	strcat(path, SYSFS_BUS_NAME);
-	strcat(path, "/");
-	strcat(path, dev->bus);
-	strcat(path, "/");
-	strcat(path, SYSFS_DRIVERS_NAME);
+	safestrcpy(path, SYSFS_BUS_NAME);
+	safestrcat(path, "/");
+	safestrcat(path, dev->bus);
+	safestrcat(path, "/");
+	safestrcat(path, SYSFS_DRIVERS_NAME);
 
-	strcpy(devpath, dev->path);
+	safestrcpy(devpath, dev->path);
 	c = strstr(devpath, SYSFS_DEVICES_NAME);
 	if (c == NULL)
 		return 1;
 	*c = '\0';
-	strcat(c, path);
+	safestrcatmax(c, path, (sizeof(devpath) - strlen(devpath)));
 
 	drvlist = sysfs_open_subsystem_list(path);
 	if (drvlist != NULL) {
 		dlist_for_each_data(drvlist, drv, char) {
-			strcpy(path, devpath);
-			strcat(path, "/");
-			strcat(path, drv);
-			strcat(path, "/");
-			strcat(path, dev->bus_id);
+			safestrcpy(path, devpath);
+			safestrcat(path, "/");
+			safestrcat(path, drv);
+			safestrcat(path, "/");
+			safestrcat(path, dev->bus_id);
 			if (sysfs_path_is_link(path) == 0) {
-				strcpy(dev->driver_name, drv);
+				safestrcpy(dev->driver_name, drv);
 				sysfs_close_list(drvlist);
 				return 0;
 			}
@@ -92,13 +92,12 @@ int sysfs_get_device_bus(struct sysfs_device *dev)
 	}
 
 	memset(subsys, 0, SYSFS_NAME_LEN);
-	strcat(subsys, "/");
-	strcpy(subsys, SYSFS_BUS_NAME);  /* subsys = /bus */
+	safestrcpy(subsys, SYSFS_BUS_NAME);  /* subsys = bus */
 	buslist = sysfs_open_subsystem_list(subsys);
 	if (buslist != NULL) {
 		dlist_for_each_data(buslist, bus, char) {
 			memset(path, 0, SYSFS_PATH_MAX);
-			strcpy(path, dev->path);
+			safestrcpy(path, dev->path);
 			c = strstr(path, "/devices");
 			if (c == NULL) {
 				dprintf("Invalid path to device %s\n", path);
@@ -106,25 +105,25 @@ int sysfs_get_device_bus(struct sysfs_device *dev)
 				return -1;
 			}
 			*c = '\0';
-			strcat(path, "/");
-			strcat(path, SYSFS_BUS_NAME);
-			strcat(path, "/");
-			strcat(path, bus);
-			strcat(path, "/");
-			strcat(path, SYSFS_DEVICES_NAME);
-			strcat(path, "/");
-			strcat(path, dev->bus_id);
+			safestrcat(path, "/");
+			safestrcat(path, SYSFS_BUS_NAME);
+			safestrcat(path, "/");
+			safestrcat(path, bus);
+			safestrcat(path, "/");
+			safestrcat(path, SYSFS_DEVICES_NAME);
+			safestrcat(path, "/");
+			safestrcat(path, dev->bus_id);
 			if ((sysfs_path_is_link(path)) == 0) {
 				memset(target, 0, SYSFS_PATH_MAX);
 				if ((sysfs_get_link(path, target, 
-							SYSFS_PATH_MAX)) != 0) {
+						SYSFS_PATH_MAX)) != 0) {
 					dprintf("Error getting link target\n");
 					sysfs_close_list(buslist);
 					return -1;
 				}
 				if (!(strncmp(target, dev->path, 
 							SYSFS_PATH_MAX))) {
-					strcpy(dev->bus, bus);
+					safestrcpy(dev->bus, bus);
 					sysfs_close_list(buslist);
 					return 0;
 				}
@@ -247,7 +246,7 @@ struct sysfs_device *sysfs_open_device_path(const char *path)
 		sysfs_close_device(dev);
 		return NULL;
 	}
-	strcpy(dev->path, path);
+	safestrcpy(dev->path, path);
 	if ((sysfs_remove_trailing_slash(dev->path)) != 0) {
 		dprintf("Invalid path to device %s\n", dev->path);
 		sysfs_close_device(dev);
@@ -258,14 +257,14 @@ struct sysfs_device *sysfs_open_device_path(const char *path)
 	 * sysfs representation instead, in the "dev->name" field, which
 	 * implies that the dev->name and dev->bus_id contain same data.
 	 */
-	strncpy(dev->name, dev->bus_id, SYSFS_NAME_LEN);
+	safestrcpy(dev->name, dev->bus_id);
 	
 	if (sysfs_get_device_bus(dev) != 0)
 		dprintf("Could not get device bus\n");
 	
 	if (get_dev_driver(dev) != 0) {
 		dprintf("Could not get device %s's driver\n", dev->bus_id);
-		strcpy(dev->driver_name, SYSFS_UNKNOWN);
+		safestrcpy(dev->driver_name, SYSFS_UNKNOWN);
 	}
 
 	return dev;
@@ -396,10 +395,10 @@ struct sysfs_root_device *sysfs_open_root_device(const char *name)
 		return NULL;
 	}
 
-	strcat(rootpath, "/");
-	strcat(rootpath, SYSFS_DEVICES_NAME);
-	strcat(rootpath, "/");
-	strcat(rootpath, name);
+	safestrcat(rootpath, "/");
+	safestrcat(rootpath, SYSFS_DEVICES_NAME);
+	safestrcat(rootpath, "/");
+	safestrcat(rootpath, name);
 	if ((sysfs_path_is_dir(rootpath)) != 0) {
 		errno = EINVAL;
 		dprintf("Invalid root device: %s\n", name);
@@ -411,8 +410,8 @@ struct sysfs_root_device *sysfs_open_root_device(const char *name)
 		dprintf("calloc failure\n");
 		return NULL;
 	}
-	strcpy(root->name, name);
-	strcpy(root->path, rootpath);
+	safestrcpy(root->name, name);
+	safestrcpy(root->path, rootpath);
 	if ((sysfs_remove_trailing_slash(root->path)) != 0) {
 		dprintf("Invalid path to root device %s\n", root->path);
 		sysfs_close_root_device(root);
@@ -518,14 +517,14 @@ static int get_device_absolute_path(const char *device,	const char *bus,
 		dprintf ("Sysfs not supported on this system\n");
 		return -1;
 	}
-	strcat(bus_path, "/");
-	strcat(bus_path, SYSFS_BUS_NAME);
-	strcat(bus_path, "/");
-	strcat(bus_path, bus);
-	strcat(bus_path, "/");
-	strcat(bus_path, SYSFS_DEVICES_NAME);
-	strcat(bus_path, "/");
-	strcat(bus_path, device);
+	safestrcat(bus_path, "/");
+	safestrcat(bus_path, SYSFS_BUS_NAME);
+	safestrcat(bus_path, "/");
+	safestrcat(bus_path, bus);
+	safestrcat(bus_path, "/");
+	safestrcat(bus_path, SYSFS_DEVICES_NAME);
+	safestrcat(bus_path, "/");
+	safestrcat(bus_path, device);
 	/*
 	 * We now are at /sys/bus/"bus_name"/devices/"device" which is a link.
 	 * Now read this link to reach to the device.
@@ -592,13 +591,13 @@ struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev)
 		return (dev->parent);
 
 	memset(ppath, 0, SYSFS_PATH_MAX);
-	strcpy(ppath, dev->path);
+	safestrcpy(ppath, dev->path);
 	tmp = strrchr(ppath, '/');
 	if (tmp == NULL) {
 		dprintf("Invalid path to device %s\n", ppath);
 		return NULL;
 	}
-	if (*(tmp +1) == '\0') {
+	if (*(tmp + 1) == '\0') {
 		*tmp = '\0';
 		tmp = strrchr(tmp, '/');
 		if (tmp == NULL) {
@@ -611,7 +610,7 @@ struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev)
 	/*
 	 * All "devices" have the "detach_state" attribute - validate here
 	 */
-	strcat(ppath, "/detach_state");
+	safestrcat(ppath, "/detach_state");
 	if ((sysfs_path_is_file(ppath)) != 0) {
 		dprintf("Device at %s does not have a parent\n", dev->path);
 		return NULL;
@@ -655,8 +654,8 @@ struct sysfs_attribute *sysfs_open_device_attr(const char *bus,
 		dprintf("Error getting to device %s\n", bus_id);
 		return NULL;
 	}
-	strcat(devpath, "/");
-	strcat(devpath, attrib);
+	safestrcat(devpath, "/");
+	safestrcat(devpath, attrib);
 	attribute = sysfs_open_attribute(devpath);
 	if (attribute == NULL) {
 		dprintf("Error opening attribute %s for device %s\n",

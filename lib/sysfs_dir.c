@@ -58,9 +58,9 @@ static int dir_attribute_name_equal(void *a, void *b)
 	if (a == NULL || b == NULL)
 		return 0;
 
-	if (strcmp(((char *)a), ((struct sysfs_attribute *)b)->name) 
-	    == 0)
+	if (strcmp(((char *)a), ((struct sysfs_attribute *)b)->name) == 0)
 		return 1;
+
 	return 0;
 }
 
@@ -75,9 +75,9 @@ static int dir_link_name_equal(void *a, void *b)
 	if (a == NULL || b == NULL)
 		return 0;
 
-	if (strcmp(((char *)a), ((struct sysfs_link *)b)->name) 
-	    == 0)
+	if (strcmp(((char *)a), ((struct sysfs_link *)b)->name) == 0)
 		return 1;
+
 	return 0;
 }
 
@@ -92,9 +92,9 @@ static int dir_subdir_name_equal(void *a, void *b)
 	if (a == NULL || b == NULL)
 		return 0;
 
-	if (strcmp(((char *)a), ((struct sysfs_directory *)b)->name)
-	    == 0)
+	if (strcmp(((char *)a), ((struct sysfs_directory *)b)->name) == 0)
 		return 1;
+
 	return 0;
 }
 
@@ -140,14 +140,13 @@ struct sysfs_attribute *sysfs_open_attribute(const char *path)
 		dprintf("Error allocating attribute at %s\n", path);
 		return NULL;
 	}
-	if (sysfs_get_name_from_path(path, sysattr->name, SYSFS_NAME_LEN) 
-	    != 0) {
-		dprintf("Error retrieving attribute name from path: %s\n", 
-			path);
+	if (sysfs_get_name_from_path(path, sysattr->name, 
+				SYSFS_NAME_LEN) != 0) {
+		dprintf("Error retrieving attrib name from path: %s\n", path);
 		sysfs_close_attribute(sysattr);
 		return NULL;
 	}
-	strncpy(sysattr->path, path, SYSFS_PATH_MAX);
+	safestrcpy(sysattr->path, path);
 	if ((stat(sysattr->path, &fileinfo)) != 0) {
 		dprintf("Stat failed: No such attribute?\n");
 		sysattr->method = 0;
@@ -237,20 +236,19 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 	 */ 
 	if (sysattr->method & SYSFS_METHOD_SHOW) {
 		if (length != sysattr->len) {
-			sysattr->value = (char *)realloc(sysattr->value, 
-								length);
+			sysattr->value = (char *)realloc
+				(sysattr->value, length);
 			sysattr->len = length;
-			strncpy(sysattr->value, new_value, length);
+			safestrcpymax(sysattr->value, new_value, length);
 		} else {
 			/*"length" of the new value is same as old one */ 
-			strncpy(sysattr->value, new_value, length);
+			safestrcpymax(sysattr->value, new_value, length);
 		}
 	}
 			
 	close(fd);	
 	return 0;
 }
-
 
 /**
  * sysfs_read_attribute: reads value from attribute
@@ -350,7 +348,7 @@ int sysfs_read_attribute_value(const char *attrpath,
 	if (length > vsize) 
 		dprintf("Value length %d is larger than supplied buffer %d\n",
 			length, vsize);
-	strncpy(value, attr->value, vsize);
+	safestrcpymax(value, attr->value, vsize);
 	sysfs_close_attribute(attr);
 
 	return 0;
@@ -488,7 +486,7 @@ struct sysfs_directory *sysfs_open_directory(const char *path)
 		sysfs_close_directory(sdir);
 		return NULL;
 	}
-	strncpy(sdir->path, path, SYSFS_PATH_MAX);
+	safestrcpy(sdir->path, path);
 
 	return sdir;
 }
@@ -512,7 +510,7 @@ struct sysfs_link *sysfs_open_link(const char *linkpath)
 		dprintf("Error allocating link %s\n", linkpath);
 		return NULL;
 	}
-	strcpy(ln->path, linkpath);
+	safestrcpy(ln->path, linkpath);
 	if ((sysfs_get_name_from_path(linkpath, ln->name, SYSFS_NAME_LEN)) != 0
 	    || (sysfs_get_link(linkpath, ln->target, SYSFS_PATH_MAX)) != 0) {
 		errno = EINVAL;
@@ -626,9 +624,9 @@ int sysfs_read_dir_attributes(struct sysfs_directory *sysdir)
 		if (0 == strcmp(dirent->d_name, ".."))
 			continue;
 		memset(file_path, 0, SYSFS_PATH_MAX);
-		strncpy(file_path, sysdir->path, SYSFS_PATH_MAX);
-		strcat(file_path, "/");
-		strcat(file_path, dirent->d_name);
+		safestrcpy(file_path, sysdir->path);
+		safestrcat(file_path, "/");
+		safestrcat(file_path, dirent->d_name);
 		if ((sysfs_path_is_file(file_path)) == 0)
 			retval = add_attribute(sysdir, file_path);
 	}
@@ -665,9 +663,9 @@ int sysfs_read_dir_links(struct sysfs_directory *sysdir)
 		if (0 == strcmp(dirent->d_name, ".."))
 			continue;
 		memset(file_path, 0, SYSFS_PATH_MAX);
-		strncpy(file_path, sysdir->path, SYSFS_PATH_MAX);
-		strcat(file_path, "/");
-		strcat(file_path, dirent->d_name);
+		safestrcpy(file_path, sysdir->path);
+		safestrcat(file_path, "/");
+		safestrcat(file_path, dirent->d_name);
 		if ((sysfs_path_is_link(file_path)) == 0) {
 			retval = add_link(sysdir, file_path);
 			if (retval != 0)
@@ -707,9 +705,9 @@ int sysfs_read_dir_subdirs(struct sysfs_directory *sysdir)
 		if (0 == strcmp(dirent->d_name, ".."))
 			continue;
 		memset(file_path, 0, SYSFS_PATH_MAX);
-		strncpy(file_path, sysdir->path, SYSFS_PATH_MAX);
-		strcat(file_path, "/");
-		strcat(file_path, dirent->d_name);
+		safestrcpy(file_path, sysdir->path);
+		safestrcat(file_path, "/");
+		safestrcat(file_path, dirent->d_name);
 		if ((sysfs_path_is_dir(file_path)) == 0)
 			retval = add_subdirectory(sysdir, file_path);
 	}
@@ -747,9 +745,9 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 		if (0 == strcmp(dirent->d_name, ".."))
 			continue;
 		memset(file_path, 0, SYSFS_PATH_MAX);
-		strncpy(file_path, sysdir->path, SYSFS_PATH_MAX);
-		strcat(file_path, "/");
-		strcat(file_path, dirent->d_name);
+		safestrcpy(file_path, sysdir->path);
+		safestrcat(file_path, "/");
+		safestrcat(file_path, dirent->d_name);
 		if ((lstat(file_path, &astats)) != 0) {
 			dprintf("stat failed\n");
 			continue;
@@ -892,9 +890,9 @@ struct sysfs_attribute *sysfs_get_directory_attribute
 		}
 	} else {
 		memset(new_path, 0, SYSFS_PATH_MAX);
-		strcpy(new_path, dir->path);
-		strcat(new_path, "/");
-		strcat(new_path, attrname);
+		safestrcpy(new_path, dir->path);
+		safestrcat(new_path, "/");
+		safestrcat(new_path, attrname);
 		if ((sysfs_path_is_file(new_path)) == 0) {
 			if ((add_attribute(dir, new_path)) == 0) {
 				attr = (struct sysfs_attribute *)

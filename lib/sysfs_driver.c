@@ -102,7 +102,7 @@ struct sysfs_driver *sysfs_open_driver_path(const char *path)
 		free(driver);
 		return NULL;
 	}
-	strcpy(driver->path, path);
+	safestrcpy(driver->path, path);
 	if ((sysfs_remove_trailing_slash(driver->path)) != 0) {
 		dprintf("Invalid path to driver %s\n", driver->path);
 		sysfs_close_driver(driver);
@@ -327,7 +327,7 @@ struct sysfs_device *sysfs_get_driver_device(struct sysfs_driver *driver,
 static int get_driver_path(const char *bus, const char *drv, 
 			char *path, size_t psize)
 {
-	if (bus == NULL || drv == NULL || path == NULL) {
+	if (bus == NULL || drv == NULL || path == NULL || psize == 0) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -335,14 +335,14 @@ static int get_driver_path(const char *bus, const char *drv,
 		dprintf("Error getting sysfs mount path\n");
 		return -1;
 	}
-	strcat(path, "/");
-	strcat(path, SYSFS_BUS_NAME);
-	strcat(path, "/");
-	strcat(path, bus);
-	strcat(path, "/");
-	strcat(path, SYSFS_DRIVERS_NAME);
-	strcat(path, "/");
-	strcat(path, drv);
+	safestrcatmax(path, "/", psize);
+	safestrcatmax(path, SYSFS_BUS_NAME, psize);
+	safestrcatmax(path, "/", psize);
+	safestrcatmax(path, bus, psize);
+	safestrcatmax(path, "/", psize);
+	safestrcatmax(path, SYSFS_DRIVERS_NAME, psize);
+	safestrcatmax(path, "/", psize);
+	safestrcatmax(path, drv, psize);
 	return 0;
 }
 
@@ -373,8 +373,8 @@ struct sysfs_attribute *sysfs_open_driver_attr(const char *bus,
 		dprintf("Error getting to driver %s\n", drv);
 		return NULL;
 	}
-	strcat(path, "/");
-	strcat(path, attrib);
+	safestrcat(path, "/");
+	safestrcat(path, attrib);
 	attribute = sysfs_open_attribute(path);
         if (attribute == NULL) {
 		dprintf("Error opening attribute %s for driver %s\n",

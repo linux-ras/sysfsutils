@@ -82,7 +82,7 @@ static int sysfs_get_fs_mnt_path(const char *fs_type,
 		if (strcmp(mntent->mnt_type, fs_type) == 0) {
 			dirlen = strlen(mntent->mnt_dir);
 			if (dirlen <= (len - 1)) {
-				strcpy(mnt_path, mntent->mnt_dir);
+				safestrcpymax(mnt_path, mntent->mnt_dir, len);
 			} else {
 				dprintf("Error - mount path too long\n");
 				ret = -1;
@@ -118,7 +118,7 @@ int sysfs_get_mnt_path(char *mnt_path, size_t len)
 	}
 	sysfs_path = getenv(SYSFS_PATH_ENV);
 	if (sysfs_path != NULL) {
-		strncpy(mnt_path, sysfs_path, len);
+		safestrcpymax(mnt_path, sysfs_path, len);
 		if ((sysfs_remove_trailing_slash(mnt_path)) != 0)
 			return 1;
 	} else
@@ -133,8 +133,7 @@ int sysfs_get_mnt_path(char *mnt_path, size_t len)
  * @name: where to put name
  * @len: size of name
  */
-int sysfs_get_name_from_path(const char *path, char *name, 
-								size_t len)
+int sysfs_get_name_from_path(const char *path, char *name, size_t len)
 {
 	char tmp[SYSFS_PATH_MAX];
 	char *n = NULL;
@@ -144,7 +143,7 @@ int sysfs_get_name_from_path(const char *path, char *name,
 		return -1;
 	}
 	memset(tmp, 0, SYSFS_PATH_MAX);
-	strcpy(tmp, path);
+	safestrcpy(tmp, path);
 	n = strrchr(tmp, '/');
 	if (n == NULL) {
 		errno = EINVAL;
@@ -159,7 +158,7 @@ int sysfs_get_name_from_path(const char *path, char *name,
 		}
 	}
 	n++;
-	strncpy(name, n, len);
+	safestrcpymax(name, n, len);
 	return 0;
 }
 	
@@ -185,7 +184,7 @@ int sysfs_get_link(const char *path, char *target, size_t len)
 	memset(devdir, 0, SYSFS_PATH_MAX);
 	memset(linkpath, 0, SYSFS_PATH_MAX);
 	memset(temp_path, 0, SYSFS_PATH_MAX);
-	strncpy(devdir, path, SYSFS_PATH_MAX);
+	safestrcpy(devdir, path);
 
 	if ((readlink(path, linkpath, SYSFS_PATH_MAX)) < 0) {
 		return -1;
@@ -202,7 +201,7 @@ int sysfs_get_link(const char *path, char *target, size_t len)
 			/* 
 			 * handle the case where link is of type ./abcd/xxx
 			 */
-			strncpy(temp_path, devdir, SYSFS_PATH_MAX);
+			safestrcpy(temp_path, devdir);
 			if (*(d+1) == '/')
 				d += 2;
 			else if (*(d+1) == '.')
@@ -210,11 +209,11 @@ int sysfs_get_link(const char *path, char *target, size_t len)
 			s = strrchr(temp_path, '/');
 			if (s != NULL) {
 				*(s+1) = '\0';
-				strcat(temp_path, d);
+				safestrcat(temp_path, d);
 			} else {
-				strcpy(temp_path, d);
+				safestrcpy(temp_path, d);
 			}
-			strncpy(target, temp_path, len);
+			safestrcpymax(target, temp_path, len);
 			break;
 			/* 
 			 * relative path  
@@ -233,24 +232,24 @@ parse_path:
 				if (*s == '/')
 					count++;
 			}
-			strncpy(s, d, (SYSFS_PATH_MAX-strlen(devdir)));
-			strncpy(target, devdir, len);
+			safestrcpymax(s, d, (SYSFS_PATH_MAX-strlen(devdir)));
+			safestrcpymax(target, devdir, len);
 			break;
 		case '/':
 			/* absolute path - copy as is */
-			strncpy(target, linkpath, len);
+			safestrcpymax(target, linkpath, len);
 			break;
 		default:
 			/* relative path from this directory */
-			strncpy(temp_path, devdir, len);
+			safestrcpy(temp_path, devdir);
 			s = strrchr(temp_path, '/');
 			if (s != NULL) {
 				*(s+1) = '\0';
-				strcat(temp_path, linkpath);
+				safestrcat(temp_path, linkpath);
 			} else {
-				strncpy(temp_path, linkpath, len);
+				safestrcpy(temp_path, linkpath);
 			}
-			strncpy(target, temp_path, len);
+			safestrcpymax(target, temp_path, len);
 	}
 	return 0;
 }
@@ -297,8 +296,8 @@ struct dlist *sysfs_open_subsystem_list(char *name)
 		return NULL;
 	}
 
-	strcat(sysfs_path, "/");
-	strcat(sysfs_path, name);
+	safestrcat(sysfs_path, "/");
+	safestrcat(sysfs_path, name);
 	dir = sysfs_open_directory(sysfs_path);
 	if (dir == NULL) {
 		dprintf("Error opening sysfs_directory at %s\n", sysfs_path);
@@ -323,7 +322,7 @@ struct dlist *sysfs_open_subsystem_list(char *name)
 		dlist_for_each_data(dir->subdirs, cur,
 				struct sysfs_directory) {
 			subsys_name = (char *)calloc(1, SYSFS_NAME_LEN);
-			strcpy(subsys_name, cur->name);
+			safestrcpymax(subsys_name, cur->name, SYSFS_NAME_LEN);
 			dlist_unshift_sorted(list, subsys_name, sort_char);
 		}
 	}
@@ -337,10 +336,13 @@ struct dlist *sysfs_open_subsystem_list(char *name)
 		c = strstr(sysfs_path, SYSFS_CLASS_NAME);
 		if (c == NULL)
 			goto out;
-		strcpy(c, SYSFS_BLOCK_NAME);
+		*c = '\0';
+		safestrcpymax(c, SYSFS_BLOCK_NAME, 
+				sizeof(sysfs_path) - strlen(sysfs_path));
 		if ((sysfs_path_is_dir(sysfs_path)) == 0) {
 			subsys_name = (char *)calloc(1, SYSFS_NAME_LEN);
-			strcpy(subsys_name, SYSFS_BLOCK_NAME);
+			safestrcpymax(subsys_name, SYSFS_BLOCK_NAME, 
+					SYSFS_NAME_LEN);
 			dlist_unshift_sorted(list, subsys_name, sort_char);
 		}
 	}
@@ -369,12 +371,12 @@ struct dlist *sysfs_open_bus_devices_list(char *name)
 		return NULL;
 	}
 
-	strcat(sysfs_path, "/");
-	strcat(sysfs_path, SYSFS_BUS_NAME);
-	strcat(sysfs_path, "/");
-	strcat(sysfs_path, name);
-	strcat(sysfs_path, "/");
-	strcat(sysfs_path, SYSFS_DEVICES_NAME);
+	safestrcat(sysfs_path, "/");
+	safestrcat(sysfs_path, SYSFS_BUS_NAME);
+	safestrcat(sysfs_path, "/");
+	safestrcat(sysfs_path, name);
+	safestrcat(sysfs_path, "/");
+	safestrcat(sysfs_path, SYSFS_DEVICES_NAME);
 	dir = sysfs_open_directory(sysfs_path);
 	if (dir == NULL) {
 		dprintf("Error opening sysfs_directory at %s\n", sysfs_path);
@@ -399,7 +401,7 @@ struct dlist *sysfs_open_bus_devices_list(char *name)
 		dlist_for_each_data(dir->links, cur,
 				struct sysfs_link) {
 			device_name = (char *)calloc(1, SYSFS_NAME_LEN);
-			strcpy(device_name, cur->name);
+			safestrcpymax(device_name, cur->name, SYSFS_NAME_LEN);
 			dlist_unshift_sorted(list, device_name, sort_char);
 		}
 	}

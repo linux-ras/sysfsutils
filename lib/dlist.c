@@ -260,7 +260,7 @@ void dlist_unshift(Dlist *list,void *data)
 }
 
 void dlist_unshift_sorted(Dlist *list, void *data, 
-			int (*sorter)(void *new, void *old))
+			int (*sorter)(void *new_elem, void *old_elem))
 {
 	if (list->count == 0)
 		dlist_unshift(list, data);

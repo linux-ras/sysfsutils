@@ -1,4 +1,8 @@
 
+03/12/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Modified string functions to use wrappers to take care
+			of potential buffer overflow issues
+
 03/08/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Remove "unsigned" declarations for prototype 
 			compatibility per Lev Makhlis' suggestion

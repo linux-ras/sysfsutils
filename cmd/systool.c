@@ -278,8 +278,8 @@ static void show_device(struct sysfs_device *device, int level)
 			fprintf(stdout, "%s ", device->bus_id);
 			memset(path, 0, SYSFS_PATH_MAX);
 			memset(value, 0, SYSFS_PATH_MAX);
-			strcpy(path, device->path);
-			strcat(path, "/config");
+			safestrcpy(path, device->path);
+			safestrcat(path, "/config");
 			if ((sysfs_read_attribute_value(path, 
 							value, 256)) == 0) {
 				vendor_id = get_pciconfig_word
@@ -611,7 +611,7 @@ static int show_default_info(void)
 	char *cur = NULL;
 	int retval = 0;
 
-	strcpy(subsys, SYSFS_BUS_NAME);
+	safestrcpy(subsys, SYSFS_BUS_NAME);
 	list = sysfs_open_subsystem_list(subsys);
 	if (list != NULL) {
 		fprintf(stdout, "Supported sysfs buses:\n");
@@ -620,7 +620,7 @@ static int show_default_info(void)
 	}
 	sysfs_close_list(list);
 
-	strcpy(subsys, SYSFS_CLASS_NAME);
+	safestrcpy(subsys, SYSFS_CLASS_NAME);
 	list = sysfs_open_subsystem_list(subsys);
 	if (list != NULL) {
 		fprintf(stdout, "Supported sysfs classes:\n");
@@ -629,7 +629,7 @@ static int show_default_info(void)
 	}
 	sysfs_close_list(list);
 
-	strcpy(subsys, SYSFS_DEVICES_NAME);
+	safestrcpy(subsys, SYSFS_DEVICES_NAME);
 	list = sysfs_open_subsystem_list(subsys);
 	if (list != NULL) {
 		fprintf(stdout, "Supported sysfs devices:\n");
