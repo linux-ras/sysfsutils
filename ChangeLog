@@ -1,4 +1,7 @@
 
+10/17/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Add "path" to device in sysfs_device structure
+
 10/15/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Fixed bug in sysfs_block.c (initrd)
 		* Fixed possible bug in systool.c
