@@ -80,12 +80,12 @@ struct sysfs_driver {
 };
 
 struct sysfs_device {
-	struct sysfs_driver *driver;
 	struct sysfs_device *parent;		
 	struct dlist *children;	
 	unsigned char name[SYSFS_NAME_LEN];
 	unsigned char bus_id[SYSFS_NAME_LEN];
 	unsigned char bus_name[SYSFS_NAME_LEN];
+	unsigned char driver_name[SYSFS_NAME_LEN];
 
 	/* for internal use only */
 	struct sysfs_directory *directory;	

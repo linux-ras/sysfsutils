@@ -221,9 +221,9 @@ void print_device(struct sysfs_device *device)
 		    & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
 		    | SHOW_ALL_ATTRIB_VALUES))) 
 			print_device_attributes(device->directory);
-		if (device->driver != NULL) 
+		if (device->driver_name != NULL) 
 			fprintf (stdout, "\tDriver: %s\n", 
-						device->driver->name);
+						device->driver_name);
 	}
 }
 

@@ -246,10 +246,10 @@ void show_device(struct sysfs_device *device, int level)
 		    & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
 		    | SHOW_ALL_ATTRIB_VALUES))) 
 			show_attributes(device->directory, (level+4));
-		if (device->driver != NULL) {
+		if (isalnum(device->driver_name[0])) {
 			indent(level+4);
 			fprintf (stdout, "Driver: %s\n", 
-						device->driver->name);
+						device->driver_name);
 		}
 	}
 }
@@ -416,6 +416,8 @@ void show_class_device(struct sysfs_class_device *dev, int level)
 		    & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
 		    | SHOW_ALL_ATTRIB_VALUES))) {
 			show_attributes(dev->directory, (level+4));
+			if (dev->directory->subdirs == NULL)
+				return;
 			dlist_for_each_data(dev->directory->subdirs, cur,
 					struct sysfs_directory) {
 				indent(level+4);

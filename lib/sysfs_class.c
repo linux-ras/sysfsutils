@@ -171,7 +171,9 @@ struct sysfs_class_device *sysfs_open_class_device(const unsigned char *path)
 				if (sdev != NULL) {
 					cdev->sysdevice = sdev;
 					if (cdev->driver != NULL) 
-						sdev->driver = cdev->driver;
+						strncpy(sdev->driver_name,
+							cdev->driver->name, 
+							SYSFS_NAME_LEN);
 				}
 			} else if (strncmp(curl->name, 
 						SYSFS_DRIVERS_NAME, 6) == 0) {

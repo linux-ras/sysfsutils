@@ -74,10 +74,7 @@ struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
 	}
 	dlist_for_each_data(dev->directory->attributes, cur,
 			struct sysfs_attribute) {
-		if ((sysfs_get_name_from_path(cur->path, attrname, 
-		    SYSFS_NAME_LEN)) != 0) 
-			continue;
-		if (strcmp(name, attrname) != 0)
+		if (strcmp(cur->name, attrname) != 0)
 			continue;
 
 		return cur;

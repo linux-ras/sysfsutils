@@ -1,4 +1,8 @@
 
+08/28/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+                * Removed sysfs_driver reference from sysfs_device struct
+                * Fixed a few bugs in the commands.
+
 08/19/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
                * Integrated Eric Bohm's dlist patch
                * Integrated Eric Bohm's follow on patch adding dlist_for_each

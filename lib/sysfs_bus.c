@@ -260,7 +260,8 @@ static void link_bus_devices_to_drivers(struct sysfs_bus *bus)
 					struct sysfs_driver) {
 				if ((match_bus_device_to_driver(drv, 
 						dev->bus_id)) != 0) {
-					dev->driver = drv;
+					strncpy(dev->driver_name, drv->name,
+							SYSFS_NAME_LEN);
 					drv->device = dev;
 				}
 			}
