@@ -197,6 +197,11 @@ struct sysfs_device *sysfs_open_device_path(const unsigned char *path)
 		return NULL;
 	}
 	strcpy(dev->path, path);
+	if ((sysfs_remove_trailing_slash(dev->path)) != 0) {
+		dprintf("Invalid path to device %s\n", dev->path);
+		sysfs_close_device(dev);
+		return NULL;
+	}
 	/* 
 	 * The "name" attribute no longer exists... return the device's
 	 * sysfs representation instead, in the "dev->name" field, which
@@ -351,6 +356,11 @@ struct sysfs_root_device *sysfs_open_root_device(const unsigned char *name)
 	}
 	strcpy(root->name, name);
 	strcpy(root->path, rootpath);
+	if ((sysfs_remove_trailing_slash(root->path)) != 0) {
+		dprintf("Invalid path to root device %s\n", root->path);
+		sysfs_close_root_device(root);
+		return NULL;
+	}
 	return root;
 }
 
@@ -372,17 +382,34 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 	if (device->directory->attributes == NULL) {
 		if ((sysfs_read_dir_attributes(device->directory)) != 0)
 			return NULL;
-	} else {
-		if ((sysfs_path_is_dir(device->path)) != 0) {
-			dprintf("Device at %s no longer exists", device->path);
-			return NULL;
-		}
-		if ((sysfs_refresh_attributes
-				(device->directory->attributes)) != 0) {
-			dprintf("Error refreshing device attributes\n");
-			return NULL;
-		}
 	}
+	return (device->directory->attributes);
+}
+
+/**
+ * sysfs_refresh_device_attributes: refreshes the device's list of attributes
+ * @device: sysfs_device whose attributes to refresh
+ *  
+ * NOTE: Upon return, prior references to sysfs_attributes for this device
+ * 		_may_ not be valid
+ *
+ * Returns list of attributes on success and NULL on failure
+ */
+struct dlist *sysfs_refresh_device_attributes(struct sysfs_device *device)
+{
+	if (device == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (device->directory == NULL)
+		return (sysfs_get_device_attributes(device));
+
+	if ((sysfs_refresh_dir_attributes(device->directory)) != 0) {
+		dprintf("Error refreshing device attributes\n");
+		return NULL;
+	}
+
 	return (device->directory->attributes);
 }
 
@@ -395,7 +422,6 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
 						const unsigned char *name)
 {
-	struct sysfs_attribute *cur = NULL;
 	struct dlist *attrlist = NULL;
 
 	if (dev == NULL || name == NULL) {
@@ -407,10 +433,8 @@ struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
 	if (attrlist == NULL)
 		return NULL;
 
-	cur = sysfs_get_directory_attribute(dev->directory, 
-			(unsigned char *)name);
-
-	return cur;
+	return sysfs_get_directory_attribute(dev->directory, 
+					(unsigned char *)name);
 }
 
 /**

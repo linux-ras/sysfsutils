@@ -195,7 +195,7 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 			return -1;
 		}
 		if ((strncmp(sysattr->value, new_value, sysattr->len)) == 0) {
-			dprintf("Attribute %s already has the requested value %s\n",
+			dprintf("Attr %s already has the requested value %s\n",
 					sysattr->name, new_value);
 			return 0;	
 		}
@@ -517,39 +517,6 @@ struct sysfs_link *sysfs_open_link(const unsigned char *linkpath)
 }
 
 /**
- * sysfs_refresh_attributes: Refresh attributes list
- * @attrlist: list of attributes to refresh
- * Returns 0 on success, 1 on failure
- */
-int sysfs_refresh_attributes(struct dlist *attrlist)
-{
-	struct sysfs_attribute *attr = NULL;
-
-	if (attrlist == NULL) {
-		errno = EINVAL;
-		return 1;
-	}
-	dlist_for_each_data(attrlist, attr, struct sysfs_attribute) {
-		if (attr->method & SYSFS_METHOD_SHOW) {
-			if ((sysfs_read_attribute(attr)) != 0) {
-				dprintf("Error reading attribute %s\n", 
-								attr->path);
-				if ((sysfs_path_is_file(attr->path)) != 0) {
-					dprintf("Attr %s no longer exists\n", 
-								attr->name);
-				}
-			}
-		} else {
-			if ((sysfs_path_is_file(attr->path)) != 0) {
-				dprintf("Attr %s no longer exists\n", 
-								attr->name);
-			}
-		}
-	}
-	return 0;
-}
-
-/**
  * add_attribute: open and add attribute at path to given directory
  * @sysdir: directory to add attribute to
  * @path: path to attribute
@@ -636,7 +603,6 @@ int sysfs_read_dir_attributes(struct sysfs_directory *sysdir)
 {
 	DIR *dir = NULL;
 	struct dirent *dirent = NULL;
-	struct stat astats;
 	unsigned char file_path[SYSFS_PATH_MAX];
 	int retval = 0;
 
@@ -658,11 +624,7 @@ int sysfs_read_dir_attributes(struct sysfs_directory *sysdir)
 		strncpy(file_path, sysdir->path, SYSFS_PATH_MAX);
 		strcat(file_path, "/");
 		strcat(file_path, dirent->d_name);
-		if ((lstat(file_path, &astats)) != 0) {
-			dprintf("stat failed\n");
-			continue;
-		}
-		if (S_ISREG(astats.st_mode)) 
+		if ((sysfs_path_is_file(file_path)) == 0)
 			retval = add_attribute(sysdir, file_path);
 	}
 	closedir(dir);
@@ -678,7 +640,6 @@ int sysfs_read_dir_links(struct sysfs_directory *sysdir)
 {
 	DIR *dir = NULL;
 	struct dirent *dirent = NULL;
-	struct stat astats;
 	unsigned char file_path[SYSFS_PATH_MAX];
 	int retval = 0;
 
@@ -700,11 +661,7 @@ int sysfs_read_dir_links(struct sysfs_directory *sysdir)
 		strncpy(file_path, sysdir->path, SYSFS_PATH_MAX);
 		strcat(file_path, "/");
 		strcat(file_path, dirent->d_name);
-		if ((lstat(file_path, &astats)) != 0) {
-			dprintf("stat failed\n");
-			continue;
-		}
-		if (S_ISLNK(astats.st_mode)) {
+		if ((sysfs_path_is_link(file_path)) == 0) {
 			retval = add_link(sysdir, file_path);
 			if (retval != 0)
 				break;
@@ -723,7 +680,6 @@ int sysfs_read_dir_subdirs(struct sysfs_directory *sysdir)
 {
 	DIR *dir = NULL;
 	struct dirent *dirent = NULL;
-	struct stat astats;
 	unsigned char file_path[SYSFS_PATH_MAX];
 	int retval = 0;
 
@@ -745,11 +701,7 @@ int sysfs_read_dir_subdirs(struct sysfs_directory *sysdir)
 		strncpy(file_path, sysdir->path, SYSFS_PATH_MAX);
 		strcat(file_path, "/");
 		strcat(file_path, dirent->d_name);
-		if ((lstat(file_path, &astats)) != 0) {
-			dprintf("stat failed\n");
-			continue;
-		}
-		if (S_ISDIR(astats.st_mode))
+		if ((sysfs_path_is_dir(file_path)) == 0)
 			retval = add_subdirectory(sysdir, file_path);
 	}
 	closedir(dir);
@@ -805,10 +757,98 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 }
 
 /**
+ * sysfs_refresh_dir_attributes: Refresh attributes list
+ * @sysdir: directory whose list of attributes to refresh
+ * Returns 0 on success, 1 on failure
+ */
+int sysfs_refresh_dir_attributes(struct sysfs_directory *sysdir)
+{
+	if (sysdir == NULL) {
+		errno = EINVAL;
+		return 1;
+	}
+	if ((sysfs_path_is_dir(sysdir->path)) != 0) {
+		dprintf("Invalid path to directory %s\n", sysdir->path);
+		errno = EINVAL;
+		return 1;
+	}
+	if (sysdir->attributes != NULL) {
+		dlist_destroy(sysdir->attributes);
+		sysdir->attributes = NULL;
+	}
+	if ((sysfs_read_dir_attributes(sysdir)) != 0) {
+		dprintf("Error refreshing attributes for directory %s\n", 
+							sysdir->path);
+		return 1;
+	}
+	return 0;
+}
+
+/**
+ * sysfs_refresh_dir_links: Refresh links list
+ * @sysdir: directory whose list of links to refresh
+ * Returns 0 on success, 1 on failure
+ */
+int sysfs_refresh_dir_links(struct sysfs_directory *sysdir)
+{
+	if (sysdir == NULL) {
+		errno = EINVAL;
+		return 1;
+	}
+	if ((sysfs_path_is_dir(sysdir->path)) != 0) {
+		dprintf("Invalid path to directory %s\n", sysdir->path);
+		errno = EINVAL;
+		return 1;
+	}
+	if (sysdir->links != NULL) {
+		dlist_destroy(sysdir->links);
+		sysdir->links = NULL;
+	}
+	if ((sysfs_read_dir_links(sysdir)) != 0) {
+		dprintf("Error refreshing links for directory %s\n", 
+							sysdir->path);
+		return 1;
+	}
+	return 0;
+}
+
+/**
+ * sysfs_refresh_dir_subdirs: Refresh subdirs list
+ * @sysdir: directory whose list of subdirs to refresh
+ * Returns 0 on success, 1 on failure
+ */
+int sysfs_refresh_dir_subdirs(struct sysfs_directory *sysdir)
+{
+	if (sysdir == NULL) {
+		errno = EINVAL;
+		return 1;
+	}
+	if ((sysfs_path_is_dir(sysdir->path)) != 0) {
+		dprintf("Invalid path to directory %s\n", sysdir->path);
+		errno = EINVAL;
+		return 1;
+	}
+	if (sysdir->subdirs != NULL) {
+		dlist_destroy(sysdir->subdirs);
+		sysdir->subdirs = NULL;
+	}
+	if ((sysfs_read_dir_subdirs(sysdir)) != 0) {
+		dprintf("Error refreshing subdirs for directory %s\n", 
+							sysdir->path);
+		return 1;
+	}
+	return 0;
+}
+
+/**
  * sysfs_get_directory_attribute: retrieves attribute attrname from current
  *	directory only
  * @dir: directory to retrieve attribute from
  * @attrname: name of attribute to look for
+ *
+ * NOTE: Since we know the attribute to look for, this routine looks for the
+ * 	attribute if it was created _after_ the attrlist was read initially.
+ * 	
  * returns sysfs_attribute if found and NULL if not found
  */
 struct sysfs_attribute *sysfs_get_directory_attribute
@@ -829,19 +869,25 @@ struct sysfs_attribute *sysfs_get_directory_attribute
 
 	attr = (struct sysfs_attribute *)dlist_find_custom
 			(dir->attributes, attrname, dir_attribute_name_equal);
-	if (attr == NULL) {
+	if (attr != NULL) {
+		if ((sysfs_read_attribute(attr)) != 0) {
+			dprintf("Error reading attribute %s\n", attr->name);
+			return NULL;
+		}
+	} else {
 		memset(new_path, 0, SYSFS_PATH_MAX);
 		strcpy(new_path, dir->path);
 		strcat(new_path, "/");
 		strcat(new_path, attrname);
 		if ((sysfs_path_is_file(new_path)) == 0) {
-		 	if ((add_attribute(dir, new_path)) == 0) {
+			if ((add_attribute(dir, new_path)) == 0) {
 				attr = (struct sysfs_attribute *)
-					dlist_find_custom(dir->attributes, 
+					dlist_find_custom(dir->attributes,
 					attrname, dir_attribute_name_equal);
 			}
 		}
 	}
+		
 	return attr;
 }
 
@@ -858,9 +904,13 @@ struct sysfs_link *sysfs_get_directory_link
 		errno = EINVAL;
 		return NULL;
 	}
-	if (dir->links == NULL)
+	if (dir->links == NULL) {
 		if ((sysfs_read_dir_links(dir) != 0) || (dir->links == NULL))
 			return NULL;
+	} else {
+		if ((sysfs_refresh_dir_links(dir)) != 0) 
+			return NULL;
+	}
 
 	return (struct sysfs_link *)dlist_find_custom(dir->links,
 		linkname, dir_link_name_equal);
@@ -959,18 +1009,8 @@ struct dlist *sysfs_get_dir_attributes(struct sysfs_directory *dir)
 	if (dir->attributes == NULL) {
 		if (sysfs_read_dir_attributes(dir) != 0)
 			return NULL;
-	} else {
-		if (sysfs_path_is_dir(dir->path) != 0) {
-			dprintf("Directory at %s no longer exists\n", 
-				dir->path);
-			return NULL;
-		}
-		if (sysfs_refresh_attributes(dir->attributes) != 0) {
-			dprintf("Error refreshing attributes at %s\n",
-				dir->path);
-			return NULL;
-		}
 	}
+
 	return (dir->attributes);
 }
 

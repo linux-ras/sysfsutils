@@ -1,4 +1,12 @@
 
+01/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added numerous "refresh" functions
+		* Added funtion to remove trailing slash from paths
+		* Fixed sysfs_get_link() to handle different possibilities
+
+01/07/2003 - Martin Hicks <mort@bork.org>
+		* Fixed sysfs_get_class_device()
+
 12/26/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Removed unneeded functions
 		* Added APIs to get directory links, subdirs and attribs

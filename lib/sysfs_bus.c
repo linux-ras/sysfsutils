@@ -224,6 +224,11 @@ struct sysfs_bus *sysfs_open_bus(const unsigned char *name)
 	}
 	strcpy(bus->name, name);	
 	strcpy(bus->path, buspath);
+	if ((sysfs_remove_trailing_slash(bus->path)) != 0) {
+		dprintf("Incorrect path to bus %s\n", bus->path);
+		sysfs_close_bus(bus);
+		return NULL;
+	}
 
 	return bus;
 }
@@ -294,18 +299,35 @@ struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus)
 	if (bus->directory->attributes == NULL) {
 		if ((sysfs_read_dir_attributes(bus->directory)) != 0) 
 			return NULL;
-	} else {
-		if ((sysfs_path_is_dir(bus->path)) != 0) {
-			dprintf("Bus at %s no longer exists\n", bus->path);
-			return NULL;
-		}
-		if ((sysfs_refresh_attributes
-					(bus->directory->attributes)) != 0) {
-			dprintf("Error refreshing bus attributes\n");
-			return NULL;
-		}
 	}
 	return bus->directory->attributes;
+}
+
+/**
+ * sysfs_refresh_bus_attributes: refreshes the bus's list of attributes
+ * @bus: sysfs_bus whose attributes to refresh
+ * 
+ * NOTE: Upon return, prior references to sysfs_attributes for this bus
+ * 		_may_ not be valid
+ * 
+ * Returns list of attributes on success and NULL on failure
+ */
+struct dlist *sysfs_refresh_bus_attributes(struct sysfs_bus *bus)
+{
+	if (bus == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (bus->directory == NULL)
+		return (sysfs_get_bus_attributes(bus));
+	
+	if ((sysfs_refresh_dir_attributes(bus->directory)) != 0) {
+		dprintf("Error refreshing bus attributes\n");
+		return NULL;
+	}
+
+	return (bus->directory->attributes);
 }
 
 /**
