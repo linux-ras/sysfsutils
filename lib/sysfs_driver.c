@@ -222,3 +222,44 @@ open_device:
 	return driver;
 }
 
+/**
+ * sysfs_write_driver_attr: modify "writable" driver attribute
+ * @drv: driver whose attribute has to be modified
+ * @attrib: Attribute to be modified
+ * @value: Value to change to
+ * Returns 0 on success -1 on failure
+ */ 
+int sysfs_write_driver_attr(unsigned char *drv, unsigned char *attrib,
+						unsigned char *value)
+{
+	struct sysfs_driver *driver = NULL;
+	struct sysfs_attribute *attribute = NULL;
+	unsigned char busname[SYSFS_NAME_LEN];
+
+	if (drv == NULL || attrib == NULL || value == NULL) {
+		dprintf("Invalid parameters\n");
+		return -1;
+	}
+
+	memset(busname, 0, SYSFS_NAME_LEN);
+	driver = sysfs_open_driver_by_name(drv, busname, SYSFS_NAME_LEN);
+	if (driver == NULL) {
+		dprintf("Driver %s not found\n", drv);
+		return -1;
+	}
+	attribute = sysfs_get_directory_attribute(driver->directory, attrib);
+        if (attribute == NULL) {
+                dprintf("Attribute %s not defined for driver %s\n", 
+							attrib, drv);
+		sysfs_close_drv(driver);
+		return -1;
+	}
+	if ((sysfs_write_attribute(attribute, value)) < 0) {
+		dprintf("Error setting %s to %s\n", attrib, value);
+		sysfs_close_drv(driver);
+		return -1;
+	}
+	sysfs_close_drv(driver);
+	return 0;
+}
+

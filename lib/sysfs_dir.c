@@ -182,10 +182,12 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 			sysattr->path);
 		return -1;
 	}
-	if ((strncmp(sysattr->value, new_value, sysattr->len)) == 0) {
-		dprintf("Attribute %s already has the requested value %s\n",
-				sysattr->name, new_value);
-		return 0;	
+	if (sysattr->method & SYSFS_METHOD_SHOW) {
+		if ((strncmp(sysattr->value, new_value, sysattr->len)) == 0) {
+			dprintf("Attribute %s already has the requested value %s\n",
+					sysattr->name, new_value);
+			return 0;	
+		}
 	}
 	/* 
 	 * open O_WRONLY since some attributes have no "read" but only
@@ -199,9 +201,8 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 
 	length = write(fd, new_value, strlen(new_value));
 	if (length < 0) {
-		perror("sysfs_write_attribute: write");
-		dprintf("Error write to the attribute %s\n",
-			sysattr->path);
+		dprintf("Error writing to the attribute %s - invalid value?\n",
+			sysattr->name);
 		close(fd);
 		return -1;
 	}

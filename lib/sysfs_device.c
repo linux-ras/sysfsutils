@@ -340,27 +340,27 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 
 /**
  * sysfs_open_device_by_id: open a device by id (use the "bus" subsystem)
- * @dev_name: name of the device to open - has to be the name in 
+ * @bus_id: bus_id of the device to open - has to be the "bus_id" in 
  * 		/sys/bus/xxx/devices
  * @bus: bus the device belongs to
  * @bsize: size of the bus buffer
  * returns struct sysfs_device if found, NULL otherwise
  * NOTE: Use sysfs_close_device to close the device
  */
-struct sysfs_device *sysfs_open_device_by_name(unsigned char *dev_name, 
+struct sysfs_device *sysfs_open_device_by_id(unsigned char *bus_id, 
 		unsigned char *bus, size_t bsize)
 {
 	char sysfs_path[SYSFS_PATH_MAX], device_path[SYSFS_PATH_MAX];
 	struct sysfs_device *device = NULL;
 	struct stat astats;
 
-	if (dev_name == NULL || bus == NULL) {
+	if (bus_id == NULL || bus == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
-	
-	if ((sysfs_find_device_bus_name(dev_name, bus, bsize)) != 0) {
-		dprintf("Device %s not found\n", dev_name);
+
+	if ((sysfs_find_device_bus_name(bus_id, bus, bsize)) != 0) {
+		dprintf("Device %s not found\n", bus_id);
 		errno = EINVAL;
 		return NULL;
 	}
@@ -374,7 +374,7 @@ struct sysfs_device *sysfs_open_device_by_name(unsigned char *dev_name,
 	strcat(sysfs_path, "/");
 	strncat(sysfs_path, bus, bsize);
 	strcat(sysfs_path, "/devices/");	/* sysfs_path = "/sys/bus/xxx/devices/" */
-	strcat(sysfs_path, dev_name);
+	strcat(sysfs_path, bus_id);
 
 	/* devices under /sys/bus/xxx/devices are links to devices subsystem */
 	if ((sysfs_get_link(sysfs_path, device_path, SYSFS_PATH_MAX)) < 0) {
@@ -384,9 +384,51 @@ struct sysfs_device *sysfs_open_device_by_name(unsigned char *dev_name,
 	
 	device = sysfs_open_device(device_path);
 	if (device == NULL) {
-		dprintf("Error opening device %s\n", dev_name);
+		dprintf("Error opening device %s\n", bus_id);
 		return NULL;
 	}
 
 	return device;
 }
+
+/**
+ * sysfs_write_device_attr: modify a "writable" attribute for the given device
+ * @dev: device bus_id for which attribute has to be changed
+ * @attrib: attribute to change
+ * @value: value to change to
+ * Returns 0 on success -1 on error
+ */ 
+int sysfs_write_device_attr(unsigned char *dev, unsigned char *attrib,
+							unsigned char *value)
+{
+	struct sysfs_device *device = NULL;
+	struct sysfs_attribute *attribute = NULL;
+	unsigned char subsys_name[SYSFS_NAME_LEN];
+
+	if (dev == NULL || attrib == NULL || value == NULL) {
+		dprintf("Invalid parameters\n");
+		return -1;
+	}
+	
+	memset(subsys_name, 0, SYSFS_NAME_LEN);
+	device = sysfs_open_device_by_id(dev, subsys_name, SYSFS_NAME_LEN);
+	if (device == NULL) {
+		dprintf("Device %s not found\n", dev);
+		return -1;
+	}
+	attribute = sysfs_get_directory_attribute(device->directory, attrib);
+	if (attribute == NULL) {
+		dprintf("Attribute %s not defined for device %s\n",
+				attrib, dev);
+		sysfs_close_device(device);
+		return -1;
+	}
+	if ((sysfs_write_attribute(attribute, value)) < 0) {
+		dprintf("Error setting %s to %s\n", attrib, value);
+		sysfs_close_device(device);
+		return -1;
+	}
+	sysfs_close_device(device);
+	return 0;
+}
+	

@@ -142,8 +142,6 @@ extern int sysfs_get_link(const unsigned char *path, unsigned char *target,
 extern struct dlist *sysfs_open_subsystem_list(unsigned char *name);
 extern struct dlist *sysfs_open_bus_devices_list(unsigned char *name);
 extern void sysfs_close_list(struct dlist *list);
-extern int sysfs_change_attribute_value(unsigned char *device,
-		unsigned char *attribute, unsigned char *value);
 
 /* sysfs directory and file access */
 extern void sysfs_close_attribute(struct sysfs_attribute *sysattr);
@@ -177,6 +175,8 @@ extern struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver);
 extern struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver);
 extern struct sysfs_driver *sysfs_open_driver_by_name
 		(unsigned char *drv_name, unsigned char *bus, size_t bsize);
+extern int sysfs_write_driver_attr(unsigned char *drv, unsigned char *attrib,
+					unsigned char *value);
 
 /* generic sysfs device access */
 extern void sysfs_close_root_device(struct sysfs_root_device *root);
@@ -189,8 +189,10 @@ extern struct sysfs_device *sysfs_open_device_tree(const unsigned char *path);
 extern struct sysfs_attribute *sysfs_get_device_attr
 			(struct sysfs_device *dev, const unsigned char *name);
 extern struct dlist *sysfs_get_device_attributes(struct sysfs_device *device);
-extern struct sysfs_device *sysfs_open_device_by_name
-		(unsigned char *dev_name, unsigned char *bus, size_t bsize);
+extern struct sysfs_device *sysfs_open_device_by_id
+		(unsigned char *bus_id, unsigned char *bus, size_t bsize);
+extern int sysfs_write_device_attr(unsigned char *dev, unsigned char *attrib,
+					unsigned char *value);
 
 /* generic sysfs bus access */
 extern void sysfs_close_bus(struct sysfs_bus *bus);
@@ -221,6 +223,8 @@ extern struct dlist *sysfs_get_classdev_attributes
 	(struct sysfs_class_device *cdev);
 extern int sysfs_find_device_class_name(unsigned char *bus_id, 
 		unsigned char *classname, size_t bsize);
+extern int sysfs_write_classdev_attr(unsigned char *dev,
+		unsigned char *attrib, unsigned char *value);
 
 #ifdef __cplusplus
 }

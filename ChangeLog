@@ -1,4 +1,12 @@
 
+09/24/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added "write" attribute functions specific to device,
+			driver and class device.
+		* Removed generic write function 
+			sysfs_change_attribue_value()
+		* Changed sysfs_open_device_by_name() to 
+			sysfs_change_device_by_id()
+
 09/23/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Fixed "write" attribute functions.
 		* Removed sysfs_write_attribute_value()

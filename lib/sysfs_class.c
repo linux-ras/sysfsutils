@@ -406,4 +406,50 @@ int sysfs_find_device_class_name(unsigned char *bus_id,
 	}
 	return -1;
 }
-						
+
+/**
+ * sysfs_write_classdev_attr: modify writable attribute value for the given
+ * 				class device
+ * @dev: class device name for which the attribute has to be changed
+ * @attrib: attribute to change
+ * @value: value to change to
+ * Returns 0 on success and -1 on error
+ */
+int sysfs_write_classdev_attr(unsigned char *dev, unsigned char *attrib,
+					unsigned char *value)
+{
+	struct sysfs_class_device *clsdev = NULL;
+	struct sysfs_attribute *attribute = NULL;
+	unsigned char class_name[SYSFS_NAME_LEN];
+
+	if (dev == NULL || attrib == NULL || value == NULL) {
+		dprintf("Invalid parameters\n");
+		return -1;
+	}
+	
+	memset(class_name, 0, SYSFS_NAME_LEN);
+	if ((sysfs_find_device_class_name(dev, 
+					class_name, SYSFS_NAME_LEN)) < 0) {
+		dprintf("Class device %s not found\n", dev);
+		return -1;
+	}
+	clsdev = sysfs_open_class_device_by_name(class_name, dev);
+	if (clsdev == NULL) {
+		dprintf("Error opening %s in class %s\n", dev, class_name);
+		return -1;
+	}
+	attribute = sysfs_get_directory_attribute(clsdev->directory, attrib);
+	if (attribute == NULL) {
+		dprintf("Attribute %s not defined for device %s on class %s\n",
+				attrib, dev, class_name);
+		sysfs_close_class_device(clsdev);
+		return -1;
+	}
+	if ((sysfs_write_attribute(attribute, value)) < 0) {
+		dprintf("Error setting %s to %s\n", attrib, value);
+		sysfs_close_class_device(clsdev);
+		return -1;
+	}
+	sysfs_close_class_device(clsdev);
+	return 0;
+}
