@@ -1,4 +1,7 @@
 
+08/16/2004 - Brian King <brking@us.ibm.com>
+		* Fix sysfs write only attributes bug
+
 03/31/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* More updates to docs/libsysfs.txt
 		* Updated NEWS and CREDITS files
