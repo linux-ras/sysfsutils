@@ -127,6 +127,8 @@ static int get_all_block_devices(struct sysfs_block_device *block)
 		errno = EINVAL;
 		return -1;
 	}
+	if (block->directory->subdirs == NULL)
+		return 0;
 
 	dlist_for_each_data(block->directory->subdirs, cur, 
 						struct sysfs_directory) {
@@ -270,6 +272,9 @@ struct dlist *sysfs_get_queue_attributes(struct sysfs_block_device *block)
 {
 	struct sysfs_directory *dir = NULL;
 
+	if (block->directory->subdirs == NULL)
+		return NULL;
+
 	dlist_for_each_data(block->directory->subdirs, dir, 
 					struct sysfs_directory) {
 		if ((strcmp(dir->name, SYSFS_QUEUE_NAME)) != 0) 
@@ -292,6 +297,9 @@ struct dlist *sysfs_get_iosched_attributes(struct sysfs_block_device *block)
 	struct sysfs_directory *dir = NULL, *new = NULL;
 	unsigned int found = 0;
 	
+	if (block->directory->subdirs == NULL)
+		return NULL;
+
 	dlist_for_each_data(block->directory->subdirs, dir, 
 					struct sysfs_directory) {
 		if ((strcmp(dir->name, SYSFS_QUEUE_NAME)) != 0) 
@@ -306,6 +314,9 @@ struct dlist *sysfs_get_iosched_attributes(struct sysfs_block_device *block)
 		 * this is the queue directory - read this and the
 		 * iosched directory too
 		 */
+		if (dir->subdirs == NULL) 
+			goto noiosched;
+		
 		dlist_for_each_data(dir->subdirs, new, 
 						struct sysfs_directory) {
 			if ((strcmp(new->name, SYSFS_IOSCHED_NAME)) == 0) 
@@ -313,6 +324,7 @@ struct dlist *sysfs_get_iosched_attributes(struct sysfs_block_device *block)
 					return new->attributes;
 		}
 	}
+noiosched:
 	dprintf("IOSCHED attributes not found\n");
 	return NULL;
 }

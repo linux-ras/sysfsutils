@@ -512,7 +512,7 @@ int show_sysfs_root(unsigned char *rootname)
 
 	fprintf(stdout, "Root Device Tree: %s\n", rootname);
 	
-	if (root->devices) {
+	if (root->devices != NULL) {
 		dlist_for_each_data(root->devices, device,
 				struct sysfs_device) {
 			show_device_tree(device, 2);
