@@ -1,5 +1,5 @@
 /*
- * get_dev_class.c
+ * get_class_dev.c
  *
  * Utility to find the class a given device is on
  *
@@ -27,29 +27,41 @@
 
 void print_usage(void)
 {
-        fprintf(stdout, "Usage: get_dev_class [class_device]\n");
+        fprintf(stdout, "Usage: get_class_dev [class name] [class_device]\n");
 }
 
 int main(int argc, char *argv[])
 {
-	char *classname = NULL;
-	int rc;
+	struct sysfs_class_device *cdev = NULL;
+	struct sysfs_attribute *attr = NULL;
+	struct dlist *attrlist = NULL;
 
-	if (argc != 2) {
+	if (argc != 3) {
 		print_usage();
 		return 1;
 	}
 
-	classname = (char *)calloc(1, SYSFS_NAME_LEN);
-	rc = sysfs_find_device_class(argv[1], classname, SYSFS_NAME_LEN);
-	if (rc == -1) {
-		fprintf(stdout, "Device %s not found\n", argv[1]);
-		free(classname);
+	cdev = sysfs_open_class_device_by_name(argv[1], argv[2]);
+	if (cdev == NULL) {
+		fprintf(stdout, "Device %s not found\n", argv[2]);
 		return 1;
 	}
-	fprintf(stdout, "Device %s is a member of class %s\n", 
-			argv[1], classname);
-	free(classname);
+	
+	fprintf(stdout, "Class device %s\n", cdev->name);
+	
+	attrlist = sysfs_get_classdev_attributes(cdev);
+	if (attrlist != NULL) {
+		dlist_for_each_data(attrlist, attr, struct sysfs_attribute) 
+			fprintf(stdout, "\t%s : %s", attr->name, attr->value);
+	}
+	fprintf(stdout, "\n");
+		
+	if (cdev->sysdevice)
+		fprintf(stdout, "\tDevice : %s\n", cdev->sysdevice->bus_id);
+	if (cdev->driver)
+		fprintf(stdout, "\tDriver : %s\n", cdev->driver->name);
+
+	sysfs_close_class_device(cdev);
 	return 0;
 }
 

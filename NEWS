@@ -1,6 +1,15 @@
 Version History:
 ---------------
 
+ 0.3.0 - Released November 6, 2003
+	* Added support to build shared library
+	* Added patch to consider "block" as a class
+	* Corrected "write" attribute functions
+	* Added more "find/open" functions
+	* Added pci name decode support
+	* Added "test" functions to demonstrate API usage
+	* Lots of other updates resulting from user feedback
+
  0.2.0 - Released August 29, 2003
 	* Added autoconf configuration support.
 	* Added Eric J Bohm's dlist patch.

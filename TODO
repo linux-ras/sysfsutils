@@ -1,25 +1,17 @@
 Library:
 --------
-- Make bus lists of devices using topology.
 - Rework debugging error messages and look into better logging on error.
 - Need to properly set errno. 
-- Add more "find"/utility functions.
-- Add subsystem specific support for PCI, SCSI, USB, etc
+- Code optimization: open()/read()/close() only when required.
 
 Commands:
 ---------
-- Add capability to just take a device as an argument.
 - Add topology tree view.
 - Need to clean up error messages.
 - Clean up how attribute values are printed.
-- Add capability to use of attribute "write" functions.
-- Use sysfs_root_device as the base structure for listing from the 
-	devices subsystem.
-- Add subsystem specific support. Commands can, for example, do PCI id lookup.
 
 Docs:
 -----
-- Update libsysfs.txt with changes/additions to the library.
 - Create man pages for commands and for library.
 
 Test:

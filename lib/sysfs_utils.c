@@ -205,8 +205,10 @@ void sysfs_close_list(struct dlist *list)
 struct dlist *sysfs_open_subsystem_list(unsigned char *name)
 {
 	unsigned char sysfs_path[SYSFS_PATH_MAX], *subsys_name = NULL;
+	unsigned char *c = NULL;
 	struct sysfs_directory *dir = NULL, *cur = NULL;
 	struct dlist *list = NULL;
+	struct stat astats;
 	
 	if (name == NULL)
 		return NULL;
@@ -246,6 +248,27 @@ struct dlist *sysfs_open_subsystem_list(unsigned char *name)
 		}
 	}
 	sysfs_close_directory(dir);
+	/*
+	 * We are now considering "block" as a "class". Hence, if the subsys
+	 * name requested here is "class", verify if "block" is supported on
+	 * this system and return the same.
+	 */ 
+	if (strcmp(name, SYSFS_CLASS_DIR) == 0) {
+		c = strstr(sysfs_path, SYSFS_CLASS_NAME);
+		if (c == NULL)
+			goto out;
+		strcpy(c, SYSFS_BLOCK_NAME);
+		if ((lstat(sysfs_path, &astats)) != 0) {
+			dprintf("stat() failed\n");
+			goto out;
+		}
+		if (S_ISDIR(astats.st_mode)) {
+			subsys_name = (char *)calloc(1, SYSFS_NAME_LEN);
+			strcpy(subsys_name, SYSFS_BLOCK_NAME);
+			dlist_unshift(list, subsys_name);
+		}
+	}
+out:
 	return list;
 }
 

@@ -446,9 +446,11 @@ void show_class_device(struct sysfs_class_device *dev, int level)
 			if (attributes != NULL)
 				show_attributes(attributes, (level+4));
 		} 
-		if (dev->sysdevice != NULL && (show_options & SHOW_DEVICES)) 
+		if (dev->sysdevice != NULL && (show_options & (SHOW_DEVICES |
+						SHOW_ALL_ATTRIB_VALUES))) 
 			show_device(dev->sysdevice, (level+4));
-		if (dev->driver != NULL && (show_options & SHOW_DRIVERS)) 
+		if (dev->driver != NULL && (show_options & (SHOW_DRIVERS |
+						SHOW_ALL_ATTRIB_VALUES)))
 			show_driver(dev->driver, (level+4));
 	}
 }

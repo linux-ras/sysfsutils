@@ -1,63 +1,60 @@
-/* write attribute support for the given device */
+/*
+ * write_attr.c
+ *
+ * Utility to modify the value of a given class device attribute
+ *
+ * Copyright (C) IBM Corp. 2003
+ *
+ *      This program is free software; you can redistribute it and/or modify it
+ *      under the terms of the GNU General Public License as published by the
+ *      Free Software Foundation version 2 of the License.
+ *
+ *      This program is distributed in the hope that it will be useful, but
+ *      WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *      General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License along
+ *      with this program; if not, write to the Free Software Foundation, Inc.,
+ *      675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <mntent.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <ctype.h>
 
 #include "libsysfs.h"
 
+void print_usage(void)
+{
+        fprintf(stdout, "Usage: write_attr [classname] [device] [attribute] [new_value]\n");
+}
+
 int main(int argc, char *argv[])
 {
-	char *bus = NULL;
-	struct sysfs_device *device = NULL;
-	struct sysfs_attribute *attribute = NULL;
+	struct sysfs_attribute *attr = NULL;
 
-	/*
-	 * need args: device, attribute and value to be changed to
-	 * eg: ./fn_name <device> <attribute> <val to change to>
-	 */ 
-	if (argc != 4) {
-		fprintf(stdout, "Need 4 args\n");
+	if (argc != 5) {
+		print_usage();
 		return 1;
 	}
 
-	bus = (char *)calloc(1, SYSFS_NAME_LEN);
-	device = sysfs_open_device_by_name(argv[1], bus, SYSFS_NAME_LEN);
-	if (device == NULL) {
-		fprintf(stdout, "Device %s not found\n", argv[1]);
-		free(bus);
-		return 1;
-	}
-	fprintf(stdout, "Device %s is a member of bus %s\n", 
-			argv[1], bus);
-	fprintf(stdout, "\t\t%s\n", device->bus_id);
-	
-	attribute = sysfs_get_device_attr(device, argv[2]);
-	if (attribute == NULL) {
-		fprintf(stdout, "Attribute %s not defined for device %s\n",
-				argv[2], argv[1]);
-		sysfs_close_device(device);
-		free(bus);
+	attr = sysfs_open_classdev_attr(argv[1], argv[2], argv[3]);
+	if (attr == NULL) {
+		fprintf(stdout, "Attribute %s not defined for classdev %s\n", 
+					argv[3], argv[2]);
 		return 1;
 	}
 
-	if ((sysfs_write_attribute_value(attribute->path, argv[2])) < 0) {
-		fprintf(stdout, "Write attribute failed\n");
-		sysfs_close_device(device);
-		free(bus);
+	fprintf(stdout, "Attribute %s presently has a value %s\n", 
+					attr->name, attr->value);
+	if ((sysfs_write_attribute(attr, argv[4], strlen(argv[4]))) != 0) {
+		fprintf(stdout, "Error writing attribute value\n");
+		sysfs_close_attribute(attr);
 		return 1;
 	}
-
-	fprintf(stdout, "Write succeeded\n");
-	sysfs_close_device(device);
-	free(bus);
+	fprintf(stdout, "Attribute value after write is %s\n", attr->value);
+	sysfs_close_attribute(attr);
 	return 0;
 }
 

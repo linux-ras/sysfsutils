@@ -1,4 +1,16 @@
 
+11/04/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added code to consider "block" part of "class"
+		* Fixed systool to show driver details (if available)
+			when listing the class device
+		* Added bus to struct sysfs_device
+		* Modified "read_attr" functions for device/driver/classdev
+			to return a sysfs_attribute
+		* Modified test functions, added a test function to 
+			demonstrate usage of "write" attribute functions
+		* Updated libsysfs.txt to reflect latest updates to the
+			library
+
 10/27/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Fixed bug in sysfs_get_name_from_path()
 		* Added code to check if SYSFS_PATH environment variable

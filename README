@@ -31,8 +31,16 @@ This package currently includes:
 2. How to Install
 -----------------
 
-Use make to create the library and the commands. 
+Run the "configure" script to generate Makefiles. Use "make" to build the
+library and utilities. Use "make install" to install the binaries and the
+header files. "make uninstall" will delete all installed binaries and
+header files.
 
+The header files are installed in /usr/include/sysfs by default. In case
+a different path is desired, specify "includedir=xxx" while running configure
+as in
+
+./configure --includedir="path for header installs"
 
 3. Licenses
 -----------
