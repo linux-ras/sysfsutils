@@ -23,38 +23,6 @@
 #include "libsysfs.h"
 #include "sysfs.h"
 
-static int confirm_device_bus(struct sysfs_device *dev, 
-				unsigned char *busname, unsigned char *bus_id)
-{
-        struct sysfs_link *devlink = NULL;
-        unsigned char devpath[SYSFS_PATH_MAX];
-	int result = 0;
-
-        if (busname == NULL || bus_id == NULL)
-                return -1;
-
-        if (sysfs_get_mnt_path(devpath, SYSFS_PATH_MAX) != 0)
-                return -1;
-
-	strcat(devpath, "/");
-        strcat(devpath, SYSFS_BUS_NAME);
-        strcat(devpath, "/");
-        strcat(devpath, busname);
-	strcat(devpath, "/");
-        strcat(devpath, SYSFS_DEVICES_NAME);
-        strcat(devpath, "/");
-        strcat(devpath, bus_id);
-
-	devlink = sysfs_open_link(devpath);
-	if (devlink == NULL)
-		return -1;
-
-	if (strcmp(devlink->target, dev->path) == 0)
-		result++;
-	sysfs_close_link(devlink);
-	return result;
-}
-
 /**
  * get_device_bus: retrieves the bus name the device is on, checks path to
  *	bus' link to make sure it has correct device.
@@ -63,34 +31,53 @@ static int confirm_device_bus(struct sysfs_device *dev,
  */
 static int get_device_bus(struct sysfs_device *dev)
 {
-	unsigned char subsys[SYSFS_NAME_LEN], *bus = NULL, *curdev = NULL;
-	struct dlist *buslist = NULL, *device_list = NULL;
+	unsigned char subsys[SYSFS_NAME_LEN], path[SYSFS_PATH_MAX];
+	unsigned char target[SYSFS_PATH_MAX], *bus = NULL, *c = NULL;
+	struct dlist *buslist = NULL;
 
 	if (dev == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 
+	memset(subsys, 0, SYSFS_NAME_LEN);
 	strcat(subsys, "/");
 	strcpy(subsys, SYSFS_BUS_NAME);  /* subsys = /bus */
 	buslist = sysfs_open_subsystem_list(subsys);
 	if (buslist != NULL) {
 		dlist_for_each_data(buslist, bus, char) {
-			device_list = sysfs_open_bus_devices_list(bus);
-			if (device_list != NULL) {
-				dlist_for_each_data(device_list,
-							curdev, char) {
-					if (strcmp(dev->bus_id, curdev) == 0
-					    && confirm_device_bus(dev, bus,
-					    curdev) > 0) {
-						strcpy(dev->bus, bus);
-                                                sysfs_close_list(device_list);
-                                                sysfs_close_list(buslist);
-                                                return 0;
-                                        }
-                                }
-                        sysfs_close_list(device_list);
-                        }
+			memset(path, 0, SYSFS_PATH_MAX);
+			strcpy(path, dev->path);
+			c = strstr(path, "/devices");
+			if (c == NULL) {
+				dprintf("Invalid path to device %s\n", path);
+				sysfs_close_list(buslist);
+				return -1;
+			}
+			*c = '\0';
+			strcat(path, "/");
+			strcat(path, SYSFS_BUS_NAME);
+			strcat(path, "/");
+			strcat(path, bus);
+			strcat(path, "/");
+			strcat(path, SYSFS_DEVICES_NAME);
+			strcat(path, "/");
+			strcat(path, dev->bus_id);
+			if ((sysfs_path_is_link(path)) == 0) {
+				memset(target, 0, SYSFS_PATH_MAX);
+				if ((sysfs_get_link(path, target, 
+							SYSFS_PATH_MAX)) != 0) {
+					dprintf("Error getting link target\n");
+					sysfs_close_list(buslist);
+					return -1;
+				}
+				if (!(strncmp(target, dev->path, 
+							SYSFS_PATH_MAX))) {
+					strcpy(dev->bus, bus);
+					sysfs_close_list(buslist);
+					return 0;
+				}
+			}
                 }
                 sysfs_close_list(buslist);
         }

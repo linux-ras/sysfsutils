@@ -1,5 +1,8 @@
 
 12/02/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Simplified routine to get bus a device is on
+
+12/02/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Patched code to use already available functions for 
 			optimization.
 
