@@ -1,4 +1,7 @@
 
+03/15/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Updated docs/libsysfs.txt for release 1.1.0
+
 03/12/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Modified string functions to use wrappers to take care
 			of potential buffer overflow issues
