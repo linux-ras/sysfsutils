@@ -3,7 +3,7 @@
  *
  * Tests for driver related functions for the libsysfs testsuite
  *
- * Copyright (C) IBM Corp. 2004
+ * Copyright (C) IBM Corp. 2004-2005
  *
  *      This program is free software; you can redistribute it and/or modify it
  *      under the terms of the GNU General Public License as published by the

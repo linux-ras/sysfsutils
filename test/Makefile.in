@@ -83,22 +83,10 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-bin_PROGRAMS = dlist_test get_class_dev get_device get_driver write_attr \
-		get_bus_devices_list get_classdev_parent testlibsysfs
-
-BUILT_SOURCES = test.h
-CLEANFILES = test.h		
-dlist_test_SOURCES = dlist_test.c
-get_class_dev_SOURCES = get_class_dev.c
+bin_PROGRAMS = dlist_test get_class_dev_attr get_device get_driver
+get_class_dev_attr_SOURCES = get_class_dev_attr.c
 get_device_SOURCES = get_device.c
 get_driver_SOURCES = get_driver.c
-get_bus_devices_list_SOURCES = get_bus_devices_list.c
-write_attr_SOURCES = write_attr.c
-get_classdev_parent_SOURCES = get_classdev_parent.c
-testlibsysfs_SOURCES = test.c test_bus.c test_class.c test_dir.c test_driver.c \
-		       test_root.c test_utils.c testout.c test-defs.h \
-		       libsysfs.conf create-test
-
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
 CFLAGS = -Wall -Wshadow -W -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
@@ -106,32 +94,20 @@ subdir = test
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-bin_PROGRAMS = dlist_test$(EXEEXT) get_class_dev$(EXEEXT) \
-	get_device$(EXEEXT) get_driver$(EXEEXT) write_attr$(EXEEXT) \
-	get_bus_devices_list$(EXEEXT) get_classdev_parent$(EXEEXT) \
-	testlibsysfs$(EXEEXT)
+bin_PROGRAMS = dlist_test$(EXEEXT) get_class_dev_attr$(EXEEXT) \
+	get_device$(EXEEXT) get_driver$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
-am_dlist_test_OBJECTS = dlist_test.$(OBJEXT)
-dlist_test_OBJECTS = $(am_dlist_test_OBJECTS)
+dlist_test_SOURCES = dlist_test.c
+dlist_test_OBJECTS = dlist_test.$(OBJEXT)
 dlist_test_LDADD = $(LDADD)
 dlist_test_DEPENDENCIES = ../lib/libsysfs.la
 dlist_test_LDFLAGS =
-am_get_bus_devices_list_OBJECTS = get_bus_devices_list.$(OBJEXT)
-get_bus_devices_list_OBJECTS = $(am_get_bus_devices_list_OBJECTS)
-get_bus_devices_list_LDADD = $(LDADD)
-get_bus_devices_list_DEPENDENCIES = ../lib/libsysfs.la
-get_bus_devices_list_LDFLAGS =
-am_get_class_dev_OBJECTS = get_class_dev.$(OBJEXT)
-get_class_dev_OBJECTS = $(am_get_class_dev_OBJECTS)
-get_class_dev_LDADD = $(LDADD)
-get_class_dev_DEPENDENCIES = ../lib/libsysfs.la
-get_class_dev_LDFLAGS =
-am_get_classdev_parent_OBJECTS = get_classdev_parent.$(OBJEXT)
-get_classdev_parent_OBJECTS = $(am_get_classdev_parent_OBJECTS)
-get_classdev_parent_LDADD = $(LDADD)
-get_classdev_parent_DEPENDENCIES = ../lib/libsysfs.la
-get_classdev_parent_LDFLAGS =
+am_get_class_dev_attr_OBJECTS = get_class_dev_attr.$(OBJEXT)
+get_class_dev_attr_OBJECTS = $(am_get_class_dev_attr_OBJECTS)
+get_class_dev_attr_LDADD = $(LDADD)
+get_class_dev_attr_DEPENDENCIES = ../lib/libsysfs.la
+get_class_dev_attr_LDFLAGS =
 am_get_device_OBJECTS = get_device.$(OBJEXT)
 get_device_OBJECTS = $(am_get_device_OBJECTS)
 get_device_LDADD = $(LDADD)
@@ -142,18 +118,6 @@ get_driver_OBJECTS = $(am_get_driver_OBJECTS)
 get_driver_LDADD = $(LDADD)
 get_driver_DEPENDENCIES = ../lib/libsysfs.la
 get_driver_LDFLAGS =
-am_testlibsysfs_OBJECTS = test.$(OBJEXT) test_bus.$(OBJEXT) \
-	test_class.$(OBJEXT) test_dir.$(OBJEXT) test_driver.$(OBJEXT) \
-	test_root.$(OBJEXT) test_utils.$(OBJEXT) testout.$(OBJEXT)
-testlibsysfs_OBJECTS = $(am_testlibsysfs_OBJECTS)
-testlibsysfs_LDADD = $(LDADD)
-testlibsysfs_DEPENDENCIES = ../lib/libsysfs.la
-testlibsysfs_LDFLAGS =
-am_write_attr_OBJECTS = write_attr.$(OBJEXT)
-write_attr_OBJECTS = $(am_write_attr_OBJECTS)
-write_attr_LDADD = $(LDADD)
-write_attr_DEPENDENCIES = ../lib/libsysfs.la
-write_attr_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -163,15 +127,8 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/dlist_test.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/get_bus_devices_list.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/get_class_dev.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/get_classdev_parent.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/get_device.Po ./$(DEPDIR)/get_driver.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/test.Po ./$(DEPDIR)/test_bus.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/test_class.Po ./$(DEPDIR)/test_dir.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/test_driver.Po ./$(DEPDIR)/test_root.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/test_utils.Po ./$(DEPDIR)/testout.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/write_attr.Po
+@AMDEP_TRUE@	./$(DEPDIR)/get_class_dev_attr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/get_device.Po ./$(DEPDIR)/get_driver.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
@@ -179,15 +136,12 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(dlist_test_SOURCES) $(get_bus_devices_list_SOURCES) \
-	$(get_class_dev_SOURCES) $(get_classdev_parent_SOURCES) \
-	$(get_device_SOURCES) $(get_driver_SOURCES) \
-	$(testlibsysfs_SOURCES) $(write_attr_SOURCES)
+DIST_SOURCES = dlist_test.c $(get_class_dev_attr_SOURCES) \
+	$(get_device_SOURCES) $(get_driver_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(dlist_test_SOURCES) $(get_bus_devices_list_SOURCES) $(get_class_dev_SOURCES) $(get_classdev_parent_SOURCES) $(get_device_SOURCES) $(get_driver_SOURCES) $(testlibsysfs_SOURCES) $(write_attr_SOURCES)
+SOURCES = dlist_test.c $(get_class_dev_attr_SOURCES) $(get_device_SOURCES) $(get_driver_SOURCES)
 
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -228,27 +182,15 @@ clean-binPROGRAMS:
 dlist_test$(EXEEXT): $(dlist_test_OBJECTS) $(dlist_test_DEPENDENCIES) 
 	@rm -f dlist_test$(EXEEXT)
 	$(LINK) $(dlist_test_LDFLAGS) $(dlist_test_OBJECTS) $(dlist_test_LDADD) $(LIBS)
-get_bus_devices_list$(EXEEXT): $(get_bus_devices_list_OBJECTS) $(get_bus_devices_list_DEPENDENCIES) 
-	@rm -f get_bus_devices_list$(EXEEXT)
-	$(LINK) $(get_bus_devices_list_LDFLAGS) $(get_bus_devices_list_OBJECTS) $(get_bus_devices_list_LDADD) $(LIBS)
-get_class_dev$(EXEEXT): $(get_class_dev_OBJECTS) $(get_class_dev_DEPENDENCIES) 
-	@rm -f get_class_dev$(EXEEXT)
-	$(LINK) $(get_class_dev_LDFLAGS) $(get_class_dev_OBJECTS) $(get_class_dev_LDADD) $(LIBS)
-get_classdev_parent$(EXEEXT): $(get_classdev_parent_OBJECTS) $(get_classdev_parent_DEPENDENCIES) 
-	@rm -f get_classdev_parent$(EXEEXT)
-	$(LINK) $(get_classdev_parent_LDFLAGS) $(get_classdev_parent_OBJECTS) $(get_classdev_parent_LDADD) $(LIBS)
+get_class_dev_attr$(EXEEXT): $(get_class_dev_attr_OBJECTS) $(get_class_dev_attr_DEPENDENCIES) 
+	@rm -f get_class_dev_attr$(EXEEXT)
+	$(LINK) $(get_class_dev_attr_LDFLAGS) $(get_class_dev_attr_OBJECTS) $(get_class_dev_attr_LDADD) $(LIBS)
 get_device$(EXEEXT): $(get_device_OBJECTS) $(get_device_DEPENDENCIES) 
 	@rm -f get_device$(EXEEXT)
 	$(LINK) $(get_device_LDFLAGS) $(get_device_OBJECTS) $(get_device_LDADD) $(LIBS)
 get_driver$(EXEEXT): $(get_driver_OBJECTS) $(get_driver_DEPENDENCIES) 
 	@rm -f get_driver$(EXEEXT)
 	$(LINK) $(get_driver_LDFLAGS) $(get_driver_OBJECTS) $(get_driver_LDADD) $(LIBS)
-testlibsysfs$(EXEEXT): $(testlibsysfs_OBJECTS) $(testlibsysfs_DEPENDENCIES) 
-	@rm -f testlibsysfs$(EXEEXT)
-	$(LINK) $(testlibsysfs_LDFLAGS) $(testlibsysfs_OBJECTS) $(testlibsysfs_LDADD) $(LIBS)
-write_attr$(EXEEXT): $(write_attr_OBJECTS) $(write_attr_DEPENDENCIES) 
-	@rm -f write_attr$(EXEEXT)
-	$(LINK) $(write_attr_LDFLAGS) $(write_attr_OBJECTS) $(write_attr_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -257,20 +199,9 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlist_test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_bus_devices_list.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_class_dev.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_classdev_parent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_class_dev_attr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_device.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_driver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_bus.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_class.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dir.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_driver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_root.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_utils.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testout.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/write_attr.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)
@@ -389,7 +320,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-rm -f Makefile $(CONFIG_CLEAN_FILES)
@@ -397,7 +327,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
@@ -448,8 +377,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 	mostlyclean-libtool tags uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-info-am
 
-test.h:
-	./create-test
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -1,5 +1,4 @@
-man_MANS = systool.1
-EXTRA_DIST = docs include $(man_MANS) CREDITS lib/LGPL cmd/GPL test/GPL
+EXTRA_DIST = docs include CREDITS lib/LGPL test/GPL
 SUBDIRS = lib cmd test
 include_HEADERS = include/libsysfs.h include/dlist.h
 

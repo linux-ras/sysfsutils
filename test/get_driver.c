@@ -3,7 +3,7 @@
  *
  * Utility to get details of the given driver
  *
- * Copyright (C) IBM Corp. 2003
+ * Copyright (C) IBM Corp. 2003-2005
  *
  *      This program is free software; you can redistribute it and/or modify it
  *      under the terms of the GNU General Public License as published by the
@@ -28,7 +28,7 @@
 
 static void print_usage(void)
 {
-        fprintf(stdout, "Usage: get_driver [driver]\n");
+        fprintf(stdout, "Usage: get_driver [bus] [driver]\n");
 }
 
 int main(int argc, char *argv[])
@@ -37,21 +37,14 @@ int main(int argc, char *argv[])
 	struct sysfs_driver *driver = NULL;
 	struct sysfs_device *device = NULL;
 	struct dlist *devlist = NULL;
+	struct sysfs_attribute *attr = NULL;
 
-	if (argc != 2) {
+	if (argc != 3) {
 		print_usage();
 		return 1;
 	}
 
 	memset(path, 0, SYSFS_PATH_MAX);
-	bus = (char *)calloc(1, SYSFS_NAME_LEN);
-	if ((sysfs_find_driver_bus(argv[1], bus, SYSFS_NAME_LEN)) < 0) {
-		fprintf(stdout, "Driver %s not found\n", argv[1]);
-		free(bus);
-		return 1;
-	}
-	fprintf(stdout, "Driver %s is a member of bus %s\n", argv[1], bus);
-	
 	if ((sysfs_get_mnt_path(path, SYSFS_PATH_MAX)) != 0) {
 		fprintf(stdout, "Sysfs not mounted?\n");
 		return 1;
@@ -59,25 +52,27 @@ int main(int argc, char *argv[])
 	strcat(path, "/");
 	strcat(path, SYSFS_BUS_NAME);
 	strcat(path, "/");
-	strcat(path, bus);
+	strcat(path, argv[1]);
 	strcat(path, "/");
 	strcat(path, SYSFS_DRIVERS_NAME);
 	strcat(path, "/");
-	strcat(path, argv[1]);
+	strcat(path, argv[2]);
 	driver = sysfs_open_driver_path(path);
 	if (driver == NULL) {
-		fprintf(stdout, "Device %s not found\n", argv[1]);
+		fprintf(stdout, "Driver %s not found\n", argv[1]);
 		free(bus);
 		return 1;
 	}
 	devlist = sysfs_get_driver_devices(driver);
 	if (devlist != NULL) {
-		fprintf(stdout, "%s is used by:\n", argv[1]);
+		fprintf(stdout, "%s is used by:\n", argv[2]);
 		dlist_for_each_data(devlist, device, struct sysfs_device) 
 			fprintf(stdout, "\t\t%s\n", device->bus_id);
 	} else 
-		fprintf(stdout, "%s is presently not used by any device\n", argv[1]);
+		fprintf(stdout, "%s is presently not used by any device\n", 
+				argv[2]);
 	
+	fprintf(stdout, "driver %s is on bus %s\n", driver->name, driver->bus);
 	sysfs_close_driver(driver);
 	free(bus);
 	return 0;

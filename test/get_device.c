@@ -3,7 +3,7 @@
  *
  * Utility to get details of a given device
  *
- * Copyright (C) IBM Corp. 2003
+ * Copyright (C) IBM Corp. 2003-2005
  *
  *      This program is free software; you can redistribute it and/or modify it
  *      under the terms of the GNU General Public License as published by the
@@ -33,8 +33,6 @@ static void print_usage(void)
 int main(int argc, char *argv[])
 {
 	struct sysfs_device *device = NULL;
-	struct sysfs_attribute *attr = NULL;
-	struct dlist *attrlist = NULL;
 
 	if (argc != 3) {
 		print_usage();
@@ -47,17 +45,13 @@ int main(int argc, char *argv[])
 					argv[2], argv[1]);
 		return 1;
 	}
-	
-	attrlist = sysfs_get_device_attributes(device);
-	if (attrlist != NULL) {
-		dlist_for_each_data(attrlist, attr, 
-					struct sysfs_attribute) 
-			fprintf(stdout, "\t%-20s : %s", 
-					attr->name, attr->value);
-	}
-	fprintf(stdout, "\n");
-	
-	sysfs_close_device(device);
+	struct sysfs_device *parent = sysfs_get_device_parent(device);
+	if (parent) {
+		fprintf(stdout, "parent is %s\n", parent->name);
+		fprintf(stdout, "parent is on bus %s, using driver %s\n",
+				parent->bus, parent->driver_name);
+	} else
+		fprintf(stdout, "no parent\n");
 	return 0;
 }
 

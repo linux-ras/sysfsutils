@@ -3,7 +3,7 @@
  *
  * Internal Header Definitions for libsysfs
  *
- * Copyright (C) IBM Corp. 2003
+ * Copyright (C) IBM Corp. 2003-2005
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -27,14 +27,32 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 #include <mntent.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
 
-/* external library functions */
-extern int isascii(int c);
+#define safestrcpy(to, from)	strncpy(to, from, sizeof(to)-1)
+#define safestrcat(to, from)	strncat(to, from, sizeof(to) - strlen(to)-1)
+
+#define safestrcpymax(to, from, max) \
+do { \
+	to[max-1] = '\0'; \
+	strncpy(to, from, max-1); \
+} while (0)
+
+#define safestrcatmax(to, from, max) \
+do { \
+	to[max-1] = '\0'; \
+	strncat(to, from, max - strlen(to)-1); \
+} while (0)
+
+extern struct sysfs_attribute *get_attribute(void *dev, const char *name);
+extern struct dlist *read_dir_subdirs(const char *path);
+extern struct dlist *read_dir_links(const char *path);
+extern struct dlist *get_attributes_list(void *dev);
 
 /* Debugging */
 #ifdef DEBUG

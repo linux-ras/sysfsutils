@@ -1,4 +1,16 @@
 
+03/06/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* sysfs_directory, sysfs_link baggage is gone
+		* When an attribute is requested, _only_ that attribute
+			is "stat"ed and read
+		* APIs have been audited and only the relevent ones
+			have been retained.
+		* Fixed sysfs mount point to /sys
+
+04/06/2005 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Merged tag sysfsutils-1_3_0 with main trunk
+		* Created new sysfsutils-2_0_0 branch
+
 01/17/2005 - Kay Sievers <kay.sievers@vrfy.org>
 		* Fix dlist.c so it compiles with older gcc versions
 

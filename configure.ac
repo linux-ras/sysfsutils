@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(sysfsutils, 1.2.0, linux-diag-devel@lists.sourceforge.net)
+AC_INIT(sysfsutils, 2.0.0, linux-diag-devel@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
@@ -30,7 +30,7 @@ AC_FUNC_STAT
 AC_CHECK_FUNCS([bzero getmntent isascii memset strchr strerror strrchr strstr strtol])
 
 AC_CONFIG_FILES([Makefile
-                 cmd/Makefile
                  lib/Makefile
+                 cmd/Makefile
                  test/Makefile])
 AC_OUTPUT
