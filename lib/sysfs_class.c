@@ -347,8 +347,6 @@ struct sysfs_device *sysfs_get_classdev_device
 	clsdev->sysdevice = sysfs_open_device_path(devlink->target);
 	if (clsdev->sysdevice == NULL)
 		return NULL;
-	if (clsdev->driver != NULL) 
-		strcpy(clsdev->sysdevice->driver_name, clsdev->driver->name);
 
 	return (clsdev->sysdevice);
 }
@@ -407,8 +405,6 @@ struct sysfs_driver *sysfs_get_classdev_driver
 	clsdev->driver = sysfs_open_driver_path(drvlink->target);
 	if (clsdev->driver == NULL)
 		return NULL;
-	if (clsdev->sysdevice != NULL)
-		strcpy(clsdev->sysdevice->driver_name, clsdev->driver->name);
 
 	return (clsdev->driver);
 }

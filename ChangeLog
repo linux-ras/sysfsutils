@@ -1,4 +1,7 @@
 
+02/13/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Patched code to fill sysfs_device->driver_name correctly
+
 02/12/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added Nitin Vashisth to AUTHORS
 		* Removed lsbus and its manpage

@@ -24,6 +24,57 @@
 #include "sysfs.h"
 
 /**
+ * get_dev_driver: fills in the dev->driver_name field 
+ *
+ * Returns 0 on SUCCESS and 1 on error
+ */
+static int get_dev_driver(struct sysfs_device *dev)
+{
+	struct dlist *drvlist = NULL;
+	unsigned char path[SYSFS_PATH_MAX], devpath[SYSFS_PATH_MAX];
+	unsigned char *drv = NULL, *c = NULL;
+	
+	if (dev == NULL) {
+		errno = EINVAL;
+		return 1;
+	}
+	if (dev->bus[0] == '\0')
+		return 1;
+	memset(path, 0, SYSFS_PATH_MAX);
+	memset(devpath, 0, SYSFS_PATH_MAX);
+	strcat(path, SYSFS_BUS_NAME);
+	strcat(path, "/");
+	strcat(path, dev->bus);
+	strcat(path, "/");
+	strcat(path, SYSFS_DRIVERS_NAME);
+
+	strcpy(devpath, dev->path);
+	c = strstr(devpath, SYSFS_DEVICES_NAME);
+	if (c == NULL)
+		return 1;
+	*c = '\0';
+	strcat(c, path);
+
+	drvlist = sysfs_open_subsystem_list(path);
+	if (drvlist != NULL) {
+		dlist_for_each_data(drvlist, drv, char) {
+			strcpy(path, devpath);
+			strcat(path, "/");
+			strcat(path, drv);
+			strcat(path, "/");
+			strcat(path, dev->bus_id);
+			if (sysfs_path_is_link(path) == 0) {
+				strcpy(dev->driver_name, drv);
+				sysfs_close_list(drvlist);
+				return 0;
+			}
+		}
+		sysfs_close_list(drvlist);
+	}
+	return 1;
+}
+	
+/**
  * sysfs_get_device_bus: retrieves the bus name the device is on, checks path 
  * 	to bus' link to make sure it has correct device.
  * @dev: device to get busname.
@@ -211,6 +262,11 @@ struct sysfs_device *sysfs_open_device_path(const unsigned char *path)
 	
 	if (sysfs_get_device_bus(dev) != 0)
 		dprintf("Could not get device bus\n");
+	
+	if (get_dev_driver(dev) != 0) {
+		dprintf("Could not get device %s's driver\n", dev->bus_id);
+		strcpy(dev->driver_name, SYSFS_UNKNOWN);
+	}
 
 	return dev;
 }

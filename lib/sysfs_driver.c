@@ -241,7 +241,6 @@ struct dlist *sysfs_get_driver_devices(struct sysfs_driver *driver)
 						curlink->target);
 				return NULL;
 			}
-			strcpy(device->driver_name, driver->name);
 			if (driver->devices == NULL) 
 				driver->devices = dlist_new_with_delete
 						(sizeof(struct sysfs_device),
