@@ -251,9 +251,10 @@ struct dlist *sysfs_open_bus_devices_list(unsigned char *name)
 		return NULL;
 	}
 
-	strcat(sysfs_path, "/bus/");
+	strcat(sysfs_path, SYSFS_BUS_DIR);
+	strcat(sysfs_path, "/");
 	strcat(sysfs_path, name);
-	strcat(sysfs_path, "/devices");
+	strcat(sysfs_path, SYSFS_DEVICES_DIR);
 	dir = sysfs_open_directory(sysfs_path);
 	if (dir == NULL) {
 		dprintf("Error opening sysfs_directory at %s\n", sysfs_path);

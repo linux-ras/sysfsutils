@@ -212,7 +212,7 @@ extern struct sysfs_attribute *sysfs_get_device_attr
 			(struct sysfs_device *dev, const unsigned char *name);
 extern struct dlist *sysfs_get_device_attributes(struct sysfs_device *device);
 extern struct sysfs_device *sysfs_open_device_by_id
-		(unsigned char *bus_id, unsigned char *bus, size_t bsize);
+		(const unsigned char *bus_id, unsigned char *bus, size_t bsize);
 extern int sysfs_write_device_attr(unsigned char *dev, unsigned char *attrib,
 					unsigned char *value);
 
@@ -228,7 +228,9 @@ extern struct sysfs_attribute *sysfs_get_bus_attribute(struct sysfs_bus *bus,
 						unsigned char *attrname);
 extern struct sysfs_device *sysfs_open_bus_device(unsigned char *busname, 
 							unsigned char *dev_id);
-extern int sysfs_find_device_bus_name(unsigned char *dev_id, 
+extern int sysfs_find_device_bus(const unsigned char *dev_id, 
+					unsigned char *busname,	size_t bsize);
+extern int sysfs_find_driver_bus(const unsigned char *driver, 
 					unsigned char *busname,	size_t bsize);
 
 /* generic sysfs class access */

@@ -155,8 +155,7 @@ struct sysfs_driver *sysfs_open_driver_by_name(unsigned char *drv_name,
 	struct sysfs_driver *driver = NULL;
 	struct sysfs_device *device = NULL;
 	struct sysfs_link *curlink = NULL;
-	char path[SYSFS_PATH_MAX], fullpath[SYSFS_PATH_MAX], 
-				*curbus = NULL, *curdrv = NULL;
+	unsigned char path[SYSFS_PATH_MAX];
 
 	if (drv_name == NULL || bus == NULL) {
 		errno = EINVAL;
@@ -164,41 +163,19 @@ struct sysfs_driver *sysfs_open_driver_by_name(unsigned char *drv_name,
 	}
 
 	memset(path, 0, SYSFS_PATH_MAX);
-	memset(fullpath, 0, SYSFS_PATH_MAX);
-	buslist = sysfs_open_subsystem_list(SYSFS_BUS_DIR);
-	if (buslist != NULL) {
-		dlist_for_each_data(buslist, curbus, char) {
-			strcpy(path, SYSFS_BUS_DIR);
-			strcat(path, "/");
-			strcat(path, curbus);
-			strcat(path, "/drivers/");
-			drivers = sysfs_open_subsystem_list(path);
-			if (drivers != NULL) {
-				dlist_for_each_data(drivers, curdrv, char) {
-					if (strcmp(drv_name, curdrv) == 0) {
-						strncpy(bus, curbus, bsize);
-						strcat(path, curdrv);
-						sysfs_close_list(drivers);
-						sysfs_close_list(buslist);
-						goto open_device;
-					}
-				}
-				sysfs_close_list(drivers);
-			}
-		}
-		sysfs_close_list(buslist);
-		return NULL;
-	}
-
-open_device:
-	if (sysfs_get_mnt_path(fullpath, SYSFS_PATH_MAX) != 0) {
+	if (sysfs_get_mnt_path(path, SYSFS_PATH_MAX) != 0) {
 		dprintf("Error getting sysfs mount path\n");
 		return NULL;
 	}
-	strcat(fullpath, path);
-	driver = sysfs_open_driver(fullpath);
+	strcat(path, SYSFS_BUS_DIR);
+	strcat(path, "/");
+	strcat(path, bus);
+	strcat(path, SYSFS_DRIVERS_DIR);
+	strcat(path, "/");
+	strcat(path, drv_name);
+	driver = sysfs_open_driver(path);
 	if (driver == NULL) {
-		dprintf("Driver %s not found\n", drv_name);
+		dprintf("Could not open driver %s\n", drv_name);
 		return NULL;
 	}
 	if (driver->directory->links != NULL) {
@@ -242,9 +219,13 @@ int sysfs_write_driver_attr(unsigned char *drv, unsigned char *attrib,
 	}
 
 	memset(busname, 0, SYSFS_NAME_LEN);
+	if ((sysfs_find_driver_bus(drv, busname, SYSFS_NAME_LEN)) < 0) {
+		dprintf("Driver %s not found\n", drv);
+		return -1;
+	}
 	driver = sysfs_open_driver_by_name(drv, busname, SYSFS_NAME_LEN);
 	if (driver == NULL) {
-		dprintf("Driver %s not found\n", drv);
+		dprintf("Could not open driverr %s\n", drv);
 		return -1;
 	}
 	attribute = sysfs_get_directory_attribute(driver->directory, attrib);

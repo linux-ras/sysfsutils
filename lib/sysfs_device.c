@@ -347,7 +347,7 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
  * returns struct sysfs_device if found, NULL otherwise
  * NOTE: Use sysfs_close_device to close the device
  */
-struct sysfs_device *sysfs_open_device_by_id(unsigned char *bus_id, 
+struct sysfs_device *sysfs_open_device_by_id(const unsigned char *bus_id, 
 		unsigned char *bus, size_t bsize)
 {
 	char sysfs_path[SYSFS_PATH_MAX], device_path[SYSFS_PATH_MAX];
@@ -358,13 +358,13 @@ struct sysfs_device *sysfs_open_device_by_id(unsigned char *bus_id,
 		errno = EINVAL;
 		return NULL;
 	}
-
-	if ((sysfs_find_device_bus_name(bus_id, bus, bsize)) != 0) {
+/*
+	if ((sysfs_find_device_bus(bus_id, bus, bsize)) != 0) {
 		dprintf("Device %s not found\n", bus_id);
 		errno = EINVAL;
 		return NULL;
 	}
-	
+*/	
 	memset(sysfs_path, 0, SYSFS_PATH_MAX);
 	if ((sysfs_get_mnt_path(sysfs_path, SYSFS_PATH_MAX)) != 0) {
 		dprintf("Error getting sysfs mount path\n");
@@ -373,7 +373,8 @@ struct sysfs_device *sysfs_open_device_by_id(unsigned char *bus_id,
 	strcat(sysfs_path, SYSFS_BUS_DIR);
 	strcat(sysfs_path, "/");
 	strncat(sysfs_path, bus, bsize);
-	strcat(sysfs_path, "/devices/");	/* sysfs_path = "/sys/bus/xxx/devices/" */
+	strcat(sysfs_path, SYSFS_DEVICES_DIR);
+	strcat(sysfs_path, "/");
 	strcat(sysfs_path, bus_id);
 
 	/* devices under /sys/bus/xxx/devices are links to devices subsystem */

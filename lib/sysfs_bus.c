@@ -406,9 +406,11 @@ struct sysfs_device *sysfs_open_bus_device(unsigned char *busname,
 		return NULL;
 	}
 
-	strcat(path, "/bus/");
+	strcat(path, SYSFS_BUS_DIR);
+	strcat(path, "/");
 	strcat(path, busname);
-	strcat(path, "/devices/");
+	strcat(path, SYSFS_DEVICES_DIR);
+	strcat(path, "/");
 	strcat(path, dev_id);
 
 	rdev = sysfs_open_device(path);
@@ -428,7 +430,7 @@ struct sysfs_device *sysfs_open_bus_device(unsigned char *busname,
  * @bsize: buffer size
  * returns 0 with success or -1 with error
  */
-int sysfs_find_device_bus_name(unsigned char *dev_id, unsigned char *busname, 
+int sysfs_find_device_bus(const unsigned char *dev_id, unsigned char *busname, 
 								size_t bsize)
 {
 	unsigned char subsys[SYSFS_NAME_LEN], *bus = NULL, *curdev = NULL; 
@@ -463,3 +465,49 @@ int sysfs_find_device_bus_name(unsigned char *dev_id, unsigned char *busname,
 	return -1;
 }
 
+/**
+ * sysfs_find_driver_bus: locates the bus the driver is on.
+ * @driver: name of the driver to locate
+ * @busname: buffer to copy name to
+ * @bsize: buffer size
+ * returns 0 with success, -1 with error
+ */
+int sysfs_find_driver_bus(const unsigned char *driver, unsigned char *busname,
+							size_t bsize)
+{
+	unsigned char subsys[SYSFS_PATH_MAX], *bus = NULL, *curdrv = NULL;
+	struct dlist *buslist = NULL, *drivers = NULL;
+
+	if (driver == NULL || busname == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	memset(subsys, 0, SYSFS_PATH_MAX);
+	strcpy(subsys, SYSFS_BUS_DIR);
+	buslist = sysfs_open_subsystem_list(subsys);
+	if (buslist != NULL) {
+		dlist_for_each_data(buslist, bus, char) {
+			memset(subsys, 0, SYSFS_PATH_MAX);
+			strcpy(subsys, SYSFS_BUS_DIR);
+			strcat(subsys, "/");
+			strcat(subsys, bus);
+			strcat(subsys, SYSFS_DRIVERS_DIR);
+			drivers = sysfs_open_subsystem_list(subsys);
+			if (drivers != NULL) {
+				dlist_for_each_data(drivers, curdrv, char) {
+					if (strcmp(driver, curdrv) == 0) {
+						strncpy(busname, bus, bsize);
+						sysfs_close_list(drivers);
+						sysfs_close_list(buslist);
+						return 0;
+					}
+				}
+				sysfs_close_list(drivers);
+			}
+		}
+		sysfs_close_list(buslist);
+	}
+	return -1;
+}
+					
