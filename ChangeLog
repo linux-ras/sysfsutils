@@ -1,4 +1,8 @@
 
+09/16/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Patch sysfs_close_driver() so as not to segfault when
+			during dlist shifting.
+
 09/15/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added sysfs_open_device_by_name() to open a device
 			given the device name
