@@ -1,4 +1,11 @@
 
+09/23/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Fixed "write" attribute functions.
+		* Removed sysfs_write_attribute_value()
+		* Added sysfs_change_attribute_value() - a wrapper for
+			sysfs_write_attribute()
+		* Simplified sysfs_get_device_attr()
+		
 09/16/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Patch sysfs_close_driver() so as not to segfault when
 			during dlist shifting.
@@ -22,7 +29,7 @@
 		* Simplify sysfs_find_device_bus_name()
 
 09/04/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
-		* Simplify sysfs_open_bus_device
+		* Simplified sysfs_open_bus_device
 
 08/29/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Removed "bus_name" from struct sysfs_device

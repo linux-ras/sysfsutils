@@ -73,20 +73,17 @@ struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
 						const unsigned char *name)
 {
 	struct sysfs_attribute *cur = NULL;
-	unsigned char attrname[SYSFS_NAME_LEN];
 
 	if (dev == NULL || dev->directory == NULL 
 	    || dev->directory->attributes == NULL || name == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
-	dlist_for_each_data(dev->directory->attributes, cur,
-			struct sysfs_attribute) {
-		if (strcmp(cur->name, attrname) != 0)
-			continue;
-
+	
+	cur = sysfs_get_directory_attribute(dev->directory, 
+			(unsigned char *)name);
+	if (cur != NULL)
 		return cur;
-	}
 
 	return NULL;
 }
@@ -350,8 +347,8 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
  * returns struct sysfs_device if found, NULL otherwise
  * NOTE: Use sysfs_close_device to close the device
  */
-struct sysfs_device *sysfs_open_device_by_name(char *dev_name, char *bus,
-							size_t bsize)
+struct sysfs_device *sysfs_open_device_by_name(unsigned char *dev_name, 
+		unsigned char *bus, size_t bsize)
 {
 	char sysfs_path[SYSFS_PATH_MAX], device_path[SYSFS_PATH_MAX];
 	struct sysfs_device *device = NULL;

@@ -160,12 +160,14 @@ struct sysfs_attribute *sysfs_open_attribute(const unsigned char *path)
 
 	return sysattr;
 }
+
 /**
  * sysfs_write_attribute: write value to the attribute
  * @sysattr: attribute to write
  * returns 0 with success and -1 with error.
  */
-int sysfs_write_attribute(struct sysfs_attribute *sysattr)
+int sysfs_write_attribute(struct sysfs_attribute *sysattr,
+		const unsigned char *new_value)
 {
 	int fd;
 	int length;
@@ -180,19 +182,43 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr)
 			sysattr->path);
 		return -1;
 	}
-		
-	if ((fd = open(sysattr->path, O_RDWR)) < 0) {
+	if ((strncmp(sysattr->value, new_value, sysattr->len)) == 0) {
+		dprintf("Attribute %s already has the requested value %s\n",
+				sysattr->name, new_value);
+		return 0;	
+	}
+	/* 
+	 * open O_WRONLY since some attributes have no "read" but only
+	 * "write" permission 
+	 */ 
+	if ((fd = open(sysattr->path, O_WRONLY)) < 0) {
+		perror("sysfs_write_attribute: open");
 		dprintf ("Error reading attribute %s\n", sysattr->path);
 		return -1;
 	}
 
-	length = write(fd, sysattr->value, sizeof(sysattr->value));
+	length = write(fd, new_value, strlen(new_value));
 	if (length < 0) {
+		perror("sysfs_write_attribute: write");
 		dprintf("Error write to the attribute %s\n",
 			sysattr->path);
 		close(fd);
 		return -1;
 	}
+	
+	/*
+	 * Validate length that has been copied. Alloc appropriate area
+	 * in sysfs_attribute
+	 */ 
+	if (length != sysattr->len) {
+		free(sysattr->value);	/* can we use realloc here? */
+		sysattr->value = (char *)calloc(1, length);
+		strncpy(sysattr->value, new_value, length);
+	} else {
+		/*"length" of the new value is same as old one */ 
+		strncpy(sysattr->value, new_value, length);
+	}
+			
 	close(fd);	
 	return 0;
 }
@@ -250,42 +276,6 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 
 	return 0;
 }
-
-/**
- * sysfs_write_attribute_value: given path to attribute, 
- * value will be saved to the attribute.
- * @attrpath: sysfs path to attribute
- * @value: value to give to attribute
- * returns 0 with success and -1 with error.
- */
-int sysfs_write_attribute_value(const unsigned char *attrpath, 
-						unsigned char *value)
-{
-	struct sysfs_attribute *attr = NULL;
-	
-	if (attrpath == NULL || value == NULL) {
-		errno = EINVAL;
-		return -1;
-	}
-
-	attr = sysfs_open_attribute(attrpath);
-	if (attr == NULL) {
-		dprintf("Invalid attribute path %s\n", attrpath);
-		errno = EINVAL;
-		return -1;
-	}
-	strncpy(attr->value,value,sizeof(value));
-	if ((sysfs_write_attribute(attr) != 0 )) {
-		dprintf("Error write to attribute %s\n", attrpath);
-		sysfs_close_attribute(attr);
-		return -1;
-	}
-
-	sysfs_close_attribute(attr);
-
-	return 0;
-}
-
 
 /**
  * sysfs_read_attribute_value: given path to attribute, return its value.
