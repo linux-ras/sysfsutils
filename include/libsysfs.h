@@ -168,7 +168,7 @@ extern int sysfs_read_attribute_value(const unsigned char *attrpath,
 extern int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 		const unsigned char *new_value, size_t len);
 extern unsigned char *sysfs_get_value_from_attributes(struct dlist *attr, 
-						const unsigned char * name);
+						const unsigned char *name);
 extern int sysfs_refresh_dir_attributes(struct sysfs_directory *sysdir);
 extern int sysfs_refresh_dir_links(struct sysfs_directory *sysdir);
 extern int sysfs_refresh_dir_subdirs(struct sysfs_directory *sysdir);
