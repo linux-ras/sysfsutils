@@ -1,4 +1,8 @@
 
+12/10/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added more optimization changes
+		* Added code to add and refresh attributes dynamically
+
 12/08/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Patched code for directory/attribute read optimization
 

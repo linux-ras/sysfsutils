@@ -524,9 +524,23 @@ int sysfs_refresh_attributes(struct dlist *attrlist)
 		if (attr->method & SYSFS_METHOD_SHOW) {
 			if ((sysfs_read_attribute(attr)) != 0) {
 				dprintf("Error reading attribute %s\n", path);
-				return 1;
+				if ((sysfs_path_is_file(attr->path)) != 0) {
+					dprintf("Attr %s no longer exists\n", 
+								attr->name);
+				}
+			}
+		} else {
+			if ((sysfs_path_is_file(attr->path)) != 0) {
+				dprintf("Attr %s no longer exists\n", 
+								attr->name);
 			}
 		}
+	}
+	if (attrlist->count == 0) {
+		dprintf("No attributes in the list, destroying list now\n");
+		dlist_destroy(attrlist);
+		attrlist = NULL;
+		return 1;
 	}
 	return 0;
 }
@@ -798,6 +812,7 @@ struct sysfs_attribute *sysfs_get_directory_attribute
 			(struct sysfs_directory *dir, unsigned char *attrname)
 {
 	struct sysfs_attribute *attr = NULL;
+	unsigned char new_path[SYSFS_PATH_MAX];
 	
 	if (dir == NULL || attrname == NULL) {
 		errno = EINVAL;
@@ -812,14 +827,24 @@ struct sysfs_attribute *sysfs_get_directory_attribute
 	attr = (struct sysfs_attribute *)dlist_find_custom
 			(dir->attributes, attrname, dir_attribute_name_equal);
 	if (attr != NULL) {
-		if ((sysfs_read_attribute(attr)) != 0) {
-			dprintf("Attribute at %s no longer exists?\n", 
-							attr->path);
-			return NULL;
-		} else
+		/*
+		 * don't read here since we would have read the attribute in 
+		 * in the routine that called this routine
+		 */ 
+		return attr;
+	} else {
+		memset(new_path, 0, SYSFS_PATH_MAX);
+		strcpy(new_path, dir->path);
+		strcat(new_path, "/");
+		strcat(new_path, attrname);
+		if ((sysfs_path_is_file(new_path)) == 0) {
+		 	if ((add_attribute(dir, new_path)) == 0) {
+				attr = (struct sysfs_attribute *)dlist_find_custom
+					(dir->attributes, attrname, dir_attribute_name_equal);
+			}
 			return attr;
+		}
 	}
-
 	return NULL;
 }
 

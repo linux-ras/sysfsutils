@@ -377,3 +377,26 @@ int sysfs_path_is_link(const unsigned char *path)
 		
 	return 1;
 }
+
+/**
+ * sysfs_path_is_file: Check if the path supplied points to a file
+ * @path: path to validate
+ * Returns 0 if path points to file, 1 otherwise
+ */
+int sysfs_path_is_file(const unsigned char *path)
+{
+	struct stat astats;
+
+	if (path == NULL) {
+		errno = EINVAL;
+		return 1;
+	}
+	if ((lstat(path, &astats)) != 0) {
+		dprintf("stat() failed\n");
+		return 1;
+	}
+	if (S_ISREG(astats.st_mode))
+		return 0;
+		
+	return 1;
+}

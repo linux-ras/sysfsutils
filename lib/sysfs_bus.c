@@ -335,6 +335,7 @@ struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus)
 {
 	if (bus == NULL)
 		return NULL;
+
 	if (bus->directory == NULL) {
 		bus->directory = sysfs_open_directory(bus->path);
 		if (bus->directory == NULL)
@@ -344,6 +345,10 @@ struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus)
 		if ((sysfs_read_dir_attributes(bus->directory)) != 0) 
 			return NULL;
 	} else {
+		if ((sysfs_path_is_dir(bus->path)) != 0) {
+			dprintf("Bus at %s no longer exists\n", bus->path);
+			return NULL;
+		}
 		if ((sysfs_refresh_attributes
 					(bus->directory->attributes)) != 0) {
 			dprintf("Error refreshing bus attributes\n");

@@ -538,6 +538,11 @@ struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev)
 			return NULL;
 		}
 	} else {
+		if ((sysfs_path_is_dir(cdev->path)) != 0) {
+			dprintf("Class device at %s no longer exists\n", 
+							cdev->path);
+			return NULL;
+		}
 		if ((sysfs_refresh_attributes
 					(cdev->directory->attributes)) != 0) {
 			dprintf("Error refreshing classdev attributes\n");
@@ -565,15 +570,13 @@ struct sysfs_attribute *sysfs_get_classdev_attr
 		return NULL;
 	}
 	
-	if (clsdev->directory == NULL) {
-		clsdev->directory = sysfs_open_directory(clsdev->path);
-		if (clsdev->directory == NULL) 
-			return NULL;
-	}
 	/* 
 	 * First, see if it's in the current directory. Then look at 
 	 * subdirs since class devices can have subdirs of attributes.
 	 */ 
+	attrlist = sysfs_get_classdev_attributes(clsdev);
+	if (attrlist == NULL)
+		return NULL;
 	cur = sysfs_get_directory_attribute(clsdev->directory,
 						(unsigned char *)name);
 	if (cur != NULL)

@@ -154,6 +154,11 @@ struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver)
 			return NULL;
 		}
 	} else {
+		if ((sysfs_path_is_dir(driver->path)) != 0) {
+			dprintf("Driver at %s no longer exists\n", 
+							driver->path);
+			return NULL;
+		}
 		if ((sysfs_refresh_attributes
 				(driver->directory->attributes)) != 0) {
 			dprintf("Error refreshing driver attributes\n");

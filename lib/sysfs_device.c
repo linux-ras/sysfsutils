@@ -378,6 +378,10 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 		if ((sysfs_read_dir_attributes(device->directory)) != 0)
 			return NULL;
 	} else {
+		if ((sysfs_path_is_dir(device->path)) != 0) {
+			dprintf("Device at %s no longer exists", device->path);
+			return NULL;
+		}
 		if ((sysfs_refresh_attributes
 				(device->directory->attributes)) != 0) {
 			dprintf("Error refreshing device attributes\n");
@@ -397,19 +401,15 @@ struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
 						const unsigned char *name)
 {
 	struct sysfs_attribute *cur = NULL;
+	struct dlist *attrlist = NULL;
 
 	if (dev == NULL || name == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
 	
-	if (dev->directory == NULL) {
-		dev->directory = sysfs_open_directory(dev->path);
-		if (dev->directory == NULL)
-			return NULL;
-	}
-	dev->directory->attributes = sysfs_get_device_attributes(dev);
-	if (dev->directory->attributes == NULL)
+	attrlist = sysfs_get_device_attributes(dev);
+	if (attrlist == NULL)
 		return NULL;
 
 	cur = sysfs_get_directory_attribute(dev->directory, 
@@ -431,14 +431,14 @@ struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
 static int get_device_absolute_path(const unsigned char *device,
 		const unsigned char *bus, unsigned char *path, size_t psize)
 {
-	unsigned char bus_path[SYSFS_NAME_LEN];
+	unsigned char bus_path[SYSFS_PATH_MAX];
 
 	if (device == NULL || path == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	memset(bus_path, 0, SYSFS_NAME_LEN);
+	memset(bus_path, 0, SYSFS_PATH_MAX);
 	if (sysfs_get_mnt_path(bus_path, SYSFS_PATH_MAX) != 0) {
 		dprintf ("Sysfs not supported on this system\n");
 		return -1;

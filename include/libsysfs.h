@@ -142,6 +142,8 @@ extern int sysfs_get_mnt_path(unsigned char *mnt_path, size_t len);
 extern int sysfs_get_name_from_path(const unsigned char *path, 
 					unsigned char *name, size_t len);
 extern int sysfs_path_is_dir(const unsigned char *path);
+extern int sysfs_path_is_link(const unsigned char *path);
+extern int sysfs_path_is_file(const unsigned char *path);
 extern int sysfs_get_link(const unsigned char *path, unsigned char *target, 
 								size_t len);
 extern struct dlist *sysfs_open_subsystem_list(unsigned char *name);
