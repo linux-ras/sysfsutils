@@ -945,7 +945,7 @@ Prototype:	void sysfs_close_class(struct sysfs_class *class);
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Name:		sysfs_open_class_device
+Name:		sysfs_open_class_device_path
 
 Description:	Function opens up one of the class devices represented in 
 		sysfs in sysfs/class/"class"/ directory. It returns a
@@ -957,7 +957,7 @@ Returns:	struct sysfs_class_device * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_class_device *sysfs_open_class_device
+Prototype:	struct sysfs_class_device *sysfs_open_class_device_path
 					(const unsigned char *path)
 -------------------------------------------------------------------------------
 
@@ -991,7 +991,7 @@ Prototype:	struct sysfs_class_device *sysfs_get_class_device
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Name:		sysfs_open_class_device_by_name
+Name:		sysfs_open_class_device
 
 Description:	Given the name of the class on which to look for, this function 
 		locates a given class device and returns a sysfs_class_device 
@@ -1011,7 +1011,7 @@ Returns:	struct sysfs_class_device * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_class_device *sysfs_open_class_device_by_name
+Prototype:	struct sysfs_class_device *sysfs_open_class_device
 			(const unsigned char *classname, unsigned char *class)
 -------------------------------------------------------------------------------
 
@@ -1084,7 +1084,7 @@ root devices. These functions recursively open or close a device
 and all of its children. 
 
 -------------------------------------------------------------------------------
-Name:		sysfs_open_device
+Name:		sysfs_open_device_path
 
 Description:	Opens up a device at a specific path. It opens the device's
 		directory, reads the directory, and returns a sysfs_device
@@ -1096,7 +1096,7 @@ Returns:	struct sysfs_device * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_device *sysfs_open_device
+Prototype:	struct sysfs_device *sysfs_open_device_path
 				(const unsigned char *path)
 -------------------------------------------------------------------------------
 
@@ -1173,7 +1173,7 @@ Prototype:	struct dlist *sysfs_get_device_attributes
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Name:		sysfs_open_device_by_id
+Name:		sysfs_open_device
 
 Description:	Given the name of the bus on which to look for, this function 
 		locates a given device and returns a sysfs_device structure 
@@ -1193,7 +1193,7 @@ Returns:	struct sysfs_device * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_device *sysfs_open_device_by_id
+Prototype:	struct sysfs_device *sysfs_open_device
 			(const unsigned char *bus_id, const unsigned char *bus)
 -------------------------------------------------------------------------------
 
@@ -1230,7 +1230,7 @@ the bus type, such as "pci", "usb, and so on). Functions are provided to
 open and close drivers.
 
 -------------------------------------------------------------------------------
-Name:		sysfs_open_driver
+Name:		sysfs_open_driver_path
 
 Description:	Opens driver at specific path.
 
@@ -1240,7 +1240,7 @@ Returns:	struct sysfs_driver * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_driver *sysfs_open_driver
+Prototype:	struct sysfs_driver *sysfs_open_driver_path
 				(const unsigned char *path)
 -------------------------------------------------------------------------------
 
@@ -1289,7 +1289,7 @@ Prototype:	struct dlist *sysfs_get_driver_attributes
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Name:		sysfs_open_driver_by_name
+Name:		sysfs_open_driver
 
 Description:	Given the name of the bus on which to look for, this function 
 		locates a given driver and returns a sysfs_driver structure 
@@ -1311,7 +1311,7 @@ Returns:	struct sysfs_driver * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	struct sysfs_driver *sysfs_open_driver_by_name
+Prototype:	struct sysfs_driver *sysfs_open_driver
 				(const unsigned char *drv_name,
 					const unsigned char *bus, size_t bsize)
 -------------------------------------------------------------------------------

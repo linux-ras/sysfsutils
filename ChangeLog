@@ -1,4 +1,15 @@
 
+12/12/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Changed function prototypes for sysfs_open_* calls that
+			accept absolute path to have _path suffix
+		* Changed function prototypes that take the device/driver 
+			bus/class and name to be normal sysfs_open_xxx()
+		* Changed sysfs_close_cls_dev() to be a static function
+
+12/12/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added function to open a driver knowing its name
+			and the bus it is on
+
 12/10/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added more optimization changes
 		* Added code to add and refresh attributes dynamically

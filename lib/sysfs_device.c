@@ -174,11 +174,11 @@ static struct sysfs_directory *open_device_dir(const unsigned char *path)
 }
 
 /**
- * sysfs_open_device: opens and populates device structure
+ * sysfs_open_device_path: opens and populates device structure
  * @path: path to device, this is the /sys/devices/ path
  * returns sysfs_device structure with success or NULL with error
  */
-struct sysfs_device *sysfs_open_device(const unsigned char *path)
+struct sysfs_device *sysfs_open_device_path(const unsigned char *path)
 {
 	struct sysfs_device *dev = NULL;
 
@@ -232,7 +232,7 @@ static struct sysfs_device *sysfs_open_device_tree(const unsigned char *path)
 		errno = EINVAL;
 		return NULL;
 	}
-	rootdev = sysfs_open_device(path);
+	rootdev = sysfs_open_device_path(path);
 	if (rootdev == NULL) {
 		dprintf("Error opening root device at %s\n", path);
 		return NULL;
@@ -463,7 +463,7 @@ static int get_device_absolute_path(const unsigned char *device,
 }
 
 /**
- * sysfs_open_device_by_id: open a device by id (use the "bus" subsystem)
+ * sysfs_open_device: open a device by id (use the "bus" subsystem)
  * @bus_id: bus_id of the device to open - has to be the "bus_id" in 
  * 		/sys/bus/xxx/devices
  * @bus: bus the device belongs to
@@ -473,7 +473,7 @@ static int get_device_absolute_path(const unsigned char *device,
  * 2. Bus the device is on must be supplied
  * 	Use sysfs_find_device_bus to get the bus name
  */
-struct sysfs_device *sysfs_open_device_by_id(const unsigned char *bus_id, 
+struct sysfs_device *sysfs_open_device(const unsigned char *bus_id, 
 						const unsigned char *bus)
 {
 	char sysfs_path[SYSFS_PATH_MAX];
@@ -490,7 +490,7 @@ struct sysfs_device *sysfs_open_device_by_id(const unsigned char *bus_id,
 		return NULL;
 	}
 	
-	device = sysfs_open_device(sysfs_path);
+	device = sysfs_open_device_path(sysfs_path);
 	if (device == NULL) {
 		dprintf("Error opening device %s\n", bus_id);
 		return NULL;
