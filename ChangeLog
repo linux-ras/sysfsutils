@@ -1,4 +1,7 @@
 
+10/22/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Removed "block" subsystem support
+
 10/20/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added code to install header files (from include dir)
 			to /usr/local/include/ directory

@@ -41,10 +41,6 @@
 #define SYSFS_NAME_ATTRIBUTE	"name"
 #define SYSFS_UNKNOWN		"unknown"
 
-/* Some "block" subsystem specific #defines */
-#define SYSFS_QUEUE_NAME	"queue"
-#define SYSFS_IOSCHED_NAME	"iosched"
-
 #define SYSFS_PATH_MAX		255
 #define	SYSFS_NAME_LEN		50
 #define SYSFS_BUS_ID_SIZE	20
@@ -131,23 +127,6 @@ struct sysfs_class {
 
 	/* for internal use only */
 	struct sysfs_directory *directory;	
-};
-
-struct sysfs_block_device {
-	struct sysfs_device *device;	/* the physical device */
-	struct dlist *partitions;	/* struct sysfs_block_partition */
-	unsigned char name[SYSFS_NAME_LEN];
-	unsigned char path[SYSFS_PATH_MAX];
-
-	/* for internal use only */
-	struct sysfs_directory *directory;
-};
-
-struct sysfs_block_partition {
-	unsigned char name[SYSFS_NAME_LEN];
-
-	/* for internal use only */
-	struct sysfs_directory *directory;
 };
 
 #ifdef __cplusplus
@@ -259,20 +238,6 @@ extern int sysfs_write_classdev_attr(unsigned char *dev, unsigned char *attrib,
 		unsigned char *value, size_t len);
 extern int sysfs_read_classdev_attr(unsigned char *dev, unsigned char *attrib, 
 		unsigned char *value, size_t len);
-
-/* generic sysfs block access */
-extern void sysfs_close_block_device(struct sysfs_block_device *block);
-extern struct sysfs_block_device *sysfs_open_block_device(unsigned char *name);
-extern struct dlist *sysfs_get_blockdev_attributes
-					(struct sysfs_block_device *block);
-extern struct sysfs_attribute *sysfs_get_blockdev_attr
-		(struct sysfs_block_device *block, const unsigned char *name);
-extern struct dlist *sysfs_get_partition_attributes
-					(struct sysfs_block_partition *part);
-extern struct dlist *sysfs_get_queue_attributes
-					(struct sysfs_block_device *block);
-extern struct dlist *sysfs_get_iosched_attributes
-					(struct sysfs_block_device *block);
 
 #ifdef __cplusplus
 }

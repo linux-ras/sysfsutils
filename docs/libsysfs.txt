@@ -3,7 +3,7 @@
 	=========================================
 
 Version: 0.3.0 
-October 9, 2003
+October 22, 2003
 
 Contents
 --------
@@ -19,10 +19,8 @@ Contents
    5.2 Bus Data Structure
    5.3 Class Data Structures
    5.4 Root Device Data Structure
-   5.5 Block Data Structure
-	5.5.1 Block Partition Data Structure
-   5.6 Device Data Structure
-   5.7 Driver Data Structure
+   5.5 Device Data Structure
+   5.6 Driver Data Structure
 6. Functions
    6.1 Utility Functions
    6.2 Filesystem Functions
@@ -31,9 +29,8 @@ Contents
        6.2.3 Directory Functions
    6.3 Bus Functions
    6.4 Class Functions
-   6.5 Block Functions
-   6.6 Device Functions
-   6.7 Driver Functions
+   6.5 Device Functions
+   6.6 Driver Functions
 7. Usage
 8. Conclusion
 
@@ -302,65 +299,7 @@ The name of the root device as represented under /sys/devices is read into
 intended to be used internal to the library. 
 
 
-5.5 Block Data Structure
-------------------------
-Block devices and their heirarchies (partitions) in sysfs are repersented under
-the /sys/block directory structure. Partitions are also represented in the 
-heirarchy as directories under the parent device. As an example, if a
-SCSI disk (sda) has two partitions (sda1, sda2), they show up as
-
-sda---
-     |
-     |--- sda1
-     |
-     |--- sda2
-
-In addition to this, statistics related to I/O scheduling on these block devices
-are also included.
-
-struct sysfs_block_device {
-        struct sysfs_device *device;    /* the physical device */
-	struct dlist *partitions;       /* struct sysfs_block_partition */
-	unsigned char name[SYSFS_NAME_LEN];
-	unsigned char path[SYSFS_PATH_MAX];
-
-	/* for internal use only */
-	struct sysfs_directory *directory;
-};
-						
-The sysfs_block_device structure imbeds in it a sysfs_device (if present), which
-is the physical device corresponding to this block device. In addition, it 
-contains a list of partitions. The name of the block device is read into "name"
-and the absolute path to the block device into "path". Its directory information
-is also stored but is intended to be used internal to the library. Applications
-desirous of obtaining block device attributes, queue attributes and I/O 
-scheduling information need to use:
-
-struct dlist *sysfs_get_blockdev_attributes(struct sysfs_block_device *block)
-struct dlist *sysfs_get_queue_attributes(struct sysfs_block_device *block)
-struct dlist *sysfs_get_iosched_attributes(struct sysfs_block_device *block)
-
-
-5.5.1 Block Partition Data Structure
-------------------------------------
-Partitions under block devices are represented by the sysfs_block_partition data
-structure. 
-
-struct sysfs_block_partition {
-	unsigned char *name[SYSFS_NAME_LEN];
-
-	/* for internal use only */
-	struct sysfs_directory *directory;
-};
-
-The sysfs_block_partition structure contains the name of the partition (hda1, 
-hda2, sda1, etc) and its directory information. Applications may use the 
-following function to get a list of attributes for the partition
-
-struct dlist *sysfs_get_partition_attributes
-				(struct sysfs_block_partition *part)
-
-5.6 Device Data Structure
+5.5 Device Data Structure
 -------------------------
 
 The sysfs_device structure represents a system device that's exposed
@@ -389,7 +328,7 @@ struct sysfs_attribute *sysfs_get_device_attribute(struct sysfs_device *dev,
 struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 
 
-5.7 Driver Data Structure
+5.6 Driver Data Structure
 -------------------------
 
 The sysfs_driver structure represents a device driver.
@@ -1159,128 +1098,7 @@ Prototype:	int sysfs_write_classdev_attr(unsigned char *dev,
 -------------------------------------------------------------------------------
 
 
-6.5 Block Functions
--------------------
-Libsysfs supports functions to access the "block" subsystem. Semantics for 
-the calls are similar to the subsystems detailed above.
-
--------------------------------------------------------------------------------
-Name:		sysfs_open_block_device
-
-Description:	Function opens up one of the block devices represented in sysfs
-		in /sys/block directory. It returns a sysfs_block_device 
-		structure, containing details about the "physical" entity
-		for the block device and its partitions.
-
-Arguments:	unsigned char *name	Name of the block device to open, "sda"..
-
-Returns:	struct sysfs_block_device * on success
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_block_device *sysfs_open_block_device
-							(unsigned char *name)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_close_block_device
-
-Description:	Function closes a sysfs_block_device structure including its
-		partitions.
-
-Arguments:	struct sysfs_block_device *block	Block device to close
-
-Prototype:	void sysfs_close_block_device(struct sysfs_block_device *block)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_blockdev_attributes
-
-Description:	Function takes a sysfs_block_device structure and returns a list 
-		of attributes for the block device.
-
-Arguments:	struct sysfs_block_device *block	Block device for which 
-							attributes are required
-
-Returns:	struct dlist * of attributes with success 
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_get_blockdev_attributes
-					(struct sysfs_block_device *block)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_blockdev_attr
-
-Description:	Searches supplied block device's attributes by name and returns
-		the attribute.
-
-Arguments:	struct sysfs_block_device *block	Device to search
-		const unsigned char *name		Attribute name to find
-
-Returns:	struct sysfs_attribute * with success 
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_attribute *sysfs_get_blockdev_attr
-		(struct sysfs_block_device *block, const unsigned char *name)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_partition_attributes
-
-Description:	Function takes a sysfs_block_partition structure and returns a 
-		list of attributes for the block partition.
-
-Arguments:	struct sysfs_block_partition *part	Block partition for 
-							which attributes are 
-							required
-
-Returns:	struct dlist * of attributes with success 
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_get_partition_attributes
-					(struct sysfs_block_partition *part)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_queue_attributes
-
-Description:	Function takes a sysfs_block_device structure and returns a list 
-		of "queue" attributes for the block device.
-
-Arguments:	struct sysfs_block_device *block	Block device for which 
-							attributes are required
-
-Returns:	struct dlist * of attributes with success 
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_get_queue_attributes
-					(struct sysfs_block_device *block)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_iosched_attributes
-
-Description:	Function takes a sysfs_block_device structure and returns a list 
-		of "iosched" attributes for the block device.
-
-Arguments:	struct sysfs_block_device *block	Block device for which 
-							attributes are required
-
-Returns:	struct dlist * of attributes with success 
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_get_iosched_attributes
-					(struct sysfs_block_device *block)
--------------------------------------------------------------------------------
-
-
-6.6 Device Functions
+6.5 Device Functions
 --------------------
 
 Devices represent everything in sysfs under /sys/devices, which is a
@@ -1427,7 +1245,7 @@ Prototype:	int sysfs_write_device_attr(unsigned char *dev,
 -------------------------------------------------------------------------------
 
 
-6.7 Driver Functions
+6.6 Driver Functions
 --------------------
 
 Drivers are represented in sysfs under the /sys/bus/xxx/drivers (xxx being
