@@ -642,14 +642,14 @@ struct sysfs_attribute *sysfs_get_directory_attribute
 	}
 
 	if (dir->attributes == NULL) {
-		if ((sysfs_read_dir_attributes(dir)) != 0) {
+		if ((sysfs_read_dir_attributes(dir)) != 0) 
 			return NULL;
-		}
-		attr = (struct sysfs_attribute *)dlist_find_custom
-			(dir->attributes, attrname, dir_attribute_name_equal);
-		if (attr != NULL)
-			return attr;
 	}
+
+	attr = (struct sysfs_attribute *)dlist_find_custom
+				(dir->attributes, attrname, dir_attribute_name_equal);
+	if (attr != NULL)
+		return attr;
 	
 	if (dir->subdirs != NULL) {
 		dlist_for_each_data(dir->subdirs, sdir, 
