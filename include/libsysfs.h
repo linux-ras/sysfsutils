@@ -172,7 +172,7 @@ extern int sysfs_read_attribute(struct sysfs_attribute *sysattr);
 extern int sysfs_read_attribute_value(const unsigned char *attrpath, 
 				unsigned char *value, size_t vsize);
 extern int sysfs_write_attribute(struct sysfs_attribute *sysattr,
-		const unsigned char *new_value);
+		const unsigned char *new_value, size_t len);
 extern unsigned char *sysfs_get_value_from_attributes(struct dlist *attr, 
 						const unsigned char * name);
 extern void sysfs_close_directory(struct sysfs_directory *sysdir);
@@ -193,29 +193,29 @@ extern struct sysfs_attribute *sysfs_get_directory_attribute
 /* sysfs driver access */
 extern void sysfs_close_driver(struct sysfs_driver *driver);
 extern struct sysfs_driver *sysfs_open_driver(const unsigned char *path);
+extern struct sysfs_attribute *sysfs_get_driver_attr
+		(struct sysfs_driver *drv, const unsigned char *name);
 extern struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver);
 extern struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver);
 extern void sysfs_close_driver_by_name(struct sysfs_driver *driver);
 extern struct sysfs_driver *sysfs_open_driver_by_name
 	(const unsigned char *drv_name, const unsigned char *bus, size_t bsize);
 extern int sysfs_write_driver_attr(unsigned char *drv, unsigned char *attrib,
-					unsigned char *value);
+				unsigned char *value, size_t len);
 
 /* generic sysfs device access */
 extern void sysfs_close_root_device(struct sysfs_root_device *root);
 extern struct sysfs_root_device *sysfs_open_root_device
 						(const unsigned char *name);
 extern void sysfs_close_device(struct sysfs_device *dev);
-extern void sysfs_close_device_tree(struct sysfs_device *dev);
 extern struct sysfs_device *sysfs_open_device(const unsigned char *path);
-extern struct sysfs_device *sysfs_open_device_tree(const unsigned char *path);
 extern struct sysfs_attribute *sysfs_get_device_attr
 			(struct sysfs_device *dev, const unsigned char *name);
 extern struct dlist *sysfs_get_device_attributes(struct sysfs_device *device);
 extern struct sysfs_device *sysfs_open_device_by_id
 	(const unsigned char *bus_id, const unsigned char *bus, size_t bsize);
 extern int sysfs_write_device_attr(unsigned char *dev, unsigned char *attrib,
-					unsigned char *value);
+				unsigned char *value, size_t len);
 
 /* generic sysfs bus access */
 extern void sysfs_close_bus(struct sysfs_bus *bus);
@@ -248,16 +248,18 @@ extern struct dlist *sysfs_get_classdev_attributes
 	(struct sysfs_class_device *cdev);
 extern int sysfs_find_device_class(const unsigned char *bus_id, 
 		unsigned char *classname, size_t bsize);
-extern int sysfs_write_classdev_attr(unsigned char *dev,
-		unsigned char *attrib, unsigned char *value);
+extern struct sysfs_attribute *sysfs_get_classdev_attr
+	(struct sysfs_class_device *clsdev, const unsigned char *name);
+extern int sysfs_write_classdev_attr(unsigned char *dev, unsigned char *attrib, 
+		unsigned char *value, size_t len);
 
 /* generic sysfs block access */
-extern void sysfs_close_block_partition
-			(struct sysfs_block_partition *partition);
 extern void sysfs_close_block_device(struct sysfs_block_device *block);
 extern struct sysfs_block_device *sysfs_open_block_device(unsigned char *name);
 extern struct dlist *sysfs_get_blockdev_attributes
 					(struct sysfs_block_device *block);
+extern struct sysfs_attribute *sysfs_get_blockdev_attr
+		(struct sysfs_block_device *block, const unsigned char *name);
 extern struct dlist *sysfs_get_partition_attributes
 					(struct sysfs_block_partition *part);
 extern struct dlist *sysfs_get_queue_attributes

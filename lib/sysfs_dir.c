@@ -164,15 +164,17 @@ struct sysfs_attribute *sysfs_open_attribute(const unsigned char *path)
 /**
  * sysfs_write_attribute: write value to the attribute
  * @sysattr: attribute to write
+ * @new_value: value to write
+ * @len: length of "new_value"
  * returns 0 with success and -1 with error.
  */
 int sysfs_write_attribute(struct sysfs_attribute *sysattr,
-		const unsigned char *new_value)
+		const unsigned char *new_value, size_t len)
 {
 	int fd;
 	int length;
 	
-	if (sysattr == NULL) {
+	if (sysattr == NULL || new_value == NULL || len == 0) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -199,10 +201,20 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 		return -1;
 	}
 
-	length = write(fd, new_value, strlen(new_value));
+	length = write(fd, new_value, len);
 	if (length < 0) {
 		dprintf("Error writing to the attribute %s - invalid value?\n",
 			sysattr->name);
+		close(fd);
+		return -1;
+	} else if (length != len) {
+		dprintf("Could not write %d bytes to attribute %s\n", 
+					len, sysattr->name);
+		/* 
+		 * since we could not write user supplied number of bytes,
+		 * restore the old value
+		 */
+		length = write(fd, sysattr->value, sysattr->len);
 		close(fd);
 		return -1;
 	}
@@ -212,8 +224,8 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 	 * in sysfs_attribute
 	 */ 
 	if (length != sysattr->len) {
-		free(sysattr->value);	/* can we use realloc here? */
-		sysattr->value = (char *)calloc(1, length);
+		sysattr->value = (char *)realloc(sysattr->value, length);
+		sysattr->len = length;
 		strncpy(sysattr->value, new_value, length);
 	} else {
 		/*"length" of the new value is same as old one */ 

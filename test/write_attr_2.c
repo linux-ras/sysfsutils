@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 /*	if ((sysfs_change_attribute_value(argv[1], argv[2], argv[3])) < 0) {*/
-	if ((sysfs_write_device_attr(argv[1], argv[2], argv[3])) < 0) {
+	if ((sysfs_write_device_attr(argv[1], argv[2], argv[3], strlen(argv[3]))) < 0) {
 /*	if ((sysfs_write_classdev_attr(argv[1], argv[2], argv[3])) < 0) {*/
 /*	if ((sysfs_write_driver_attr(argv[1], argv[2], argv[3])) < 0) {*/
 		fprintf(stdout, "Write attribute error\n");

@@ -1,4 +1,12 @@
 
+10/09/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Updated docs/libsysfs.txt
+		* Fixed warning in cmd/names.c
+		* Modified "write" attribute functions to accept 
+			length to write as a parameter
+		* Added functions sysfs_get_driver_attr(),
+			sysfs_get_blockdev_attr(), sysfs_get_classdev_attr()
+
 10/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Miscellaneous changes - renaming of some
 			functions, etc

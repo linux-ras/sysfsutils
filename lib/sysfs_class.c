@@ -408,6 +408,31 @@ int sysfs_find_device_class(const unsigned char *bus_id,
 }
 
 /**
+ * sysfs_get_classdev_attr: searches class device's attributes by name
+ * @clsdev: class device to look through
+ * @name: attribute name to get
+ * returns sysfs_attribute reference with success or NULL with error
+ */
+struct sysfs_attribute *sysfs_get_classdev_attribute
+		(struct sysfs_class_device *clsdev, const unsigned char *name)
+{
+	struct sysfs_attribute *cur = NULL;
+
+	if (clsdev == NULL || clsdev->directory == NULL ||
+		clsdev->directory->attributes == NULL || name == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	cur = sysfs_get_directory_attribute(clsdev->directory,
+						(unsigned char *)name);
+	if (cur != NULL)
+		return cur;
+
+	return NULL;
+}
+
+/**
  * sysfs_write_classdev_attr: modify writable attribute value for the given
  * 				class device
  * @dev: class device name for which the attribute has to be changed
@@ -416,14 +441,14 @@ int sysfs_find_device_class(const unsigned char *bus_id,
  * Returns 0 on success and -1 on error
  */
 int sysfs_write_classdev_attr(unsigned char *dev, unsigned char *attrib,
-					unsigned char *value)
+				unsigned char *value, size_t len)
 {
 	struct sysfs_class_device *clsdev = NULL;
 	struct sysfs_attribute *attribute = NULL;
 	unsigned char class_name[SYSFS_NAME_LEN];
 
 	if (dev == NULL || attrib == NULL || value == NULL) {
-		dprintf("Invalid parameters\n");
+		errno = EINVAL;
 		return -1;
 	}
 	
@@ -445,7 +470,7 @@ int sysfs_write_classdev_attr(unsigned char *dev, unsigned char *attrib,
 		sysfs_close_class_device(clsdev);
 		return -1;
 	}
-	if ((sysfs_write_attribute(attribute, value)) < 0) {
+	if ((sysfs_write_attribute(attribute, value, len)) < 0) {
 		dprintf("Error setting %s to %s\n", attrib, value);
 		sysfs_close_class_device(clsdev);
 		return -1;

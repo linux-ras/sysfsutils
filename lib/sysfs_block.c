@@ -33,24 +33,21 @@
 #include "libsysfs.h"
 #include "sysfs.h"
 
-void sysfs_del_partition(void *partition)
-{
-	sysfs_close_block_partition((struct sysfs_block_partition *)partition);
-}
-
 /**
  * sysfs_close_block_partition: closes a block partition
  * @partition: sysfs_block_partition to close
  */
-void sysfs_close_block_partition(struct sysfs_block_partition *partition)
+static void sysfs_close_block_partition(struct sysfs_block_partition *partition)
 {
 	if (partition != NULL) {
 		if (partition->directory != NULL)
-/*	reuse sysfs_dir from the earlier structure - just set it to NULL here 
- *	free it while closing sysfs_block_device->directory
- * 		sysfs_close_directory(partition->directory);*/
 			partition->directory = NULL;
 	}
+}
+
+static void sysfs_del_partition(void *partition)
+{
+	sysfs_close_block_partition((struct sysfs_block_partition *)partition);
 }
 
 /**
@@ -231,6 +228,31 @@ struct dlist *sysfs_get_blockdev_attributes(struct sysfs_block_device *block)
 		return NULL;
 	
 	return(block->directory->attributes);
+}
+
+/**
+ * sysfs_get_blockdev_attr: searches block device's attributes by name
+ * @block: block device to look through
+ * @name: attribute name to get
+ * returns sysfs_attribute reference with success or NULL with error.
+ */
+struct sysfs_attribute *sysfs_get_blockdev_attr
+		(struct sysfs_block_device *block, const unsigned char *name)
+{
+        struct sysfs_attribute *cur = NULL;
+
+	if (block == NULL || block->directory == NULL
+		|| block->directory->attributes == NULL || name == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	cur = sysfs_get_directory_attribute(block->directory,
+					(unsigned char *)name);
+	if (cur != NULL)
+		return cur;
+
+	return NULL;
 }
 		
 /** 

@@ -336,5 +336,8 @@ pci_lookup_name(struct pci_access *a, unsigned char *buf, int size, int flags, u
     default:
       return "<pci_lookup_name: invalid request>";
     }
-  return (res == size) ? "<too-large>" : buf;
+    if (res == size) 
+      return "<too-large>";
+    else
+      return buf; 
 }

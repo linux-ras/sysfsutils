@@ -24,6 +24,26 @@
 #include "sysfs.h"
 
 /**
+ * sysfs_close_device_tree: closes every device in the supplied tree, 
+ * 	closing children only.
+ * @devroot: device root of tree.
+ */
+static void sysfs_close_device_tree(struct sysfs_device *devroot)
+{
+	if (devroot != NULL) {
+		if (devroot->children != NULL) {
+			struct sysfs_device *child = NULL;
+
+			dlist_for_each_data(devroot->children, child,
+					struct sysfs_device) {
+				sysfs_close_device_tree(child);
+			}
+		}
+		sysfs_close_device(devroot);
+	}
+}
+
+/**
  * sysfs_del_device: routine for dlist integration
  */
 static void sysfs_del_device(void *dev)
@@ -135,33 +155,13 @@ struct sysfs_device *sysfs_open_device(const unsigned char *path)
 }
 
 /**
- * sysfs_close_device_tree: closes every device in the supplied tree, 
- * 	closing children only.
- * @devroot: device root of tree.
- */
-void sysfs_close_device_tree(struct sysfs_device *devroot)
-{
-	if (devroot != NULL) {
-		if (devroot->children != NULL) {
-			struct sysfs_device *child = NULL;
-
-			dlist_for_each_data(devroot->children, child,
-					struct sysfs_device) {
-				sysfs_close_device_tree(child);
-			}
-		}
-		sysfs_close_device(devroot);
-	}
-}
-
-/**
  * sysfs_open_device_tree: opens root device and all of its children,
  *	creating a tree of devices. Only opens children.
  * @path: sysfs path to devices
  * returns struct sysfs_device and its children with success or NULL with
  *	error.
  */
-struct sysfs_device *sysfs_open_device_tree(const unsigned char *path)
+static struct sysfs_device *sysfs_open_device_tree(const unsigned char *path)
 {
 	struct sysfs_device *rootdev = NULL, *new = NULL;
 	struct sysfs_directory *cur = NULL;
@@ -361,13 +361,6 @@ struct sysfs_device *sysfs_open_device_by_id(const unsigned char *bus_id,
 		errno = EINVAL;
 		return NULL;
 	}
-/*
-	if ((sysfs_find_device_bus(bus_id, bus, bsize)) != 0) {
-		dprintf("Device %s not found\n", bus_id);
-		errno = EINVAL;
-		return NULL;
-	}
-*/	
 	memset(sysfs_path, 0, SYSFS_PATH_MAX);
 	if ((sysfs_get_mnt_path(sysfs_path, SYSFS_PATH_MAX)) != 0) {
 		dprintf("Error getting sysfs mount path\n");
@@ -400,24 +393,29 @@ struct sysfs_device *sysfs_open_device_by_id(const unsigned char *bus_id,
  * @dev: device bus_id for which attribute has to be changed
  * @attrib: attribute to change
  * @value: value to change to
+ * @len: "value" length to write
  * Returns 0 on success -1 on error
  */ 
 int sysfs_write_device_attr(unsigned char *dev, unsigned char *attrib,
-							unsigned char *value)
+					unsigned char *value, size_t len)
 {
 	struct sysfs_device *device = NULL;
 	struct sysfs_attribute *attribute = NULL;
-	unsigned char subsys_name[SYSFS_NAME_LEN];
+	unsigned char bus_name[SYSFS_NAME_LEN];
 
 	if (dev == NULL || attrib == NULL || value == NULL) {
-		dprintf("Invalid parameters\n");
+		errno = EINVAL;
 		return -1;
 	}
 	
-	memset(subsys_name, 0, SYSFS_NAME_LEN);
-	device = sysfs_open_device_by_id(dev, subsys_name, SYSFS_NAME_LEN);
-	if (device == NULL) {
+	memset(bus_name, 0, SYSFS_NAME_LEN);
+	if ((sysfs_find_device_bus(dev, bus_name, SYSFS_NAME_LEN)) != 0) {
 		dprintf("Device %s not found\n", dev);
+		return -1;
+	}
+	device = sysfs_open_device_by_id(dev, bus_name, SYSFS_NAME_LEN);
+	if (device == NULL) {
+		dprintf("Error opening device %s\n", dev);
 		return -1;
 	}
 	attribute = sysfs_get_directory_attribute(device->directory, attrib);
@@ -427,7 +425,7 @@ int sysfs_write_device_attr(unsigned char *dev, unsigned char *attrib,
 		sysfs_close_device(device);
 		return -1;
 	}
-	if ((sysfs_write_attribute(attribute, value)) < 0) {
+	if ((sysfs_write_attribute(attribute, value, len)) < 0) {
 		dprintf("Error setting %s to %s\n", attrib, value);
 		sysfs_close_device(device);
 		return -1;

@@ -23,7 +23,7 @@
 #include "libsysfs.h"
 #include "sysfs.h"
 
-void sysfs_close_driver_by_name_dev(void *device)
+static void sysfs_close_driver_by_name_dev(void *device)
 {
 	sysfs_close_device((struct sysfs_device *)device);
 }
@@ -63,8 +63,6 @@ void sysfs_close_driver_by_name(struct sysfs_driver *driver)
 	}
 }
 		
-	
-
 /**
  * alloc_driver: allocates and initializes driver
  * returns struct sysfs_driver with success and NULL with error.
@@ -123,6 +121,31 @@ struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver)
 		return NULL;
 
 	return(driver->directory->attributes);
+}
+
+/**
+ * sysfs_get_driver_attr: searches driver's attributes by name
+ * @drv: driver to look through
+ * @name: attribute name to get
+ * returns sysfs_attribute reference on success or NULL with error
+ */ 
+struct sysfs_attribute *sysfs_get_driver_attr(struct sysfs_driver *drv,
+					const unsigned char *name)
+{
+	struct sysfs_attribute *cur = NULL;
+
+        if (drv == NULL || drv->directory == NULL
+            || drv->directory->attributes == NULL || name == NULL) {
+                errno = EINVAL;
+                return NULL;
+        }
+
+        cur = sysfs_get_directory_attribute(drv->directory,
+		                        (unsigned char *)name);
+        if (cur != NULL)
+                return cur;
+
+        return NULL;
 }
 
 /**
@@ -210,14 +233,14 @@ struct sysfs_driver *sysfs_open_driver_by_name(const unsigned char *drv_name,
  * Returns 0 on success -1 on failure
  */ 
 int sysfs_write_driver_attr(unsigned char *drv, unsigned char *attrib,
-						unsigned char *value)
+					unsigned char *value, size_t len)
 {
 	struct sysfs_driver *driver = NULL;
 	struct sysfs_attribute *attribute = NULL;
 	unsigned char busname[SYSFS_NAME_LEN];
 
 	if (drv == NULL || attrib == NULL || value == NULL) {
-		dprintf("Invalid parameters\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -238,7 +261,7 @@ int sysfs_write_driver_attr(unsigned char *drv, unsigned char *attrib,
 		sysfs_close_driver_by_name(driver);
 		return -1;
 	}
-	if ((sysfs_write_attribute(attribute, value)) < 0) {
+	if ((sysfs_write_attribute(attribute, value, len)) < 0) {
 		dprintf("Error setting %s to %s\n", attrib, value);
 		sysfs_close_driver_by_name(driver);
 		return -1;
