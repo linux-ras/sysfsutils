@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
 	struct sysfs_class_device *cdev = NULL;
 	struct sysfs_attribute *attr = NULL;
 	struct dlist *attrlist = NULL;
+	struct sysfs_device *device = NULL;
+	struct sysfs_driver *driver = NULL;
 
 	if (argc != 3) {
 		print_usage();
@@ -56,9 +58,11 @@ int main(int argc, char *argv[])
 	}
 	fprintf(stdout, "\n");
 		
-	if (cdev->sysdevice)
+	device = sysfs_get_classdev_device(cdev);
+	if (device)
 		fprintf(stdout, "\tDevice : %s\n", cdev->sysdevice->bus_id);
-	if (cdev->driver)
+	driver = sysfs_get_classdev_driver(cdev);
+	if (driver)
 		fprintf(stdout, "\tDriver : %s\n", cdev->driver->name);
 
 	sysfs_close_class_device(cdev);

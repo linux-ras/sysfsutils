@@ -385,6 +385,7 @@ void sysfs_close_directory(struct sysfs_directory *sysdir)
 		if (sysdir->attributes != NULL) 
 			dlist_destroy(sysdir->attributes);
 		free(sysdir);
+		sysdir = NULL;
 	}
 }
 

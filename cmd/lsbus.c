@@ -259,32 +259,23 @@ void print_driver_attributes(struct sysfs_driver *driver)
 }
 
 /**
- * print_driver_devices: prints out devices under driver.
- * @driver: print devices bound to this driver.
- */
-void print_driver_devices(struct sysfs_driver *driver)
-{
-	struct sysfs_device *device = NULL;
-	
-	if (driver != NULL) {
-		if (driver->devices != NULL) {
-			fprintf (stdout, "\tDevices:\n");
-			dlist_for_each_data(driver->devices, device,
-					struct sysfs_device) 
-				fprintf(stdout, "\t\t%s\n", device->bus_id);
-		}
-	}
-}
-
-/**
  * print_driver: prints out driver information.
  * @driver: driver to print.
  */
 void print_driver(struct sysfs_driver *driver)
 {
+	struct dlist *devlist = NULL;
+	
 	if (driver != NULL) {
 		fprintf (stdout, "  %s\n", driver->name);
-		print_driver_devices(driver);
+		devlist = sysfs_get_driver_devices(driver);
+		if (devlist != NULL) {
+			struct sysfs_device *dev = NULL;
+			fprintf(stdout, "\tDevices:\n");
+			dlist_for_each_data(driver->devices, dev,
+					struct sysfs_device)
+				fprintf(stdout, "\t\t%s\n", dev->bus_id);
+		}
 		if(show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
 			    | SHOW_ALL_ATTRIB_VALUES))
 			print_driver_attributes(driver);
@@ -301,6 +292,8 @@ int print_sysfs_bus(unsigned char *busname)
 	struct sysfs_bus *bus = NULL;
 	struct sysfs_device *curdev = NULL;
 	struct sysfs_driver *curdrv = NULL;
+	struct dlist *devlist = NULL;
+	struct dlist *drvlist = NULL;
 
 	if (busname == NULL) {
 		errno = EINVAL;
@@ -313,20 +306,27 @@ int print_sysfs_bus(unsigned char *busname)
 	}
 
 	fprintf(stdout, "Bus: %s\n", busname);
-	if (bus->devices != NULL && (show_options & SHOW_DEVICES)) {
-		if (bus_device == NULL)
-			fprintf(stdout, "Devices:\n");
-		dlist_for_each_data(bus->devices, curdev,
-				struct sysfs_device) {
-			if (bus_device == NULL || (strcmp(bus_device,
-			    curdev->bus_id) == 0)) 
-				print_device(curdev);
+	if (show_options & SHOW_DEVICES) {
+		devlist = sysfs_get_bus_devices(bus);
+		if (devlist != NULL) {
+			if (bus_device == NULL)
+				fprintf(stdout, "Devices:\n");
+			dlist_for_each_data(bus->devices, curdev,
+					struct sysfs_device) {
+				if (bus_device == NULL || (strcmp(bus_device,
+							curdev->bus_id) == 0)) 
+					print_device(curdev);
+			}
 		}
 	}
-	if (bus->drivers != NULL && (show_options & SHOW_DRIVERS)) {
-		fprintf(stdout, "Drivers:\n");
-		dlist_for_each_data(bus->drivers, curdrv, struct sysfs_driver) {
-			print_driver(curdrv);
+	if (show_options & SHOW_DRIVERS) {
+		drvlist = sysfs_get_bus_drivers(bus);
+		if (drvlist != NULL) {
+			fprintf(stdout, "Drivers:\n");
+			dlist_for_each_data(bus->drivers, curdrv, 
+					struct sysfs_driver) {
+				print_driver(curdrv);
+			}
 		}
 	}
 	sysfs_close_bus(bus);

@@ -1,4 +1,7 @@
 
+11/27/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Updated library and utilities with the optimization patch
+
 11/24/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Removed getpagesize() usage (Dan)
 		* Added patch to postpone reading of attributes until 

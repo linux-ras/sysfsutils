@@ -155,32 +155,32 @@ static struct sysfs_device *alloc_device(void)
 }
 
 /**
- * sysfs_get_device_attr: searches dev's attributes by name
- * @dev: device to look through
- * @name: attribute name to get
- * returns sysfs_attribute reference with success or NULL with error.
+ * open_device_dir: opens up sysfs_directory for specific root dev
+ * @name: name of root
+ * returns struct sysfs_directory with success and NULL with error
  */
-struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
-						const unsigned char *name)
+static struct sysfs_directory *open_device_dir(const unsigned char *path)
 {
-	struct sysfs_attribute *cur = NULL;
+	struct sysfs_directory *rdir = NULL;
 
-	if (dev == NULL || dev->directory == NULL || name == NULL) {
+	if (path == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
-	
-	if (dev->directory->attributes == NULL) {
-		if ((sysfs_read_dir_attributes(dev->directory)) != 0)
-			return NULL;
+
+	rdir = sysfs_open_directory(path);
+	if (rdir == NULL) {
+		errno = EINVAL;
+		dprintf ("Device %s not supported on this system\n", path);
+		return NULL;
 	}
-
-	cur = sysfs_get_directory_attribute(dev->directory, 
-			(unsigned char *)name);
-	if (cur != NULL)
-		return cur;
-
-	return NULL;
+	if ((sysfs_read_directory(rdir)) != 0) {
+		dprintf ("Error reading device at dir %s\n", path);
+		sysfs_close_directory(rdir);
+		return NULL;
+	}
+	
+	return rdir;
 }
 
 /**
@@ -191,10 +191,13 @@ struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
 struct sysfs_device *sysfs_open_device(const unsigned char *path)
 {
 	struct sysfs_device *dev = NULL;
-	struct sysfs_directory *sdir = NULL;
 
 	if (path == NULL) {
 		errno = EINVAL;
+		return NULL;
+	}
+	if ((sysfs_path_is_dir(path)) != 0) {
+		dprintf("Incorrect path to device: %s\n", path);
 		return NULL;
 	}
 	dev = alloc_device();	
@@ -202,29 +205,20 @@ struct sysfs_device *sysfs_open_device(const unsigned char *path)
 		dprintf("Error allocating device at %s\n", path);
 		return NULL;
 	}
-	sdir = sysfs_open_directory(path);
-	if (sdir == NULL) {
-		dprintf("Invalid device at %s\n", path);
+	if ((sysfs_get_name_from_path(path, dev->bus_id, 
+					SYSFS_NAME_LEN)) != 0) {
 		errno = EINVAL;
+		dprintf("Error getting device bus_id\n");
 		sysfs_close_device(dev);
 		return NULL;
 	}
-	if ((sysfs_read_directory(sdir)) != 0) {
-		dprintf("Error reading device directory at %s\n", path);
-		sysfs_close_directory(sdir);
-		sysfs_close_device(dev);
-		return NULL;
-	}
-	dev->directory = sdir;
-	strcpy(dev->bus_id, sdir->name);
-	strcpy(dev->path, sdir->path);
-
+	strcpy(dev->path, path);
 	/* 
 	 * The "name" attribute no longer exists... return the device's
 	 * sysfs representation instead, in the "dev->name" field, which
 	 * implies that the dev->name and dev->bus_id contain same data.
 	 */
-	strncpy(dev->name, sdir->name, SYSFS_NAME_LEN);
+	strncpy(dev->name, dev->bus_id, SYSFS_NAME_LEN);
 	
 	if (get_device_bus(dev) != 0)
 		strcpy(dev->bus, SYSFS_UNKNOWN);
@@ -252,6 +246,11 @@ static struct sysfs_device *sysfs_open_device_tree(const unsigned char *path)
 	if (rootdev == NULL) {
 		dprintf("Error opening root device at %s\n", path);
 		return NULL;
+	}
+	if (rootdev->directory == NULL) {
+		rootdev->directory = open_device_dir(rootdev->path);
+		if (rootdev->directory == NULL) 
+			return NULL;
 	}
 	if (rootdev->directory->subdirs != NULL) {
 		dlist_for_each_data(rootdev->directory->subdirs, cur,
@@ -290,60 +289,25 @@ void sysfs_close_root_device(struct sysfs_root_device *root)
 }
 
 /**
- * open_root_device_dir: opens up sysfs_directory for specific root dev
- * @name: name of root
- * returns struct sysfs_directory with success and NULL with error
- */
-static struct sysfs_directory *open_root_device_dir(const unsigned char *name)
-{
-	struct sysfs_directory *rdir = NULL;
-	unsigned char rootpath[SYSFS_PATH_MAX];
-
-	if (name == NULL) {
-		errno = EINVAL;
-		return NULL;
-	}
-
-	memset(rootpath, 0, SYSFS_PATH_MAX);
-	if (sysfs_get_mnt_path(rootpath, SYSFS_PATH_MAX) != 0) {
-		dprintf ("Sysfs not supported on this system\n");
-		return NULL;
-	}
-
-	strcat(rootpath, SYSFS_DEVICES_DIR);
-	strcat(rootpath, "/");
-	strcat(rootpath, name);
-	rdir = sysfs_open_directory(rootpath);
-	if (rdir == NULL) {
-		errno = EINVAL;
-		dprintf ("Root device %s not supported on this system\n",
-			name);
-		return NULL;
-	}
-	if ((sysfs_read_directory(rdir)) != 0) {
-		dprintf ("Error reading %s root device at dir %s\n", name,
-			rootpath);
-		sysfs_close_directory(rdir);
-		return NULL;
-	}
-	
-	return rdir;
-}
-
-/**
- * get_all_root_devices: opens up all the devices under this root device
+ * sysfs_get_root_devices: opens up all the devices under this root device
  * @root: root device to open devices for
- * returns 0 with success and -1 with error
+ * returns dlist of devices with success and NULL with error
  */
-static int get_all_root_devices(struct sysfs_root_device *root)
+struct dlist *sysfs_get_root_devices(struct sysfs_root_device *root)
 {
 	struct sysfs_device *dev = NULL;
 	struct sysfs_directory *cur = NULL;
 
-	if (root == NULL || root->directory == NULL) {
+	if (root == NULL) {
 		errno = EINVAL;
-		return -1;
+		return NULL;
 	}
+	if (root->directory == NULL) {
+		root->directory = open_device_dir(root->path);
+		if (root->directory == NULL)
+			return NULL;
+	}
+		
 	if (root->directory->subdirs == NULL)
 		return 0;
 
@@ -361,7 +325,7 @@ static int get_all_root_devices(struct sysfs_root_device *root)
 		dlist_unshift(root->devices, dev);
 	}
 
-	return 0;
+	return root->devices;
 }
 
 /**
@@ -373,33 +337,34 @@ static int get_all_root_devices(struct sysfs_root_device *root)
 struct sysfs_root_device *sysfs_open_root_device(const unsigned char *name)
 {
 	struct sysfs_root_device *root = NULL;
-	struct sysfs_directory *rootdir = NULL;
+	unsigned char rootpath[SYSFS_PATH_MAX];
 
 	if (name == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
 
+	memset(rootpath, 0, SYSFS_PATH_MAX);
+	if (sysfs_get_mnt_path(rootpath, SYSFS_PATH_MAX) != 0) {
+		dprintf ("Sysfs not supported on this system\n");
+		return NULL;
+	}
+
+	strcat(rootpath, SYSFS_DEVICES_DIR);
+	strcat(rootpath, "/");
+	strcat(rootpath, name);
+	if ((sysfs_path_is_dir(rootpath)) != 0) {
+		errno = EINVAL;
+		dprintf("Invalid root device: %s\n", name);
+		return NULL;
+	}
 	root = (struct sysfs_root_device *)calloc
 					(1, sizeof(struct sysfs_root_device));
 	if (root == NULL) {
 		dprintf("calloc failure\n");
 		return NULL;
 	}
-	rootdir = open_root_device_dir(name);
-	if (rootdir == NULL) {
-		dprintf ("Invalid root device, %s not supported\n", name);
-		sysfs_close_root_device(root);
-		return NULL;
-	}
-	strcpy(root->path, rootdir->path);
-	root->directory = rootdir;
-	if (get_all_root_devices(root) != 0) {
-		dprintf ("Error retrieving devices for root %s\n", name);
-		sysfs_close_root_device(root);
-		return NULL;
-	}
-
+	strcpy(root->path, rootpath);
 	return root;
 }
 
@@ -410,14 +375,52 @@ struct sysfs_root_device *sysfs_open_root_device(const unsigned char *name)
  */
 struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 {
-	if (device == NULL || device->directory == NULL) 
+	if (device == NULL) 
 		return NULL;
 
+	if (device->directory == NULL) {
+		device->directory = sysfs_open_directory(device->path);
+		if (device->directory == NULL) 
+			return NULL;
+	}
 	if (device->directory->attributes == NULL) {
 		if ((sysfs_read_dir_attributes(device->directory)) != 0)
 			return NULL;
 	}
 	return (device->directory->attributes);
+}
+
+/**
+ * sysfs_get_device_attr: searches dev's attributes by name
+ * @dev: device to look through
+ * @name: attribute name to get
+ * returns sysfs_attribute reference with success or NULL with error.
+ */
+struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
+						const unsigned char *name)
+{
+	struct sysfs_attribute *cur = NULL;
+
+	if (dev == NULL || name == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+	
+	if (dev->directory == NULL) {
+		dev->directory = sysfs_open_directory(dev->path);
+		if (dev->directory == NULL)
+			return NULL;
+	}
+	dev->directory->attributes = sysfs_get_device_attributes(dev);
+	if (dev->directory->attributes == NULL)
+		return NULL;
+
+	cur = sysfs_get_directory_attribute(dev->directory, 
+			(unsigned char *)name);
+	if (cur != NULL)
+		return cur;
+
+	return NULL;
 }
 
 /**

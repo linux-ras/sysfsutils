@@ -179,7 +179,7 @@ int sysfs_get_link(const unsigned char *path, unsigned char *target, size_t len)
  * sysfs_del_name: free function for sysfs_open_subsystem_list
  * @name: memory area to be freed
  */ 
-void sysfs_del_name(void *name)
+static void sysfs_del_name(void *name)
 {
 	free(name);
 }
@@ -329,3 +329,25 @@ struct dlist *sysfs_open_bus_devices_list(unsigned char *name)
 	return list;
 }
 
+/**
+ * sysfs_path_is_dir: Check if the path supplied points to a directory
+ * @path: path to validate
+ * Returns 0 if path points to dir, 1 otherwise
+ */
+int sysfs_path_is_dir(const unsigned char *path)
+{
+	struct stat astats;
+
+	if (path == NULL) {
+		errno = EINVAL;
+		return 1;
+	}
+	if ((lstat(path, &astats)) != 0) {
+		dprintf("stat() failed\n");
+		return 1;
+	}
+	if (S_ISDIR(astats.st_mode))
+		return 0;
+		
+	return 1;
+}
