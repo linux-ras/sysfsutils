@@ -1,4 +1,7 @@
 
+02/19/2004 - Brian King <brking@us.ibm.com>
+		* Fixed memory leak in sysfs_read_attribute()
+
 02/19/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Set errnos correctly in the library
 		* Provided libsysfs.conf - the config file for the testsuite

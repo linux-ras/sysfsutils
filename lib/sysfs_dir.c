@@ -297,6 +297,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 		if ((sysattr->len == length) && 
 				(!(strncmp(sysattr->value, fbuf, length)))) {
 			close(fd);
+			free(fbuf);
 			return 0;
 		}
 		free(sysattr->value);
