@@ -142,6 +142,7 @@ struct sysfs_device *sysfs_open_device(const unsigned char *path)
 	}
 	dev->directory = sdir;
 	strcpy(dev->bus_id, sdir->name);
+	strcpy(dev->path, sdir->path);
 
 	/* 
 	 * The "name" attribute no longer exists... return the device's
