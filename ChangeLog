@@ -1,4 +1,7 @@
 
+12/08/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Patched code for directory/attribute read optimization
+
 12/05/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Remove unused argument from sysfs_get_device_by_id()
 

@@ -153,6 +153,12 @@ struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver)
 			dprintf("Error reading driver attributes\n");
 			return NULL;
 		}
+	} else {
+		if ((sysfs_refresh_attributes
+				(driver->directory->attributes)) != 0) {
+			dprintf("Error refreshing driver attributes\n");
+			return NULL;
+		}
 	}
 	return(driver->directory->attributes);
 }

@@ -377,6 +377,12 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 	if (device->directory->attributes == NULL) {
 		if ((sysfs_read_dir_attributes(device->directory)) != 0)
 			return NULL;
+	} else {
+		if ((sysfs_refresh_attributes
+				(device->directory->attributes)) != 0) {
+			dprintf("Error refreshing device attributes\n");
+			return NULL;
+		}
 	}
 	return (device->directory->attributes);
 }

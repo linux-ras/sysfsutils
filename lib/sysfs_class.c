@@ -98,33 +98,6 @@ static struct sysfs_class *alloc_class(void)
 	return (struct sysfs_class *)calloc(1, sizeof(struct sysfs_class));
 }
 
-/**
- * open_class_dir: opens up sysfs class directory
- * returns sysfs_directory struct with success and NULL with error
- */
-static struct sysfs_directory *open_class_dir(const unsigned char *path)
-{
-	struct sysfs_directory *classdir = NULL;
-
-	if (path == NULL) {
-		errno = EINVAL;
-		return NULL;
-	}
-
-	classdir = sysfs_open_directory(path);
-	if (classdir == NULL) {
-		errno = EINVAL;
-		return NULL;
-	}
-	if ((sysfs_read_directory(classdir)) != 0) {
-		dprintf("Error reading class dir %s\n", path);
-		sysfs_close_directory(classdir);
-		return NULL;
-	}
-
-	return classdir;
-}
-
 /** 
  * set_classdev_classname: Grabs classname from path
  * @cdev: class device to set
@@ -206,13 +179,15 @@ struct dlist *sysfs_get_class_devices(struct sysfs_class *cls)
 		return NULL;
 	}
 	if (cls->directory == NULL) {
-		cls->directory = open_class_dir(cls->path);
+		cls->directory = sysfs_open_directory(cls->path);
 		if (cls->directory == NULL) 
 			return NULL;
 	}
-		
-	if (cls->directory->subdirs == NULL)
+
+	if ((sysfs_read_dir_subdirs(cls->directory) != 0) 
+	    || cls->directory->subdirs == NULL)
 		return NULL;
+
 	dlist_for_each_data(cls->directory->subdirs, cur, 
 			struct sysfs_directory) {
 		dev = sysfs_open_class_device(cur->path);
@@ -323,22 +298,20 @@ struct sysfs_device *sysfs_get_classdev_device
 		return (clsdev->sysdevice);
 	
 	if (clsdev->directory == NULL) {
-		clsdev->directory = open_class_dir(clsdev->path);
+		clsdev->directory = sysfs_open_directory(clsdev->path);
 		if (clsdev->directory == NULL)
 			return NULL;
 	}
-	if (clsdev->directory->links != NULL) {
-		devlink = sysfs_get_directory_link(clsdev->directory, "device");
-		if (devlink != NULL) {
-			clsdev->sysdevice = sysfs_open_device
-						(devlink->target);
-			if (clsdev->sysdevice == NULL)
-				return NULL;
-			if (clsdev->driver != NULL) 
-				strcpy(clsdev->sysdevice->driver_name,
-							clsdev->driver->name);
-		}
-	}
+	devlink = sysfs_get_directory_link(clsdev->directory, "device");
+	if (devlink == NULL) 
+		return NULL;
+
+	clsdev->sysdevice = sysfs_open_device(devlink->target);
+	if (clsdev->sysdevice == NULL)
+		return NULL;
+	if (clsdev->driver != NULL) 
+		strcpy(clsdev->sysdevice->driver_name, clsdev->driver->name);
+
 	return (clsdev->sysdevice);
 }
 				
@@ -363,19 +336,16 @@ struct sysfs_driver *sysfs_get_classdev_driver
 		return (clsdev->driver);
 	
 	if (clsdev->directory == NULL) {
-		clsdev->directory = open_class_dir(clsdev->path);
+		clsdev->directory = sysfs_open_directory(clsdev->path);
 		if (clsdev->directory == NULL)
 			return NULL;
 	}
-	if (clsdev->directory->links != NULL) {
-		drvlink = sysfs_get_directory_link(clsdev->directory, "driver");
-		if (drvlink != NULL) {
-			clsdev->driver = sysfs_open_driver
-						(drvlink->target);
-			if (clsdev->driver == NULL)
-				return NULL;
+	drvlink = sysfs_get_directory_link(clsdev->directory, "driver");
+	if (drvlink != NULL) {
+		clsdev->driver = sysfs_open_driver(drvlink->target);
+		if (clsdev->driver == NULL)
+			return NULL;
 			
-		}
 	}
 	return (clsdev->driver);
 }
@@ -557,11 +527,7 @@ struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev)
 		return NULL;
 
 	if (cdev->directory == NULL) {
-		/*
-		 * class devices have attributes in subdirs too.. so read
-		 * the directory before reading the attributes
-		 */ 
-		cdev->directory = open_class_dir(cdev->path);
+		cdev->directory = sysfs_open_directory(cdev->path);
 		if (cdev->directory == NULL) 
 			return NULL;
 	}
@@ -569,6 +535,12 @@ struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev)
 		if ((sysfs_read_dir_attributes(cdev->directory)) != 0) {
 			dprintf("Error reading attributes for directory %s\n",
 							cdev->directory->path);
+			return NULL;
+		}
+	} else {
+		if ((sysfs_refresh_attributes
+					(cdev->directory->attributes)) != 0) {
+			dprintf("Error refreshing classdev attributes\n");
 			return NULL;
 		}
 	}
@@ -585,6 +557,7 @@ struct sysfs_attribute *sysfs_get_classdev_attr
 		(struct sysfs_class_device *clsdev, const unsigned char *name)
 {
 	struct sysfs_attribute *cur = NULL;
+	struct sysfs_directory *sdir = NULL;
 	struct dlist *attrlist = NULL;
 	
 	if (clsdev == NULL || name == NULL) {
@@ -593,19 +566,32 @@ struct sysfs_attribute *sysfs_get_classdev_attr
 	}
 	
 	if (clsdev->directory == NULL) {
-		/* 
-		 * Class devices can have attributes in their subdirs
-		 * and hence we read_directory here
-		 */ 
-		clsdev->directory = open_class_dir(clsdev->path);
+		clsdev->directory = sysfs_open_directory(clsdev->path);
 		if (clsdev->directory == NULL) 
 			return NULL;
 	}
+	/* 
+	 * First, see if it's in the current directory. Then look at 
+	 * subdirs since class devices can have subdirs of attributes.
+	 */ 
 	cur = sysfs_get_directory_attribute(clsdev->directory,
 						(unsigned char *)name);
 	if (cur != NULL)
 		return cur;
 
+	if (clsdev->directory->subdirs == NULL) 
+		if ((sysfs_read_dir_subdirs(clsdev->directory)) != 0 ||
+		    clsdev->directory->subdirs == NULL) 
+			return NULL;
+
+	dlist_for_each_data(clsdev->directory->subdirs, sdir,
+				struct sysfs_directory) {
+		cur = sysfs_get_directory_attribute(sdir, 
+						(unsigned char *)name);
+		if (cur != NULL)
+			return cur;
+	}
+		
 	return NULL;
 }
 
