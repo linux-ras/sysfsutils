@@ -28,5 +28,6 @@ AC_CHECK_FUNCS([getmntent getpagesize isascii memset strrchr])
 
 AC_CONFIG_FILES([Makefile
                  cmd/Makefile
-                 lib/Makefile])
+                 lib/Makefile
+		 test/Makefile])
 AC_OUTPUT

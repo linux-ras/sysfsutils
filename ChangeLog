@@ -1,4 +1,13 @@
 
+08/19/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+               * Integrated Eric Bohm's dlist patch
+               * Integrated Eric Bohm's follow on patch adding dlist_for_each
+               * Changed chars to unsigned chars
+               * Reworked structures to be neater and to contain
+                       sysfs_directories as private structures
+               * Added more functions for retrieving data like attributes
+               * Added some find functions
+
 08/06/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Patch to correct dprintf usage
 

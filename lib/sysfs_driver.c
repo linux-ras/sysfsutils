@@ -50,11 +50,10 @@ static struct sysfs_driver *alloc_driver(void)
  * @path: path to driver directory
  * returns struct sysfs_driver with success and NULL with error
  */
-struct sysfs_driver *sysfs_open_driver(const char *path)
+struct sysfs_driver *sysfs_open_driver(const unsigned char *path)
 {
 	struct sysfs_driver *driver = NULL;
 	struct sysfs_directory *sdir = NULL;
-	char devname[SYSFS_NAME_LEN];
 
 	if (path == NULL) {
 		errno = EINVAL;
@@ -76,14 +75,9 @@ struct sysfs_driver *sysfs_open_driver(const char *path)
 		sysfs_close_directory(sdir);
 		return NULL;
 	}
-	if ((sysfs_get_name_from_path(path, devname, SYSFS_NAME_LEN)) != 0) {
-		dprintf("Error reading directory %s\n", path);
-		sysfs_close_directory(sdir);
-		free(driver);
-		return NULL;
-	}
-	strncpy(driver->name, devname, sizeof(driver->name));
+	strcpy(driver->name, sdir->name);
 	driver->directory = sdir;	
+	strcpy(driver->path, sdir->path);
 	
 	return driver;
 }

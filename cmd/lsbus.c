@@ -34,8 +34,8 @@
 
 /* Command Options */
 static int show_options = 0;		/* bitmask of show options */
-static char *attr_to_show = NULL;	/* print value for this attribute */
-static char *bus_device = NULL;		/* print only this bus device */
+static unsigned char *attr_to_show = NULL;	/* print value for this attribute*/
+static unsigned char *bus_device = NULL;		/* print only this bus device */
 
 #define SHOW_ATTRIBUTES		0x01	/* show attributes command option */
 #define SHOW_ATTRIBUTE_VALUE	0x02	/* show an attribute value option */
@@ -45,13 +45,13 @@ static char *bus_device = NULL;		/* print only this bus device */
                                                                                 
 #define SHOW_ALL		0xff
 
-static char cmd_options[] = "aA:dDhv";
+static unsigned char cmd_options[] = "aA:dDhv";
 
 /*
  * binary_files - defines existing sysfs binary files that should be printed
  * in hex.
  */
-static char *binary_files[] = {
+static unsigned char *binary_files[] = {
 	"config",
 	"data"
 };
@@ -76,9 +76,9 @@ void usage(void)
  * remove_end_newline: removes newline on the end of an attribute value
  * @value: string to remove newline from
  */
-void remove_end_newline(char *value)
+void remove_end_newline(unsigned char *value)
 {
-	char *p = value + (strlen(value) - 1);
+	unsigned char *p = value + (strlen(value) - 1);
 
 	if (p != NULL && *p == '\n')
 		*p = '\0';
@@ -93,24 +93,19 @@ void print_device_children(struct sysfs_directory *sdir)
 	if (sdir != NULL) {
 		fprintf(stdout, "\tChildren:\n");
 		if (sdir->subdirs != NULL) {
-			char dirname[SYSFS_NAME_LEN];
-			struct sysfs_directory *cur = sdir->subdirs;
+			struct sysfs_directory *cur;
 
-			while (cur != NULL) {
-				if ((sysfs_get_name_from_path(cur->path, 
-				     dirname, SYSFS_NAME_LEN)) == 0)
-					fprintf(stdout, "\t\t%s\n", dirname);
-				else
-					fprintf(stdout, "\t\t%s\n", cur->path);
-				cur = cur->next;
+			dlist_for_each_data(sdir->subdirs, cur,
+					struct sysfs_directory) {
+				fprintf(stdout, "\t\t%s\n", cur->name);
 			}
 		}	
 		if (sdir->links != NULL) {
-			struct sysfs_link *curl = sdir->links;
-			
-			while(curl != NULL) {
+			struct sysfs_link *curl = NULL;
+
+			dlist_for_each_data(sdir->links, curl,
+					struct sysfs_link) {
 				fprintf(stdout, "\t\t%s\n", curl->name);
-				curl = curl->next;
 			}
 		}
 	}
@@ -123,17 +118,13 @@ void print_device_children(struct sysfs_directory *sdir)
  */
 int isbinaryvalue(struct sysfs_attribute *attr)
 {
-	char attrname[SYSFS_NAME_LEN];
 	int i;
 
 	if (attr == NULL || attr->value == NULL)
 		return 0;
-	if ((sysfs_get_name_from_path(attr->path, attrname, SYSFS_NAME_LEN))
-	    != 0)
-		return 0;
 
 	for (i = 0; i < binfiles; i++) 
-		if ((strcmp(attrname, binary_files[i])) == 0)
+		if ((strcmp(attr->name, binary_files[i])) == 0)
 			return 1;
 
 	return 0;
@@ -178,25 +169,19 @@ void print_attribute_value(struct sysfs_attribute *attr)
  */
 void print_attribute(struct sysfs_attribute *attr)
 {
-	char attrname[SYSFS_NAME_LEN];
-
 	if (attr == NULL) 
 		return;
 
-	if ((sysfs_get_name_from_path(attr->path, attrname, SYSFS_NAME_LEN)) 
-	    != 0)
-		return; 
-
 	if (show_options & SHOW_ALL_ATTRIB_VALUES) {
-		fprintf(stdout, "\t\t%s", attrname);
+		fprintf(stdout, "\t\t%s", attr->name);
 		print_attribute_value(attr);
 
 	} else if ((show_options & SHOW_ATTRIBUTES) || ((show_options 
-	    & SHOW_ATTRIBUTE_VALUE) && (strcmp(attrname, attr_to_show) 
+	    & SHOW_ATTRIBUTE_VALUE) && (strcmp(attr->name, attr_to_show) 
 	    == 0))) {
-		fprintf (stdout, "\t\t%s", attrname);
+		fprintf (stdout, "\t\t%s", attr->name);
 		if (show_options & SHOW_ATTRIBUTE_VALUE && attr->value != NULL
-		    && (strcmp(attrname, attr_to_show)) == 0) {
+		    && (strcmp(attr->name, attr_to_show)) == 0) {
 			print_attribute_value(attr);
 		} else {
 			fprintf(stdout, "\n");
@@ -211,12 +196,12 @@ void print_attribute(struct sysfs_attribute *attr)
 void print_device_attributes(struct sysfs_directory *sdir)
 {
 	if (sdir != NULL && sdir->attributes != NULL) {
-		struct sysfs_attribute *cur = sdir->attributes;
+		struct sysfs_attribute *cur = NULL;;
 
 		fprintf (stdout, "\tAttributes:\n");
-		while (cur != NULL) {
+		dlist_for_each_data(sdir->attributes, cur,
+				struct sysfs_attribute) {
 			print_attribute(cur);
-			cur = cur->next;
 		}
 	}
 }
@@ -252,12 +237,12 @@ void print_driver_attributes(struct sysfs_driver *driver)
 		struct sysfs_directory *sdir = driver->directory;
 
 		if (sdir->attributes != NULL) {
-			struct sysfs_attribute *cur = sdir->attributes;
+			struct sysfs_attribute *cur = NULL;
 
 			fprintf (stdout, "\t%s Attributes:\n", driver->name);
-			while (cur != NULL) {
+			dlist_for_each_data(sdir->attributes, cur, 
+					struct sysfs_attribute) {
 				print_attribute(cur);
-				cur = cur->next;
 			}
 		}
 	}
@@ -273,12 +258,12 @@ void print_driver_devices(struct sysfs_driver *driver)
 		struct sysfs_directory *sdir = driver->directory;
 
 		if (sdir->links != NULL) {
-			struct sysfs_link *cur = sdir->links;
+			struct sysfs_link *cur = NULL;
 
 			fprintf (stdout, "\tDevices:\n");
-			while (cur != NULL) {
+			dlist_for_each_data(sdir->links, cur,
+					struct sysfs_link) {
 				fprintf(stdout, "\t\t%s\n", cur->name);
-				cur = cur->next;
 			}
 		}
 	}
@@ -311,7 +296,7 @@ void print_driver(struct sysfs_driver *driver)
  * @busname: bus to print.
  * returns 0 with success or 1 with error.
  */
-int print_sysfs_bus(char *busname)
+int print_sysfs_bus(unsigned char *busname)
 {
 	struct sysfs_bus *bus = NULL;
 	struct sysfs_device *curdev = NULL;
@@ -329,22 +314,19 @@ int print_sysfs_bus(char *busname)
 
 	fprintf(stdout, "Bus: %s\n", busname);
 	if (bus->devices != NULL && (show_options & SHOW_DEVICES)) {
-		curdev = bus->devices;
 		if (bus_device == NULL)
 			fprintf(stdout, "Devices:\n");
-		while (curdev != NULL) {
+		dlist_for_each_data(bus->devices, curdev,
+				struct sysfs_device) {
 			if (bus_device == NULL || (strcmp(bus_device,
 			    curdev->bus_id) == 0))
 				print_device(curdev);
-			curdev = curdev->next;
 		}
 	}
 	if (bus->drivers != NULL && (show_options & SHOW_DRIVERS)) {
-		curdrv = bus->drivers;
 		fprintf(stdout, "Drivers:\n");
-		while (curdrv != NULL) {
+		dlist_for_each_data(bus->drivers, curdrv, struct sysfs_driver) {
 			print_driver(curdrv);
-			curdrv = curdrv->next;
 		}
 	}
 	sysfs_close_bus(bus);
@@ -359,8 +341,7 @@ int print_sysfs_bus(char *busname)
 int print_sysfs_buses(void)
 {
 	struct sysfs_directory *busdir = NULL, *current = NULL;
-	char busname[SYSFS_NAME_LEN];
-	char buspath[SYSFS_PATH_MAX];
+	unsigned char buspath[SYSFS_PATH_MAX];
 	int ret = 0;
 
 	/* get sysfs mount point */
@@ -384,15 +365,8 @@ int print_sysfs_buses(void)
 	}
 
 	fprintf(stdout, "Supported sysfs buses:\n");
-	current = busdir->subdirs;
-	while (current != NULL) {
-		if ((sysfs_get_name_from_path(current->path, busname,
-		    SYSFS_NAME_LEN)) != 0) {
-			sysfs_close_directory(busdir);
-			return 1;
-		}
-		fprintf(stdout, "\t%s\n", busname);
-		current = current->next;
+	dlist_for_each_data(busdir->subdirs, current, struct sysfs_directory) {
+		fprintf(stdout, "\t%s\n", current->name);
 	}
 	sysfs_close_directory(busdir);
 	return ret;
@@ -401,7 +375,7 @@ int print_sysfs_buses(void)
 /* MAIN */
 int main(int argc, char *argv[])
 {
-	char *bus_to_print = NULL;
+	unsigned char *bus_to_print = NULL;
 	int retval = 0;
 	int opt;
 	extern int optind;

@@ -34,8 +34,8 @@
 
 /* Command Options */
 static int show_options = 0;		/* bitmask of show options */
-static char *attribute_to_show = NULL;	/* show value for this attribute */
-static char *device_to_show = NULL;	/* show only this bus device */
+static unsigned char *attribute_to_show = NULL;	/* show value for this attribute */
+static unsigned char *device_to_show = NULL;	/* show only this bus device */
 
 #define SHOW_ATTRIBUTES		0x01	/* show attributes command option */
 #define SHOW_ATTRIBUTE_VALUE	0x02	/* show an attribute value option */
@@ -45,13 +45,13 @@ static char *device_to_show = NULL;	/* show only this bus device */
                                                                                 
 #define SHOW_ALL		0xff
 
-static char cmd_options[] = "aA:b:c:dDhr:v";
+static unsigned char cmd_options[] = "aA:b:c:dDhr:v";
 
 /*
  * binary_files - defines existing sysfs binary files. These files will be
  * printed in hex.
  */
-static char *binary_files[] = {
+static unsigned char *binary_files[] = {
 	"config",
 	"data"
 };
@@ -93,9 +93,9 @@ void indent(int level)
  * remove_end_newline: removes newline on the end of an attribute value
  * @value: string to remove newline from
  */
-void remove_end_newline(char *value)
+void remove_end_newline(unsigned char *value)
 {
-	char *p = value + (strlen(value) - 1);
+	unsigned char *p = value + (strlen(value) - 1);
 
 	if (p != NULL && *p == '\n')
 		*p = '\0';
@@ -111,26 +111,21 @@ void show_device_children(struct sysfs_directory *sdir, int level)
 		indent(level);
 		fprintf(stdout, "Children:\n");
 		if (sdir->subdirs != NULL) {
-			char dirname[SYSFS_NAME_LEN];
-			struct sysfs_directory *cur = sdir->subdirs;
-
-			while (cur != NULL) {
+			struct sysfs_directory *cur;
+		
+			dlist_for_each_data(sdir->subdirs, cur, 
+					struct sysfs_directory) {
 				indent(level+4);
-				if ((sysfs_get_name_from_path(cur->path, 
-				    dirname, SYSFS_NAME_LEN)) == 0)
-					fprintf(stdout, "%s\n", dirname);
-				else
-					fprintf(stdout, "%s\n", cur->path);
-				cur = cur->next;
+				fprintf(stdout, "%s\n", cur->name);
 			}
 		}
 		if (sdir->links != NULL) {
-			struct sysfs_link *curl = sdir->links;
-
-			while (curl != NULL) {
+			struct sysfs_link *curl = NULL;
+			
+			dlist_for_each_data(sdir->links, curl,
+					struct sysfs_link) {
 				indent(level+4);
 				fprintf(stdout, "%s\n", curl->name);
-				curl = curl->next;
 			}
 		}
 	}
@@ -143,18 +138,13 @@ void show_device_children(struct sysfs_directory *sdir, int level)
  */
 int isbinaryvalue(struct sysfs_attribute *attr)
 {
-	char attrname[SYSFS_NAME_LEN];
 	int i;
 
 	if (attr == NULL || attr->value == NULL) 
 		return 0;
 
-	if ((sysfs_get_name_from_path(attr->path, attrname, SYSFS_NAME_LEN))
-	    != 0)
-		return 0;
-
 	for (i = 0; i < binfiles; i++) 
-		if ((strcmp(attrname, binary_files[i])) == 0)
+		if ((strcmp(attr->name, binary_files[i])) == 0)
 			return 1;
 
 	return 0;
@@ -200,27 +190,21 @@ void show_attribute_value(struct sysfs_attribute *attr, int level)
  */
 void show_attribute(struct sysfs_attribute *attr, int level)
 {
-	char attrname[SYSFS_NAME_LEN];
-
 	if (attr == NULL) 
 		return;
 
-	if ((sysfs_get_name_from_path(attr->path, attrname, SYSFS_NAME_LEN)) 
-	    != 0)
-		return; 
-
 	if (show_options & SHOW_ALL_ATTRIB_VALUES) {
 		indent(level);
-		fprintf(stdout, "%s", attrname);
+		fprintf(stdout, "%s", attr->name);
 		show_attribute_value(attr, level);
 
 	} else if ((show_options & SHOW_ATTRIBUTES) || ((show_options 
-	    & SHOW_ATTRIBUTE_VALUE) && (strcmp(attrname, attribute_to_show) 
+	    & SHOW_ATTRIBUTE_VALUE) && (strcmp(attr->name, attribute_to_show) 
 	    == 0))) {
 		indent(level);
-		fprintf (stdout, "%s", attrname);
+		fprintf (stdout, "%s", attr->name);
 		if (show_options & SHOW_ATTRIBUTE_VALUE && attr->value 
-		    != NULL && (strcmp(attrname, attribute_to_show)) == 0) 
+		    != NULL && (strcmp(attr->name, attribute_to_show)) == 0) 
 			show_attribute_value(attr, level);
 
 		else 
@@ -235,13 +219,13 @@ void show_attribute(struct sysfs_attribute *attr, int level)
 void show_attributes(struct sysfs_directory *sdir, int level)
 {
 	if (sdir != NULL && sdir->attributes != NULL) {
-		struct sysfs_attribute *cur = sdir->attributes;
+		struct sysfs_attribute *cur = NULL;
 
 		indent(level);
 		fprintf (stdout, "Attributes:\n");
-		while (cur != NULL) {
+		dlist_for_each_data(sdir->attributes, cur, 
+				struct sysfs_attribute) {
 			show_attribute(cur, (level+4));
-			cur = cur->next;
 		}
 	}
 }
@@ -296,13 +280,13 @@ void show_driver_attributes(struct sysfs_driver *driver, int level)
 		struct sysfs_directory *sdir = driver->directory;
 
 		if (sdir->attributes != NULL) {
-			struct sysfs_attribute *cur = sdir->attributes;
+			struct sysfs_attribute *cur = NULL;
 
 			indent(level);
 			fprintf (stdout, "%s Attributes:\n", driver->name);
-			while (cur != NULL) {
+			dlist_for_each_data(sdir->attributes, cur,
+					struct sysfs_attribute) {
 				show_attribute(cur, (level+4));
-				cur = cur->next;
 			}
 		}
 	}
@@ -318,14 +302,14 @@ void show_driver_devices(struct sysfs_driver *driver, int level)
 		struct sysfs_directory *sdir = driver->directory;
 
 		if (sdir->links != NULL) {
-			struct sysfs_link *cur = sdir->links;
+			struct sysfs_link *cur = NULL;
 
 			indent(level);
 			fprintf (stdout, "Devices:\n");
-			while (cur != NULL) {
+			dlist_for_each_data(sdir->links, cur,
+					struct sysfs_link) {
 				indent(level+4);
 				fprintf (stdout, "%s\n", cur->name);
-				cur = cur->next;
 			}
 		}
 	}
@@ -367,10 +351,11 @@ void show_device_tree(struct sysfs_device *root, int level)
 			    root->bus_id) == 0)) {
 			show_root_device(root, level);
 		}
-		cur = root->children;
-		while (cur != NULL) {
-			show_device_tree(cur, (level+6));
-			cur = cur->next;
+		if (root->children != NULL) {
+			dlist_for_each_data(root->children, cur, 
+					struct sysfs_device) {
+				show_device_tree(cur, (level+6));
+			}
 		}
 	}
 }
@@ -380,7 +365,7 @@ void show_device_tree(struct sysfs_device *root, int level)
  * @busname: bus to print.
  * returns 0 with success or 1 with error.
  */
-int show_sysfs_bus(char *busname)
+int show_sysfs_bus(unsigned char *busname)
 {
 	struct sysfs_bus *bus = NULL;
 	struct sysfs_device *curdev = NULL;
@@ -398,22 +383,18 @@ int show_sysfs_bus(char *busname)
 
 	fprintf(stdout, "Bus: %s\n", busname);
 	if (bus->devices != NULL && (show_options & SHOW_DEVICES)) {
-		curdev = bus->devices;
 		if (device_to_show == NULL)
 			fprintf(stdout, "Devices:\n");
-		while (curdev != NULL) {
+		dlist_for_each_data(bus->devices, curdev, struct sysfs_device) {
 			if (device_to_show == NULL || (strcmp(device_to_show,
 			    curdev->bus_id) == 0))
 				show_device(curdev, 2);
-			curdev = curdev->next;
 		}
 	}
 	if (bus->drivers != NULL && (show_options & SHOW_DRIVERS)) {
-		curdrv = bus->drivers;
 		fprintf(stdout, "Drivers:\n");
-		while (curdrv != NULL) {
+		dlist_for_each_data(bus->drivers, curdrv, struct sysfs_driver) {
 			show_driver(curdrv, 2);
-			curdrv = curdrv->next;
 		}
 	}
 	sysfs_close_bus(bus);
@@ -427,7 +408,6 @@ int show_sysfs_bus(char *busname)
 void show_class_device(struct sysfs_class_device *dev, int level)
 {
 	struct sysfs_directory *cur = NULL;
-	char dirname[SYSFS_NAME_LEN];
 
 	if (dev != NULL) {
 		indent(level);
@@ -436,15 +416,11 @@ void show_class_device(struct sysfs_class_device *dev, int level)
 		    & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
 		    | SHOW_ALL_ATTRIB_VALUES))) {
 			show_attributes(dev->directory, (level+4));
-			cur = dev->directory->subdirs;
-			while (cur != NULL) {
-				if ((sysfs_get_name_from_path(cur->path,
-				     dirname, SYSFS_NAME_LEN)) == 0) {
-					indent(level+4);
-					fprintf(stdout, "%s\n", dirname);
-				}
+			dlist_for_each_data(dev->directory->subdirs, cur,
+					struct sysfs_directory) {
+				indent(level+4);
+				fprintf(stdout, "%s\n", cur->name);
 				show_attributes(cur, (level+4));
-				cur = cur->next;
 			}
 		}
 		if (dev->sysdevice != NULL && (show_options & SHOW_DEVICES))
@@ -459,7 +435,7 @@ void show_class_device(struct sysfs_class_device *dev, int level)
  * @classname: class to print.
  * returns 0 with success and 1 with error.
  */
-int show_sysfs_class(char *classname)
+int show_sysfs_class(unsigned char *classname)
 {
 	struct sysfs_class *cls = NULL;
 	struct sysfs_class_device *cur = NULL;
@@ -475,14 +451,13 @@ int show_sysfs_class(char *classname)
 	}
 	fprintf(stdout, "Class: %s\n", classname);
 	if (cls->devices != NULL) {
-		cur = cls->devices;
 		if (device_to_show == NULL)
 			fprintf(stdout, "Class Devices:\n");
-		while (cur != NULL) {
+		dlist_for_each_data(cls->devices, cur, 
+				struct sysfs_class_device) {
 			if (device_to_show == NULL || (strcmp(device_to_show,
 			    cur->name) == 0))
 				show_class_device(cur, 2);
-			cur = cur->next;
 		}
 	}
 
@@ -495,10 +470,10 @@ int show_sysfs_class(char *classname)
  * @rootname: device root to print.
  * returns 0 with success and 1 with error.
  */
-int show_sysfs_root(char *rootname)
+int show_sysfs_root(unsigned char *rootname)
 {
 	struct sysfs_device *root = NULL;
-	char path[SYSFS_PATH_MAX];
+	unsigned char path[SYSFS_PATH_MAX];
 
 	if (rootname == NULL) {
 		errno = EINVAL;
@@ -530,10 +505,9 @@ int show_sysfs_root(char *rootname)
  * @path: sysfs path where subdirs are.
  * returns 0 with success or 1 with error.
  */
-int show_subdirectories(char *path, int level)
+int show_subdirectories(unsigned char *path, int level)
 {
 	struct sysfs_directory *dir = NULL, *current = NULL;
-	char name[SYSFS_NAME_LEN];
 	int ret = 0;
 
 	dir = sysfs_open_directory(path);
@@ -547,16 +521,12 @@ int show_subdirectories(char *path, int level)
 		return 1;
 	}
 
-	current = dir->subdirs;
-	while (current != NULL) {
-		if ((sysfs_get_name_from_path(current->path, name,
-		    SYSFS_NAME_LEN)) != 0) {
-			sysfs_close_directory(dir);
-			return 1;
+	if (dir->subdirs != NULL) {
+		dlist_for_each_data(dir->subdirs, current, 
+				struct sysfs_directory) {
+			indent(level);
+			fprintf(stdout, "%s\n", current->name);
 		}
-		indent(level);
-		fprintf(stdout, "%s\n", name);
-		current = current->next;
 	}
 	sysfs_close_directory(dir);
 	return ret;
@@ -569,8 +539,8 @@ int show_subdirectories(char *path, int level)
  */
 int show_default_info(void)
 {
-	char sysfs_root[SYSFS_PATH_MAX];
-	char path_to_print[SYSFS_PATH_MAX];
+	unsigned char sysfs_root[SYSFS_PATH_MAX];
+	unsigned char path_to_print[SYSFS_PATH_MAX];
 	int retval = 0;
 
 	/* get sysfs mount point */
@@ -608,9 +578,9 @@ int show_default_info(void)
 /* MAIN */
 int main(int argc, char *argv[])
 {
-	char *show_bus = NULL;
-	char *show_class = NULL;
-	char *show_root = NULL;
+	unsigned char *show_bus = NULL;
+	unsigned char *show_class = NULL;
+	unsigned char *show_root = NULL;
 	int retval = 0;
 	int opt;
 	extern int optind;

@@ -1,5 +1,5 @@
 EXTRA_DIST = docs include
-SUBDIRS = lib cmd
+SUBDIRS = lib cmd test
 
 dist-hook:
 	rm -rf `find $(distdir)/docs -name CVS`

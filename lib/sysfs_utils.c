@@ -30,8 +30,8 @@
  * @len: size of mnt_path
  * returns 0 with success and -1 with error.
  */
-static int sysfs_get_fs_mnt_path(const char *fs_type, char *mnt_path, 
-				 size_t len)
+static int sysfs_get_fs_mnt_path(const unsigned char *fs_type, 
+				unsigned char *mnt_path, size_t len)
 {
 	FILE *mnt;
 	struct mntent *mntent;
@@ -74,7 +74,7 @@ static int sysfs_get_fs_mnt_path(const char *fs_type, char *mnt_path,
  * @len: size of mnt_path
  * returns 0 with success and -1 with error.
  */
-int sysfs_get_mnt_path(char *mnt_path, size_t len)
+int sysfs_get_mnt_path(unsigned char *mnt_path, size_t len)
 {
 	int ret = -1;
 
@@ -92,9 +92,10 @@ int sysfs_get_mnt_path(char *mnt_path, size_t len)
  * @name: where to put name
  * @len: size of name
  */
-int sysfs_get_name_from_path(const char *path, char *name, size_t len)
+int sysfs_get_name_from_path(const unsigned char *path, unsigned char *name, 
+								size_t len)
 {
-	char *n = NULL;
+	unsigned char *n = NULL;
                                                                                 
 	if (path == NULL || name == NULL) {
 		errno = EINVAL;
@@ -117,11 +118,11 @@ int sysfs_get_name_from_path(const char *path, char *name, size_t len)
  * @target: where to put name
  * @len: size of name
  */
-int sysfs_get_link(const char *path, char *target, size_t len)
+int sysfs_get_link(const unsigned char *path, unsigned char *target, size_t len)
 {
-	char devdir[SYSFS_PATH_MAX];
-	char linkpath[SYSFS_PATH_MAX];
-	char *d = NULL;
+	unsigned char devdir[SYSFS_PATH_MAX];
+	unsigned char linkpath[SYSFS_PATH_MAX];
+	unsigned char *d = NULL;
 
 	if (path == NULL || target == NULL) {
 		errno = EINVAL;

@@ -24,6 +24,81 @@
 #include "sysfs.h"
 
 /**
+ * sysfs_del_attribute: routine for dlist integration
+ */
+static void sysfs_del_attribute(void *attr)
+{
+	        sysfs_close_attribute((struct sysfs_attribute *)attr);
+}
+
+/**
+ * sysfs_del_link: routine for dlist integration
+ */
+static void sysfs_del_link(void *ln)
+{
+	        sysfs_close_link((struct sysfs_link *)ln);
+}
+
+/**
+ * sysfs_del_dir: routine for dlist integration
+ */
+static void sysfs_del_directory(void *dir)
+{
+	        sysfs_close_directory((struct sysfs_directory *)dir);
+}
+
+/**
+ * dir_attribute_name_equal: compares dir attributes by name
+ * @a: attribute name for comparison
+ * @b: sysfs_attribute to be compared.
+ * returns 1 if a==b->name or 0 if not equal
+ */
+static int dir_attribute_name_equal(void *a, void *b)
+{
+	if (a == NULL || b == NULL)
+		return 0;
+
+	if (strcmp(((unsigned char *)a), ((struct sysfs_attribute *)b)->name) 
+	    == 0)
+		return 1;
+	return 0;
+}
+
+/**
+ * dir_link_name_equal: compares dir links by name
+ * @a: link name for comparison
+ * @b: sysfs_link to be compared.
+ * returns 1 if a==b->name or 0 if not equal
+ */
+static int dir_link_name_equal(void *a, void *b)
+{
+	if (a == NULL || b == NULL)
+		return 0;
+
+	if (strcmp(((unsigned char *)a), ((struct sysfs_link *)b)->name) 
+	    == 0)
+		return 1;
+	return 0;
+}
+
+/**
+ * dir_subdir_name_equal: compares subdirs by name
+ * @a: name of subdirectory to compare
+ * @b: sysfs_directory subdirectory to be compared
+ * returns 1 if a==b->name or 0 if not equal
+ */
+static int dir_subdir_name_equal(void *a, void *b)
+{
+	if (a == NULL || b == NULL)
+		return 0;
+
+	if (strcmp(((unsigned char *)a), ((struct sysfs_directory *)b)->name)
+	    == 0)
+		return 1;
+	return 0;
+}
+
+/**
  * sysfs_close_attribute: closes and cleans up attribute
  * @sysattr: attribute to close.
  */
@@ -51,7 +126,7 @@ static struct sysfs_attribute *alloc_attribute(void)
  * @path: path to attribute.
  * returns sysfs_attribute struct with success and NULL with error.
  */
-struct sysfs_attribute *sysfs_open_attribute(const char *path)
+struct sysfs_attribute *sysfs_open_attribute(const unsigned char *path)
 {
 	struct sysfs_attribute *sysattr = NULL;
 	struct stat fileinfo;
@@ -63,6 +138,13 @@ struct sysfs_attribute *sysfs_open_attribute(const char *path)
 	sysattr = alloc_attribute();
 	if (sysattr == NULL) {
 		dprintf("Error allocating attribute at %s\n", path);
+		return NULL;
+	}
+	if (sysfs_get_name_from_path(path, sysattr->name, SYSFS_NAME_LEN) 
+	    != 0) {
+		dprintf("Error retrieving attribute name from path: %s\n", 
+			path);
+		sysfs_close_attribute(sysattr);
 		return NULL;
 	}
 	strncpy(sysattr->path, path, sizeof(sysattr->path));
@@ -86,8 +168,8 @@ struct sysfs_attribute *sysfs_open_attribute(const char *path)
  */
 int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 {
-	char *fbuf = NULL;
-	char *vbuf = NULL;
+	unsigned char *fbuf = NULL;
+	unsigned char *vbuf = NULL;
 	size_t length = 0;
 	int pgsize = 0;
 	int fd;
@@ -102,7 +184,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 		return -1;
 	}
 	pgsize = getpagesize();
-	fbuf = (char *)calloc(1, pgsize+1);
+	fbuf = (unsigned char *)calloc(1, pgsize+1);
 	if (fbuf == NULL) {
 		perror("calloc");
 		return -1;
@@ -121,7 +203,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 	}
 	sysattr->len = length;
 	close(fd);
-	vbuf = (char *)realloc(fbuf, length+1);
+	vbuf = (unsigned char *)realloc(fbuf, length+1);
 	if (vbuf == NULL) {
 		perror("realloc");
 		free(fbuf);
@@ -141,7 +223,8 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
  * @vsize: size of value buffer
  * returns 0 with success and -1 with error.
  */
-int sysfs_read_attribute_value(const char *attrpath, char *value, size_t vsize)
+int sysfs_read_attribute_value(const unsigned char *attrpath, 
+					unsigned char *value, size_t vsize)
 {
 	struct sysfs_attribute *attr = NULL;
 	size_t length = 0;
@@ -177,59 +260,22 @@ int sysfs_read_attribute_value(const char *attrpath, char *value, size_t vsize)
  * 	attribute name, return its value
  * @attr: attribute to search
  * @name: name to look for
- * returns char * value - could be NULL
+ * returns unsigned char * value - could be NULL
  */
-char *sysfs_get_value_from_attributes(struct sysfs_attribute *attr, 
-					const char *name)
+unsigned char *sysfs_get_value_from_attributes(struct dlist *attr, 
+					const unsigned char *name)
 {	
 	struct sysfs_attribute *cur = NULL;
-	char tmpname[SYSFS_NAME_LEN];
 	
 	if (attr == NULL || name == NULL) {
 		errno = EINVAL;
 		return NULL;
-	}	
-	cur = attr;
-	while (cur != NULL) {
-		memset(tmpname, 0, SYSFS_NAME_LEN);	
-		if ((sysfs_get_name_from_path(cur->path, tmpname,
-		    SYSFS_NAME_LEN)) != 0) {
-			cur = cur->next;
-			continue;
-		}
-		if (strcmp(tmpname, name) == 0)
+	}
+	dlist_for_each_data(attr, cur, struct sysfs_attribute) {
+		if (strcmp(cur->name, name) == 0)
 			return cur->value;
-		cur = cur->next;
 	}
 	return NULL;
-}
-
-/**
- * add_subdir_to_dir: adds subdirectory to directory's subdirs
- * @sysdir: directory to add subdir to
- * @subdir: subdirectory to add.
- */
-static void add_subdir_to_dir(struct sysfs_directory *sysdir, 
-		     struct sysfs_directory *subdir)
-{
-	if (sysdir != NULL && subdir != NULL) {
-		subdir->next = sysdir->subdirs;
-		sysdir->subdirs = subdir;
-	}
-}
-
-/**
- * add_attr_to_dir: adds attribute to directory's attributes
- * @sysdir: directory to add attribute to
- * @sysattr: attribute to add.
- */
-static void add_attr_to_dir(struct sysfs_directory *sysdir, 
-		     			struct sysfs_attribute *sysattr)
-{
-	if (sysdir != NULL && sysattr != NULL) {
-		sysattr->next = sysdir->attributes;
-		sysdir->attributes = sysattr;
-	}
 }
 
 /**
@@ -238,24 +284,8 @@ static void add_attr_to_dir(struct sysfs_directory *sysdir,
  */
 void sysfs_close_link(struct sysfs_link *ln)
 {
-	if (ln != NULL) {
-		ln->next = NULL;
+	if (ln != NULL) 
 		free(ln);
-	}
-}
-
-/**
- * add_link_to_dir: adds link to directory's links list.
- * @sysdir: directory to add it to.
- * @ln: link to add.
- */
-static void add_link_to_dir(struct sysfs_directory *sysdir, 
-					struct sysfs_link *ln)
-{
-	if (sysdir != NULL && ln != NULL) {
-		ln->next = sysdir->links;
-		sysdir->links = ln;
-	}
 }
 
 /**
@@ -264,35 +294,13 @@ static void add_link_to_dir(struct sysfs_directory *sysdir,
  */
 void sysfs_close_directory(struct sysfs_directory *sysdir)
 {
-	struct sysfs_directory *sdir = NULL, *dnext = NULL;
-	struct sysfs_link *dlink = NULL, *nextl = NULL;
-	struct sysfs_attribute *attr = NULL, *anext = NULL;
-
 	if (sysdir != NULL) {
-		if (sysdir->subdirs != NULL) {
-			for (sdir = sysdir->subdirs; sdir != NULL;
-			     sdir = dnext) {
-				dnext = sdir->next;
-				sysfs_close_directory(sdir);
-			}
-		}
-		if (sysdir->links != NULL) {
-			for (dlink = sysdir->links; dlink != NULL;
-			    dlink = nextl) {
-				nextl = dlink->next;
-				sysfs_close_link(dlink);
-			}
-		}
-		if (sysdir->attributes != NULL) {
-			for (attr = sysdir->attributes; attr != NULL;
-			     attr = anext) {
-				anext = attr->next;
-				/* sysfs_close_attribute(attr); */
-				if (attr->value != NULL)
-					free(attr->value);
-				free(attr);
-			}
-		}
+		if (sysdir->subdirs != NULL) 
+			dlist_destroy(sysdir->subdirs);
+		if (sysdir->links != NULL)
+			dlist_destroy(sysdir->links);
+		if (sysdir->attributes != NULL) 
+			dlist_destroy(sysdir->attributes);
 		free(sysdir);
 	}
 }
@@ -317,12 +325,35 @@ static struct sysfs_link *alloc_link(void)
 }
 
 /**
+ * sysfs_read_all_subdirs: calls sysfs_read_directory for all subdirs
+ * @sysdir: directory whose subdirs need reading.
+ * returns 0 with success and -1 with error.
+ */
+int sysfs_read_all_subdirs(struct sysfs_directory *sysdir)
+{
+	struct sysfs_directory *cursub = NULL;
+
+	if (sysdir == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	if (sysdir->subdirs == NULL)
+		return 0;
+	dlist_for_each_data(sysdir->subdirs, cursub, struct sysfs_directory) {
+		if (sysfs_read_directory(cursub) != 0) 
+			dprintf ("Error reading subdirectory %s\n",
+				cursub->name);
+	}
+	return 0;
+}
+
+/**
  * sysfs_open_directory: opens a sysfs directory, creates dir struct, and
  *		returns.
  * @path: path of directory to open.
  * returns: struct sysfs_directory * with success and NULL on error.
  */
-struct sysfs_directory *sysfs_open_directory(const char *path)
+struct sysfs_directory *sysfs_open_directory(const unsigned char *path)
 {
 	struct sysfs_directory *sdir = NULL;
 
@@ -335,6 +366,11 @@ struct sysfs_directory *sysfs_open_directory(const char *path)
 		dprintf("Error allocating directory %s\n", path);
 		return NULL;
 	}
+	if (sysfs_get_name_from_path(path, sdir->name, SYSFS_NAME_LEN) != 0) {
+		dprintf("Error getting directory name from path: %s\n", path);
+		sysfs_close_directory(sdir);
+		return NULL;
+	}
 	strncpy(sdir->path, path, sizeof(sdir->path));
 
 	return sdir;
@@ -345,11 +381,11 @@ struct sysfs_directory *sysfs_open_directory(const char *path)
  * @path: path of link to open.
  * returns: struct sysfs_link * with success and NULL on error.
  */
-struct sysfs_link *sysfs_open_link(const char *linkpath)
+struct sysfs_link *sysfs_open_link(const unsigned char *linkpath)
 {
 	struct sysfs_link *ln = NULL;
 
-	if (linkpath == NULL) {
+	if (linkpath == NULL || strlen(linkpath) > SYSFS_PATH_MAX) {
 		errno = EINVAL;
 		return NULL;
 	}
@@ -359,6 +395,7 @@ struct sysfs_link *sysfs_open_link(const char *linkpath)
 		dprintf("Error allocating link %s\n", linkpath);
 		return NULL;
 	}
+	strcpy(ln->path, linkpath);
 	if ((sysfs_get_name_from_path(linkpath, ln->name, SYSFS_NAME_LEN)) != 0
 	    || (sysfs_get_link(linkpath, ln->target, SYSFS_PATH_MAX)) != 0) {
 		errno = EINVAL;
@@ -382,7 +419,7 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 	struct sysfs_attribute *attr = NULL;
 	struct sysfs_directory *subdir = NULL;
 	struct sysfs_link *ln = NULL;
-	char file_path[SYSFS_PATH_MAX];
+	unsigned char file_path[SYSFS_PATH_MAX];
 	int retval = 0;
 
 	if (sysdir == NULL) {
@@ -423,7 +460,12 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 					continue;
 				}
 			}
-			add_attr_to_dir(sysdir, attr);
+			                        
+			if (sysdir->attributes == NULL)
+				sysdir->attributes = dlist_new_with_delete
+					(sizeof(struct sysfs_attribute),
+					 		sysfs_del_attribute);
+			dlist_unshift(sysdir->attributes, attr);
 		} else if (S_ISDIR(astats.st_mode)) {
 			subdir = sysfs_open_directory(file_path);
 			if (subdir == NULL) {
@@ -432,7 +474,11 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 				retval = -1;
 				break;
 			}
-			add_subdir_to_dir(sysdir, subdir);
+			if (sysdir->subdirs == NULL)
+				sysdir->subdirs = dlist_new_with_delete
+					(sizeof(struct sysfs_directory),
+							sysfs_del_directory);
+			dlist_unshift(sysdir->subdirs, subdir);
 		} else if (S_ISLNK(astats.st_mode)) {
 			ln = sysfs_open_link(file_path);
 			if (ln == NULL) {
@@ -440,9 +486,111 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 				retval = -1;
 				break;
 			}
-			add_link_to_dir(sysdir, ln);
+			if (sysdir->links == NULL)
+				sysdir->links = dlist_new_with_delete
+						(sizeof(struct sysfs_link),
+						 		sysfs_del_link);
+			dlist_unshift(sysdir->links, ln);
 		}
 	}
 	closedir(dir);
 	return(retval);
+}
+
+/**
+ * sysfs_get_directory_attribute: retrieves attribute attrname
+ * @dir: directory to retrieve attribute from
+ * @attrname: name of attribute to look for
+ * returns sysfs_attribute if found and NULL if not found
+ */
+struct sysfs_attribute *sysfs_get_directory_attribute
+			(struct sysfs_directory *dir, unsigned char *attrname)
+{
+	if (dir == NULL || attrname == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+	return (struct sysfs_attribute *)dlist_find_custom(dir->attributes,
+		attrname, dir_attribute_name_equal);
+}
+
+/**
+ * sysfs_get_directory_link: retrieves link from one directory list
+ * @dir: directory to retrieve link from
+ * @linkname: name of link to look for
+ * returns reference to sysfs_link if found and NULL if not found
+ */
+struct sysfs_link *sysfs_get_directory_link
+			(struct sysfs_directory *dir, unsigned char *linkname)
+{
+	if (dir == NULL || linkname == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+	return (struct sysfs_link *)dlist_find_custom(dir->links,
+		linkname, dir_link_name_equal);
+}
+
+/**
+ * sysfs_get_subdirectory: retrieves subdirectory by name.
+ * @dir: directory to search for subdirectory.
+ * @subname: subdirectory name to get.
+ * returns reference to subdirectory or NULL if not found
+ */
+struct sysfs_directory *sysfs_get_subdirectory(struct sysfs_directory *dir,
+						unsigned char *subname)
+{
+	struct sysfs_directory *sub = NULL, *cursub = NULL;
+
+	if (dir == NULL || dir->subdirs == NULL || subname == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+	sub = (struct sysfs_directory *)dlist_find_custom(dir->subdirs,
+		subname, dir_subdir_name_equal);
+	if (sub != NULL) 
+		return sub;
+
+	dlist_for_each_data(dir->subdirs, cursub, struct sysfs_directory) {
+		if (cursub->subdirs == NULL)
+			continue;
+		sub = sysfs_get_subdirectory(cursub, subname);
+		if (sub != NULL)
+			return sub;
+	}
+	return NULL;
+}
+
+/**
+ * sysfs_get_subdirectory_link: looks through all subdirs for specific link.
+ * @dir: directory and subdirectories to search for link.
+ * @linkname: link name to get.
+ * returns reference to link or NULL if not found
+ */
+struct sysfs_link *sysfs_get_subdirectory_link(struct sysfs_directory *dir,
+						unsigned char *linkname)
+{
+	struct sysfs_directory *cursub = NULL;
+	struct sysfs_link *ln = NULL;
+
+	if (dir == NULL || dir->links == NULL || linkname == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	ln = sysfs_get_directory_link(dir, linkname);
+	if (ln != NULL)
+		return ln;
+
+	if (dir->subdirs == NULL)
+		return NULL;
+
+	dlist_for_each_data(dir->subdirs, cursub, struct sysfs_directory) {
+		if (cursub->subdirs == NULL)
+			continue;
+		ln = sysfs_get_subdirectory_link(cursub, linkname);
+		if (ln != NULL)
+			return ln;
+	}
+	return NULL;
 }

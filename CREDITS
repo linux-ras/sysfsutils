@@ -6,3 +6,6 @@ have made contributions:
 		- Supplied libsysfs code cleanup including code
 			simplification, read-only strings, and
 			C++ compatibility.
+	o Eric J Bohm <bohm@gate.csgeeks.org>:
+		- Supplied dlist generic linked list implementation.
+		- Added dlist_for_each* functionality.

@@ -23,6 +23,11 @@
 #include "libsysfs.h"
 #include "sysfs.h"
 
+void sysfs_close_cls_dev(void *dev)
+{
+	sysfs_close_class_device((struct sysfs_class_device *)dev);
+}
+
 /**
  * sysfs_close_class_device: closes a single class device.
  * @dev: class device to close.
@@ -46,15 +51,11 @@ void sysfs_close_class_device(struct sysfs_class_device *dev)
  */
 void sysfs_close_class(struct sysfs_class *cls)
 {
-	struct sysfs_class_device *cur = NULL, *next = NULL;
-
 	if (cls != NULL) {
 		if (cls->directory != NULL)
 			sysfs_close_directory(cls->directory);
-		for (cur = cls->devices; cur != NULL; cur = next) {
-			next = cur->next;
-			sysfs_close_class_device(cur);
-		}
+		if (cls->devices != NULL) 
+			dlist_destroy(cls->devices);
 		free(cls);
 	}
 }
@@ -82,10 +83,10 @@ static struct sysfs_class *alloc_class(void)
  * open_class_dir: opens up sysfs class directory
  * returns sysfs_directory struct with success and NULL with error
  */
-static struct sysfs_directory *open_class_dir(const char *name)
+static struct sysfs_directory *open_class_dir(const unsigned char *name)
 {
 	struct sysfs_directory *classdir = NULL;
-	char classpath[SYSFS_PATH_MAX];
+	unsigned char classpath[SYSFS_PATH_MAX];
 
 	if (name == NULL) {
 		errno = EINVAL;
@@ -121,10 +122,10 @@ static struct sysfs_directory *open_class_dir(const char *name)
  * @path: path to class device.
  * returns struct sysfs_class_device with success and NULL with error.
  */
-struct sysfs_class_device *sysfs_open_class_device(const char *path)
+struct sysfs_class_device *sysfs_open_class_device(const unsigned char *path)
 {
 	struct sysfs_class_device *cdev = NULL;
-	struct sysfs_directory *dir = NULL, *cur = NULL;
+	struct sysfs_directory *dir = NULL;
 	struct sysfs_link *curl = NULL;
 	struct sysfs_device *sdev = NULL;
 	struct sysfs_driver *drv = NULL;
@@ -157,48 +158,33 @@ struct sysfs_class_device *sysfs_open_class_device(const char *path)
 		sysfs_close_class_device(cdev);
 		return NULL;
 	}
+	sysfs_read_all_subdirs(dir);
 	cdev->directory = dir;
+	strcpy(cdev->path, dir->path);
 
-	cur = cdev->directory->subdirs;
-	while(cur != NULL) {
-		sysfs_read_directory(cur);
-		cur = cur->next;
-	}
 	/* get driver and device, if implemented */
-	curl = cdev->directory->links;
-	while (curl != NULL) {
-		if (strncmp(curl->name, SYSFS_DEVICES_NAME, 6) == 0) {
-			sdev = sysfs_open_device(curl->target);
-			if (sdev != NULL) {
-				cdev->sysdevice = sdev;
-				if (cdev->driver != NULL) 
-					sdev->driver = cdev->driver;
-			}
-		} else if (strncmp(curl->name, SYSFS_DRIVERS_NAME, 6) == 0) {
-			drv = sysfs_open_driver(curl->target);
-			if (drv != NULL) {
-				cdev->driver = drv;
-				if (cdev->sysdevice != NULL) 
-					drv->device = cdev->sysdevice;
+	if (cdev->directory->links != NULL) {
+		dlist_for_each_data(cdev->directory->links, curl,
+				struct sysfs_link) {
+			if (strncmp(curl->name, SYSFS_DEVICES_NAME, 6) == 0) {
+				sdev = sysfs_open_device(curl->target);
+				if (sdev != NULL) {
+					cdev->sysdevice = sdev;
+					if (cdev->driver != NULL) 
+						sdev->driver = cdev->driver;
+				}
+			} else if (strncmp(curl->name, 
+						SYSFS_DRIVERS_NAME, 6) == 0) {
+				drv = sysfs_open_driver(curl->target);
+				if (drv != NULL) {
+					cdev->driver = drv;
+					if (cdev->sysdevice != NULL) 
+						drv->device = cdev->sysdevice;
+				}
 			}
 		}
-		curl = curl->next;
 	}
 	return cdev;
-}
-
-/**
- * add_dev_to_class: adds a class device to class list
- * @class: class to add the device
- * @dev: device to add
- */
-static void add_dev_to_class(struct sysfs_class *cls, 
-					struct sysfs_class_device *dev)
-{
-	if (cls != NULL && dev != NULL) {
-		dev->next = cls->devices;
-		cls->devices = dev;
-	}
 }
 
 /**
@@ -209,22 +195,27 @@ static void add_dev_to_class(struct sysfs_class *cls,
 static int get_all_class_devices(struct sysfs_class *cls)
 {
 	struct sysfs_class_device *dev = NULL;
-	struct sysfs_directory *cur = NULL, *next = NULL;
+	struct sysfs_directory *cur = NULL;
 
 	if (cls == NULL || cls->directory == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
-	for (cur = cls->directory->subdirs; cur != NULL; cur = next) {
-		next = cur->next;
+	if (cls->directory->subdirs == NULL)
+		return 0;
+	dlist_for_each_data(cls->directory->subdirs, cur, 
+			struct sysfs_directory) {
 		dev = sysfs_open_class_device(cur->path);
 		if (dev == NULL) {
 			dprintf("Error opening device at %s\n",	cur->path);
 			continue;
 		}
-		add_dev_to_class(cls, dev);
+		if (cls->devices == NULL)
+			cls->devices = dlist_new_with_delete
+					(sizeof(struct sysfs_class_device),
+					 		sysfs_close_cls_dev);
+		dlist_unshift(cls->devices, dev);
 	}
-			
 	return 0;
 }
 
@@ -232,7 +223,7 @@ static int get_all_class_devices(struct sysfs_class *cls)
  * sysfs_open_class: opens specific class and all its devices on system
  * returns sysfs_class structure with success or NULL with error.
  */
-struct sysfs_class *sysfs_open_class(const char *name)
+struct sysfs_class *sysfs_open_class(const unsigned char *name)
 {
 	struct sysfs_class *cls = NULL;
 	struct sysfs_directory *classdir = NULL;
@@ -256,6 +247,7 @@ struct sysfs_class *sysfs_open_class(const char *name)
 		return NULL;
 	}
 	cls->directory = classdir;
+	strcpy(cls->path, classdir->path);
 	if ((get_all_class_devices(cls)) != 0) {
 		dprintf("Error reading %s class devices\n", name);
 		sysfs_close_class(cls);

@@ -24,17 +24,24 @@
 #include "sysfs.h"
 
 /**
+ * sysfs_del_device: routine for dlist integration
+ */
+static void sysfs_del_device(void *dev)
+{
+	sysfs_close_device((struct sysfs_device *)dev);
+}
+
+/**
  * sysfs_close_device: closes and cleans up a device
  * @dev = device to clean up
  */
 void sysfs_close_device(struct sysfs_device *dev)
 {
 	if (dev != NULL) {
-		dev->next = NULL;
-		dev->driver = NULL;
 		if (dev->directory != NULL)
 			sysfs_close_directory(dev->directory);
-		dev->children = NULL;
+		if (dev->children != NULL && dev->children->count == 0)
+			dlist_destroy(dev->children);
 		free(dev);
 	}
 }
@@ -55,16 +62,18 @@ static struct sysfs_device *alloc_device(void)
  * returns sysfs_attribute reference with success or NULL with error.
  */
 struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
-						const char *name)
+						const unsigned char *name)
 {
 	struct sysfs_attribute *cur = NULL;
-	char attrname[SYSFS_NAME_LEN];
+	unsigned char attrname[SYSFS_NAME_LEN];
 
-	if (dev == NULL || dev->directory == NULL || name == NULL) {
+	if (dev == NULL || dev->directory == NULL 
+	    || dev->directory->attributes == NULL || name == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
-	for (cur = dev->directory->attributes; cur != NULL; cur = cur->next) {
+	dlist_for_each_data(dev->directory->attributes, cur,
+			struct sysfs_attribute) {
 		if ((sysfs_get_name_from_path(cur->path, attrname, 
 		    SYSFS_NAME_LEN)) != 0) 
 			continue;
@@ -82,11 +91,11 @@ struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
  * @path: path to device, this is the /sys/devices/ path
  * returns sysfs_device structure with success or NULL with error
  */
-struct sysfs_device *sysfs_open_device(const char *path)
+struct sysfs_device *sysfs_open_device(const unsigned char *path)
 {
 	struct sysfs_device *dev = NULL;
 	struct sysfs_directory *sdir = NULL;
-	char *p = NULL;
+	unsigned char *p = NULL;
 
 	if (path == NULL) {
 		errno = EINVAL;
@@ -111,7 +120,9 @@ struct sysfs_device *sysfs_open_device(const char *path)
 		return NULL;
 	}
 	dev->directory = sdir;
-	sysfs_get_name_from_path(sdir->path, dev->bus_id, SYSFS_NAME_LEN);
+	strcpy(dev->bus_id, sdir->name);
+	sysfs_find_device_bus_name(dev->bus_id, dev->bus_name, SYSFS_NAME_LEN);
+
 	/* get device name */
 	p = sysfs_get_value_from_attributes(sdir->attributes,	
 							SYSFS_NAME_ATTRIBUTE);
@@ -134,30 +145,14 @@ void sysfs_close_device_tree(struct sysfs_device *devroot)
 {
 	if (devroot != NULL) {
 		if (devroot->children != NULL) {
-			struct sysfs_device *child = NULL, *next = NULL;
-	
-			for (child = devroot->children; child != NULL;
-			     child = next) {
-				next = child->next;
+			struct sysfs_device *child = NULL;
+
+			dlist_for_each_data(devroot->children, child,
+					struct sysfs_device) {
 				sysfs_close_device_tree(child);
 			}
 		}
 		sysfs_close_device(devroot);
-	}
-}
-
-/**
- * add_device_child_to_parent: adds child device to parent
- * @parent: parent device.
- * @child: child device to add.
- */
-static void add_device_child_to_parent(struct sysfs_device *parent,
-					struct sysfs_device *child)
-{
-	if (parent != NULL && child != NULL) {
-		child->next = parent->children;
-		parent->children = child;
-		child->parent = parent;
 	}
 }
 
@@ -168,7 +163,7 @@ static void add_device_child_to_parent(struct sysfs_device *parent,
  * returns struct sysfs_device and its children with success or NULL with
  *	error.
  */
-struct sysfs_device *sysfs_open_device_tree(const char *path)
+struct sysfs_device *sysfs_open_device_tree(const unsigned char *path)
 {
 	struct sysfs_device *rootdev = NULL, *new = NULL;
 	struct sysfs_directory *cur = NULL;
@@ -182,17 +177,22 @@ struct sysfs_device *sysfs_open_device_tree(const char *path)
 		dprintf("Error opening root device at %s\n", path);
 		return NULL;
 	}
-	cur = rootdev->directory->subdirs;
-	while (cur != NULL) {
-		new = sysfs_open_device_tree(cur->path);
-		if (new == NULL) {
-			dprintf("Error opening device tree at %s\n",
-				cur->path);
-			sysfs_close_device_tree(rootdev);
-			return NULL;
+	if (rootdev->directory->subdirs != NULL) {
+		dlist_for_each_data(rootdev->directory->subdirs, cur,
+				struct sysfs_directory) {
+			new = sysfs_open_device_tree(cur->path);
+			if (new == NULL) {
+				dprintf("Error opening device tree at %s\n",
+					cur->path);
+				sysfs_close_device_tree(rootdev);
+				return NULL;
+			}
+			if (rootdev->children == NULL)
+				rootdev->children = dlist_new_with_delete
+					(sizeof(struct sysfs_device),
+					sysfs_del_device);
+			dlist_unshift(rootdev->children, new);
 		}
-		add_device_child_to_parent(rootdev, new);	
-		cur = cur->next;
 	}
 
 	return rootdev;
