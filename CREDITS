@@ -27,3 +27,5 @@ have made contributions:
 		- Supplied patch to make library C++ compatible.
 	o Dr. Hannes Reinecke <hare@suse.de>
 		- Supplied patch to fix SEGV in dlist.c
+	o Arun Bhanu <arun@codemovers.org>
+		- Supplied patch to fix docs/libsysfs.txt

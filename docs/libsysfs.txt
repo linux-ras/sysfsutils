@@ -894,11 +894,11 @@ Description:	Reads the given sysfs_directory to create a list of subdirs.
 Arguments:	struct sysfs_directory *sysdir	sysfs_directory whose 
 						subdirs have to be read
 
-Returns:	struct dlist * of links with success
-		NULL with error. Errno will be set on error, returning EINVAL
-				for invalid arguments
-		
-Prototype:	struct dlist *sysfs_read_dir_subdirs
+Returns:	0 with success.
+		-1 with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	int sysfs_read_dir_subdirs
 					(struct sysfs_directory *sysdir)
 -------------------------------------------------------------------------------
 
