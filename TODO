@@ -9,6 +9,3 @@ Commands:
 - Need to clean up error messages.
 - Clean up how attribute values are printed.
 
-Test:
------
-- Design and implement test suites for the library.

@@ -84,7 +84,7 @@ am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
 man_MANS = lsbus.1 systool.1
-EXTRA_DIST = docs include $(man_MANS)
+EXTRA_DIST = docs include $(man_MANS) CREDITS lib/LGPL cmd/GPL test/GPL
 SUBDIRS = lib cmd test
 include_HEADERS = include/libsysfs.h include/dlist.h
 subdir = .
@@ -328,7 +328,7 @@ distcleancheck_listfiles = find . -type f -print
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkinstalldirs) $(distdir)/include
+	$(mkinstalldirs) $(distdir)/cmd $(distdir)/include $(distdir)/lib $(distdir)/test
 	@list='$(DISTFILES)'; for file in $$list; do \
 	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
 	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \

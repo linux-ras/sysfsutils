@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(sysfsutils, 0.4.0, linux-diag-devel@lists.sourceforge.net)
+AC_INIT(sysfsutils, 1.0.0, linux-diag-devel@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
@@ -31,7 +31,7 @@ AC_TYPE_SIZE_T
 AC_FUNC_LSTAT
 AC_FUNC_MALLOC
 AC_FUNC_STAT
-AC_CHECK_FUNCS([bzero getmntent isascii memset strchr strerror strrchr strstr])
+AC_CHECK_FUNCS([bzero getmntent isascii memset strchr strerror strrchr strstr strtol])
 
 AC_CONFIG_FILES([Makefile
                  cmd/Makefile

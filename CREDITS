@@ -16,3 +16,5 @@ have made contributions:
 			from Martin's library.
 	o Martin Pitt <mpitt@debian.org>
 		- Supplied initial makefiles for lsbus and systool
+	o Martin Hicks <mort@bork.org>
+		- Supplied patch to fix class_device functions

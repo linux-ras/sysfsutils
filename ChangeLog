@@ -1,5 +1,10 @@
 
 02/04/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added testsuite in "test" directory
+		* Updated autotool scripts to build testsuite
+		* Changed version number to 1.0.0
+
+02/04/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Fixed miscellaneous issues in sysfs_device/driver.c sources
 
 02/04/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>

@@ -83,8 +83,8 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-bin_PROGRAMS = dlist_test get_class_dev get_device get_driver \
-		get_bus_devices_list write_attr get_classdev_parent
+bin_PROGRAMS = dlist_test get_class_dev get_device get_driver write_attr \
+		get_bus_devices_list get_classdev_parent testlibsysfs
 
 dlist_test_SOURCES = dlist_test.c
 get_class_dev_SOURCES = get_class_dev.c
@@ -93,6 +93,9 @@ get_driver_SOURCES = get_driver.c
 get_bus_devices_list_SOURCES = get_bus_devices_list.c
 write_attr_SOURCES = write_attr.c
 get_classdev_parent_SOURCES = get_classdev_parent.c
+testlibsysfs_SOURCES = test.c test_bus.c test_class.c test_dir.c \
+		test_driver.c test_root.c test_utils.c testout.c test.h
+
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
 CFLAGS = -Wall -Wshadow -W -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
@@ -101,9 +104,9 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 bin_PROGRAMS = dlist_test$(EXEEXT) get_class_dev$(EXEEXT) \
-	get_device$(EXEEXT) get_driver$(EXEEXT) \
-	get_bus_devices_list$(EXEEXT) write_attr$(EXEEXT) \
-	get_classdev_parent$(EXEEXT)
+	get_device$(EXEEXT) get_driver$(EXEEXT) write_attr$(EXEEXT) \
+	get_bus_devices_list$(EXEEXT) get_classdev_parent$(EXEEXT) \
+	testlibsysfs$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_dlist_test_OBJECTS = dlist_test.$(OBJEXT)
@@ -136,6 +139,13 @@ get_driver_OBJECTS = $(am_get_driver_OBJECTS)
 get_driver_LDADD = $(LDADD)
 get_driver_DEPENDENCIES = ../lib/libsysfs.la
 get_driver_LDFLAGS =
+am_testlibsysfs_OBJECTS = test.$(OBJEXT) test_bus.$(OBJEXT) \
+	test_class.$(OBJEXT) test_dir.$(OBJEXT) test_driver.$(OBJEXT) \
+	test_root.$(OBJEXT) test_utils.$(OBJEXT) testout.$(OBJEXT)
+testlibsysfs_OBJECTS = $(am_testlibsysfs_OBJECTS)
+testlibsysfs_LDADD = $(LDADD)
+testlibsysfs_DEPENDENCIES = ../lib/libsysfs.la
+testlibsysfs_LDFLAGS =
 am_write_attr_OBJECTS = write_attr.$(OBJEXT)
 write_attr_OBJECTS = $(am_write_attr_OBJECTS)
 write_attr_LDADD = $(LDADD)
@@ -154,6 +164,10 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/get_class_dev.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/get_classdev_parent.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/get_device.Po ./$(DEPDIR)/get_driver.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/test.Po ./$(DEPDIR)/test_bus.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/test_class.Po ./$(DEPDIR)/test_dir.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/test_driver.Po ./$(DEPDIR)/test_root.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/test_utils.Po ./$(DEPDIR)/testout.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/write_attr.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -165,9 +179,9 @@ LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 DIST_SOURCES = $(dlist_test_SOURCES) $(get_bus_devices_list_SOURCES) \
 	$(get_class_dev_SOURCES) $(get_classdev_parent_SOURCES) \
 	$(get_device_SOURCES) $(get_driver_SOURCES) \
-	$(write_attr_SOURCES)
+	$(testlibsysfs_SOURCES) $(write_attr_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(dlist_test_SOURCES) $(get_bus_devices_list_SOURCES) $(get_class_dev_SOURCES) $(get_classdev_parent_SOURCES) $(get_device_SOURCES) $(get_driver_SOURCES) $(write_attr_SOURCES)
+SOURCES = $(dlist_test_SOURCES) $(get_bus_devices_list_SOURCES) $(get_class_dev_SOURCES) $(get_classdev_parent_SOURCES) $(get_device_SOURCES) $(get_driver_SOURCES) $(testlibsysfs_SOURCES) $(write_attr_SOURCES)
 
 all: all-am
 
@@ -225,6 +239,9 @@ get_device$(EXEEXT): $(get_device_OBJECTS) $(get_device_DEPENDENCIES)
 get_driver$(EXEEXT): $(get_driver_OBJECTS) $(get_driver_DEPENDENCIES) 
 	@rm -f get_driver$(EXEEXT)
 	$(LINK) $(get_driver_LDFLAGS) $(get_driver_OBJECTS) $(get_driver_LDADD) $(LIBS)
+testlibsysfs$(EXEEXT): $(testlibsysfs_OBJECTS) $(testlibsysfs_DEPENDENCIES) 
+	@rm -f testlibsysfs$(EXEEXT)
+	$(LINK) $(testlibsysfs_LDFLAGS) $(testlibsysfs_OBJECTS) $(testlibsysfs_LDADD) $(LIBS)
 write_attr$(EXEEXT): $(write_attr_OBJECTS) $(write_attr_DEPENDENCIES) 
 	@rm -f write_attr$(EXEEXT)
 	$(LINK) $(write_attr_LDFLAGS) $(write_attr_OBJECTS) $(write_attr_LDADD) $(LIBS)
@@ -241,6 +258,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_classdev_parent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_device.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_driver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_bus.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_class.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dir.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_driver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_root.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_utils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/write_attr.Po@am__quote@
 
 distclean-depend:

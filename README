@@ -26,6 +26,11 @@ This package currently includes:
 - lsbus: a small application to query system bus information.
 - systool: an application to view system device information by bus, class,
 	and topology.
+- A number of example usage routines in the "test" directory.
+- A comprehensive testsuite, also shipped as part of the "test" directory. This
+	testsuite can be used to test _all_ the APIs exported by Libsysfs. 
+	Please refer the libsysfs.txt file in the "docs" directory for 
+	details as to how to use the testsuite.
 
 
 2. How to Install
@@ -41,6 +46,7 @@ a different path is desired, specify "includedir=xxx" while running configure
 as in
 
 ./configure --includedir="path for header installs"
+
 
 3. Licenses
 -----------
@@ -62,7 +68,7 @@ sysfsutils/lib/LGPL
 -----------------
 
 Please direct all bugs to either the linux-diag mailing list - 
-linux-diag@lists.sourceforge.net - or to the authors:
+linux-diag-devel@lists.sourceforge.net - or to the authors:
 
 Ananth Mavinakayanahalli <ananth@in.ibm.com>
 Daniel Stekloff <dsteklof@us.ibm.com>
