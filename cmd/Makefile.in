@@ -76,8 +76,8 @@ am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
 bin_PROGRAMS = systool lsbus
-systool_SOURCES = systool.c
-lsbus_SOURCES = lsbus.c
+systool_SOURCES = systool.c names.c
+lsbus_SOURCES = lsbus.c names.c
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.a
 subdir = cmd
@@ -87,12 +87,12 @@ CONFIG_CLEAN_FILES =
 bin_PROGRAMS = systool$(EXEEXT) lsbus$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
-am_lsbus_OBJECTS = lsbus.$(OBJEXT)
+am_lsbus_OBJECTS = lsbus.$(OBJEXT) names.$(OBJEXT)
 lsbus_OBJECTS = $(am_lsbus_OBJECTS)
 lsbus_LDADD = $(LDADD)
 lsbus_DEPENDENCIES = ../lib/libsysfs.a
 lsbus_LDFLAGS =
-am_systool_OBJECTS = systool.$(OBJEXT)
+am_systool_OBJECTS = systool.$(OBJEXT) names.$(OBJEXT)
 systool_OBJECTS = $(am_systool_OBJECTS)
 systool_LDADD = $(LDADD)
 systool_DEPENDENCIES = ../lib/libsysfs.a
@@ -105,7 +105,8 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/lsbus.Po ./$(DEPDIR)/systool.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/lsbus.Po ./$(DEPDIR)/names.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/systool.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -162,6 +163,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lsbus.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/names.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/systool.Po@am__quote@
 
 distclean-depend:

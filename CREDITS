@@ -11,3 +11,6 @@ have made contributions:
 		- Added dlist_for_each* functionality.
         o Guo Min <min.guo@intel.com>:
                 - Supplied sysfs_write_attribute patch
+	o Martin Mares <mj@ucw.cz>
+		- Author of pciutils. Reused the pci name decoding
+			from Martin's library.

@@ -1,4 +1,9 @@
 
+10/01/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added number of utility routines in "test" directory
+		* Adapted PCI name decode support from Martin Mares'
+			pciutils
+
 09/30/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Modified routines to find device/driver on a bus
 		* Made some miscellaneous changes to use #defines 

@@ -31,11 +31,14 @@
 #include <ctype.h>
 
 #include "libsysfs.h"
+#include "names.h"
 
 /* Command Options */
 static int show_options = 0;		/* bitmask of show options */
-static unsigned char *attr_to_show = NULL;	/* print value for this attribute*/
-static unsigned char *bus_device = NULL;		/* print only this bus device */
+static unsigned char *attr_to_show = NULL; /* print value for this attribute*/
+static unsigned char *bus_device = NULL; /* print only this bus device */
+struct pci_access *pacc = NULL;
+unsigned char *bus_to_print = NULL;	
 
 #define SHOW_ATTRIBUTES		0x01	/* show attributes command option */
 #define SHOW_ATTRIBUTE_VALUE	0x02	/* show an attribute value option */
@@ -57,6 +60,19 @@ static unsigned char *binary_files[] = {
 };
 
 static int binfiles = 2;
+
+static unsigned int get_pciconfig_word(int offset, char *buf)
+{
+        unsigned short val = (unsigned char)buf[offset] |
+		                ((unsigned char)buf[offset+1] << 8);
+        return val;
+}
+
+static unsigned char get_pciconfig_byte(int offset, char *buf)
+{
+        return((unsigned char)buf[offset]);
+}
+
 
 /**
  * usage: prints utility usage.
@@ -125,7 +141,6 @@ void print_attribute_value(struct sysfs_attribute *attr)
 					(unsigned char)attr->value[i]);
 			}
 			fprintf(stdout, "\n");
-                                                                                
 		} else if (attr->value != NULL && strlen(attr->value) > 0) {
 			remove_end_newline(attr->value);
 			fprintf(stdout, "\t: %s\n", attr->value);
@@ -184,16 +199,34 @@ void print_device_attributes(struct dlist *attributes)
 void print_device(struct sysfs_device *device)
 {
 	struct dlist *attributes = NULL;
+	unsigned int vendor_id, device_id, subsystem_vendor, subsystem_device;
+	unsigned char buf[128], *value = NULL;
 	
 	if (device != NULL) {
-		fprintf (stdout, "  %s\n", device->bus_id);
-		if (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
-		    | SHOW_ALL_ATTRIB_VALUES)) 
-			attributes = sysfs_get_device_attributes(device);
-			if (attributes != NULL)
-				print_device_attributes(attributes);
+		fprintf (stdout, "  %s: ", device->bus_id);
+		attributes = sysfs_get_device_attributes(device);
+		if (attributes != NULL) {
+			if (!(strcmp(bus_to_print, "pci"))) {
+				value = sysfs_get_value_from_attributes
+							(attributes, "config");
+				if (value != NULL) {
+					vendor_id = get_pciconfig_word
+							(PCI_VENDOR_ID, value);
+					device_id = get_pciconfig_word
+							(PCI_DEVICE_ID, value);
+					fprintf(stdout, "%s\n", 
+						pci_lookup_name(pacc, buf, 128,
+						 PCI_LOOKUP_VENDOR | 
+						 PCI_LOOKUP_DEVICE, 
+						 vendor_id, device_id, 0, 0));
+				}
+			}
+			if (show_options & (SHOW_ATTRIBUTES | 
+				SHOW_ATTRIBUTE_VALUE | SHOW_ALL_ATTRIB_VALUES))
+					print_device_attributes(attributes);
+		}
 		if (isalnum(device->driver_name[0])) 
-			fprintf (stdout, "\tDriver: %s\n", 
+			fprintf (stdout, "\tDriver: %s\n\n", 
 						device->driver_name);
 	}
 }
@@ -324,11 +357,13 @@ int print_sysfs_buses(void)
 /* MAIN */
 int main(int argc, char *argv[])
 {
-	unsigned char *bus_to_print = NULL;
+	//unsigned char *bus_to_print = NULL;
 	int retval = 0;
 	int opt;
 	extern int optind;
 	extern char *optarg;
+	/*pci ids*/
+	char *pci_id_file = "/usr/local/share/pci.ids";
 
 	while((opt = getopt(argc, argv, cmd_options)) != EOF) {
 		switch(opt) {
@@ -406,10 +441,18 @@ int main(int argc, char *argv[])
 	if (!(show_options & (SHOW_DEVICES | SHOW_DRIVERS)))
 		show_options |= SHOW_DEVICES;
 
-	if (bus_to_print != NULL)  
+	if (bus_to_print != NULL) {
+		if (!(strcmp(bus_to_print, "pci"))) {
+			pacc = (struct pci_access *)calloc(1, sizeof(struct pci_access));
+			pacc->pci_id_file_name = pci_id_file;
+			pacc->numeric_ids = 0;
+		}
 		retval = print_sysfs_bus(bus_to_print);
-	else
+	} else
 		retval = print_sysfs_buses();
 
+	if (bus_to_print != NULL) 
+		if (!(strcmp(bus_to_print, "pci"))) 
+			pci_free_name_list(pacc);
 	exit(retval);
 }
