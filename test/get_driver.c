@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 	strcat(path, SYSFS_DRIVERS_NAME);
 	strcat(path, "/");
 	strcat(path, argv[1]);
-	driver = sysfs_open_driver(path);
+	driver = sysfs_open_driver_path(path);
 	if (driver == NULL) {
 		fprintf(stdout, "Device %s not found\n", argv[1]);
 		free(bus);

@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	cdev = sysfs_open_class_device_by_name(argv[1], argv[2]);
+	cdev = sysfs_open_class_device(argv[1], argv[2]);
 	if (cdev == NULL) {
 		fprintf(stdout, "Device %s not found\n", argv[2]);
 		return 1;

@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	struct sysfs_driver *driver = NULL;
 
 	/* FIXME: edit this path to any valid path on your system to test */
-	cdev = sysfs_open_class_device("/sys/block/sda/sda1");
+	cdev = sysfs_open_class_device_path("/sys/block/sda/sda1");
 	if (cdev == NULL) {
 		fprintf(stdout, "Class device not found\n");
 		return 1;
