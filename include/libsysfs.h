@@ -90,6 +90,15 @@ struct sysfs_device {
 	struct sysfs_directory *directory;	
 };
 
+struct sysfs_root_device {
+	struct dlist *devices;
+	unsigned char name[SYSFS_NAME_LEN];
+	unsigned char path[SYSFS_PATH_MAX];
+
+	/* for internal use only */
+	struct sysfs_directory *directory;
+};
+
 struct sysfs_bus {
 	struct dlist *drivers;
 	struct dlist *devices;
@@ -163,6 +172,9 @@ extern void sysfs_close_driver(struct sysfs_driver *driver);
 extern struct sysfs_driver *sysfs_open_driver(const unsigned char *path);
 
 /* generic sysfs device access */
+extern void sysfs_close_root_device(struct sysfs_root_device *root);
+extern struct sysfs_root_device *sysfs_open_root_device
+						(const unsigned char *name);
 extern void sysfs_close_device(struct sysfs_device *dev);
 extern void sysfs_close_device_tree(struct sysfs_device *dev);
 extern struct sysfs_device *sysfs_open_device(const unsigned char *path);

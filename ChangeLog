@@ -1,4 +1,8 @@
 
+08/28/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+                * Added sysfs_root_device struct for modelling /sys/devices
+                        path.
+
 08/28/2003 - Guo Min <min.guo@intel.com>
                 * Added "write" attribute support to sysfsutils
 

@@ -32,6 +32,14 @@ static void sysfs_del_device(void *dev)
 }
 
 /**
+ * sysfs_close_dev_tree: routine for dlist integration
+ */
+static void sysfs_close_dev_tree(void *dev)
+{
+	sysfs_close_device_tree((struct sysfs_device *)dev);
+}
+
+/**
  * sysfs_close_device: closes and cleans up a device
  * @dev = device to clean up
  */
@@ -193,4 +201,133 @@ struct sysfs_device *sysfs_open_device_tree(const unsigned char *path)
 	}
 
 	return rootdev;
+}
+
+/**
+ * sysfs_close_root_device: closes root and all devices
+ * @root: root device to close
+ */
+void sysfs_close_root_device(struct sysfs_root_device *root)
+{
+	if (root != NULL) {
+		if (root->devices != NULL)
+			dlist_destroy(root->devices);
+		if (root->directory != NULL)
+			sysfs_close_directory(root->directory);
+		free(root);
+	}
+}
+
+/**
+ * open_root_device_dir: opens up sysfs_directory for specific root dev
+ * @name: name of root
+ * returns struct sysfs_directory with success and NULL with error
+ */
+static struct sysfs_directory *open_root_device_dir(const unsigned char *name)
+{
+	struct sysfs_directory *rdir = NULL;
+	unsigned char rootpath[SYSFS_PATH_MAX];
+
+	if (name == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	memset(rootpath, 0, SYSFS_PATH_MAX);
+	if (sysfs_get_mnt_path(rootpath, SYSFS_PATH_MAX) != 0) {
+		dprintf ("Sysfs not supported on this system\n");
+		return NULL;
+	}
+
+	strcat(rootpath, SYSFS_DEVICES_DIR);
+	strcat(rootpath, "/");
+	strcat(rootpath, name);
+	rdir = sysfs_open_directory(rootpath);
+	if (rdir == NULL) {
+		errno = EINVAL;
+		dprintf ("Root device %s not supported on this system\n",
+			name);
+		return NULL;
+	}
+	if (sysfs_read_directory(rdir) != 0) {
+		dprintf ("Error reading %s root device at dir %s\n", name,
+			rootpath);
+		sysfs_close_directory(rdir);
+		return NULL;
+	}
+	
+	return rdir;
+}
+
+/**
+ * get_all_root_devices: opens up all the devices under this root device
+ * @root: root device to open devices for
+ * returns 0 with success and -1 with error
+ */
+static int get_all_root_devices(struct sysfs_root_device *root)
+{
+	struct sysfs_device *dev = NULL;
+	struct sysfs_directory *cur = NULL;
+
+	if (root == NULL || root->directory == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	if (root->directory->subdirs == NULL)
+		return 0;
+
+	dlist_for_each_data(root->directory->subdirs, cur,
+			struct sysfs_directory) {
+		dev = sysfs_open_device_tree(cur->path);
+		if (dev == NULL) {
+			dprintf ("Error opening device at %s\n", cur->path);
+			continue;
+		}
+		if (root->devices == NULL)
+			root->devices = dlist_new_with_delete
+				(sizeof(struct sysfs_device), 
+				sysfs_close_dev_tree);
+		dlist_unshift(root->devices, dev);
+	}
+
+	return 0;
+}
+
+/**
+ * sysfs_open_root_device: opens sysfs devices root and all of its
+ *	devices.
+ * @name: name of /sys/devices/root to open
+ * returns struct sysfs_root_device if success and NULL with error
+ */
+struct sysfs_root_device *sysfs_open_root_device(const unsigned char *name)
+{
+	struct sysfs_root_device *root = NULL;
+	struct sysfs_directory *rootdir = NULL;
+
+	if (name == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	root = (struct sysfs_root_device *)calloc
+					(1, sizeof(struct sysfs_root_device));
+	if (root == NULL) {
+		perror("calloc");
+		return NULL;
+	}
+	rootdir = open_root_device_dir(name);
+	if (rootdir == NULL) {
+		dprintf ("Invalid root device, %s not supported\n", name);
+		sysfs_close_root_device(root);
+		return NULL;
+	}
+	strcpy(root->path, rootdir->path);
+	root->directory = rootdir;
+	if (get_all_root_devices(root) != 0) {
+		dprintf ("Error retrieving devices for root %s\n", name);
+		sysfs_close_root_device(root);
+		return NULL;
+	}
+
+	return root;
 }
