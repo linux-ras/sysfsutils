@@ -513,6 +513,7 @@ struct sysfs_link *sysfs_open_link(const char *linkpath)
 	safestrcpy(ln->path, linkpath);
 	if ((sysfs_get_name_from_path(linkpath, ln->name, SYSFS_NAME_LEN)) != 0
 	    || (sysfs_get_link(linkpath, ln->target, SYSFS_PATH_MAX)) != 0) {
+		sysfs_close_link(ln);
 		errno = EINVAL;
 		dprintf("Invalid link path %s\n", linkpath);
 		return NULL;

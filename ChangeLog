@@ -1,4 +1,7 @@
 
+08/31/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Fix sysfs_open_link() failure path
+
 08/16/2004 - Eric J Bohm <bohm@gate.csgeeks.org>
 		* Custom sorting dlists patch
 
