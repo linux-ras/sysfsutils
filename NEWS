@@ -1,6 +1,12 @@
 Version History:
 ---------------
 
+ 1.1.0 - Released March 31, 2004
+	* Added changes for C++ compatibility (Thanks to Lev Makhlis)
+	* Patched configure.ac not to check for installed headers
+	* Fixed SEGV in dlist.c (Thanks to Dr. Hannes Reinecke)
+	* Added security audits in library.
+
  1.0.0 - Released February 24, 2004
 	* Libsysfs now ships with a comprehensive testsuite.
 	* List elements are now maintained in sorted order.

@@ -20,3 +20,10 @@ have made contributions:
 		- Supplied patch to fix class_device functions
 	o Brian King <brking@us.ibm.com>
 		- Supplied patch to fix a memory leak in sysfs_dir.c
+	o Martin Schlemmer <azarah@gentoo.org>
+		- Supplied patch to prevent checks for installed 
+			headers, while building.
+	o Lev Makhlis <mlev@despammed.com>
+		- Supplied patch to make library C++ compatible.
+	o Dr. Hannes Reinecke <hare@suse.de>
+		- Supplied patch to fix SEGV in dlist.c

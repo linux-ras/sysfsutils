@@ -3,7 +3,7 @@
 	=========================================
 
 Version: 1.1.0 
-March 15, 2004
+March 31, 2004
 
 Contents
 --------
@@ -22,15 +22,16 @@ Contents
    5.5 Device Data Structure
    5.6 Driver Data Structure
 6. Functions
-   6.1 Utility Functions
-   6.2 Filesystem Functions
-       6.2.1 Attribute Functions
-       6.2.2 Directory Link Functions
-       6.2.3 Directory Functions
-   6.3 Bus Functions
-   6.4 Class Functions
-   6.5 Device Functions
-   6.6 Driver Functions
+   6.1 Calling Conventions in Libsysfs
+   6.2 Utility Functions
+   6.3 Filesystem Functions
+       6.3.1 Attribute Functions
+       6.3.2 Directory Link Functions
+       6.3.3 Directory Functions
+   6.4 Bus Functions
+   6.5 Class Functions
+   6.6 Device Functions
+   6.7 Driver Functions
 7. Navigating a dlist
 8. Usage
 9. Testsuite
@@ -388,7 +389,21 @@ using "open" and "close". Open returns a structure and close is used
 to clean that structure up.
 
 
-6.1 Utility Functions
+6.1 Calling Conventions in Libsysfs
+-----------------------------------
+
+Libsysfs uses a simple API calling convention. APIs are classified to be 
+one of "open", "get", "close" types. The convention is as follows:
+
+	a. All "open" APIs have a corresponding "close" API.
+	b. References obtained using "get" calls should not be closed
+		explicitly.
+	c. All "opened" references have to be closed with a call to
+		their corresponding "close" call. This takes care of
+		freeing structure references obtained with "get" calls.
+
+
+6.2 Utility Functions
 ---------------------
 
 The library will provide a few utility functions for working with sysfs.
@@ -529,7 +544,7 @@ Prototype:	int sysfs_path_is_link(const char *path)
 -------------------------------------------------------------------------------
 
 
-6.2 Filesystem Functions
+6.3 Filesystem Functions
 ------------------------
 
 Libsysfs provides a set of functions to open, read, and close directories
@@ -537,7 +552,7 @@ and attributes/files in sysfs. These functions mirror their filesystem
 function counterparts. 
 
 
-6.2.1 Attribute Functions
+6.3.1 Attribute Functions
 -------------------------
 
 Along with the usual open, read, and close functions, libsysfs provides
@@ -711,7 +726,7 @@ Prototype:	struct sysfs_attribute *sysfs_get_directory_attribute
 -------------------------------------------------------------------------------
 		
 
-6.2.2 Link Functions
+6.3.2 Link Functions
 --------------------
 
 Sysfs contains many symbolic links, like bus links to bus devices. Libsysfs
@@ -829,7 +844,7 @@ Prototype:	int sysfs_refresh_dir_links(struct sysfs_directory *sysdir)
 -------------------------------------------------------------------------------
 
 
-6.2.3 Directory Functions
+6.3.3 Directory Functions
 -------------------------
 
 Sysfs directories can represent every directory under sysfs. The structures
@@ -960,7 +975,7 @@ Prototype:	int sysfs_refresh_dir_subdirs(struct sysfs_directory *sysdir)
 -------------------------------------------------------------------------------
 
 
-6.3 Bus Functions
+6.4 Bus Functions
 -----------------
 
 The library provides a functions for viewing buses represented in sysfs. 
@@ -1131,7 +1146,7 @@ Prototype:	int sysfs_find_driver_bus(const char *driver,
 -------------------------------------------------------------------------------
 
 
-6.4 Class Functions
+6.5 Class Functions
 -------------------
 
 Libsysfs provides functions to open sysfs classes and their class devices.
@@ -1385,7 +1400,7 @@ Prototype:	struct sysfs_attribute *sysfs_write_classdev_attr
 -------------------------------------------------------------------------------
 
 
-6.5 Device Functions
+6.6 Device Functions
 --------------------
 
 Devices represent everything in sysfs under /sys/devices, which is a
@@ -1614,7 +1629,7 @@ Prototype:	struct sysfs_attribute *sysfs_open_device_attr
 -------------------------------------------------------------------------------
 
 
-6.6 Driver Functions
+6.7 Driver Functions
 --------------------
 
 Drivers are represented in sysfs under the /sys/bus/xxx/drivers (xxx being

@@ -1,4 +1,8 @@
 
+03/31/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* More updates to docs/libsysfs.txt
+		* Updated NEWS and CREDITS files
+
 03/19/2004 - Dr. Hannes Reinecke <hare@suse.de>
 		* Fixed SEGV in dlist.c
 
