@@ -1,5 +1,8 @@
 
 02/04/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Fixed miscellaneous issues in sysfs_device/driver.c sources
+
+02/04/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added list sorting support
 		* Exported get_device_bus()
 		* Removed sysfs_open_bus_device()

@@ -372,8 +372,10 @@ struct sysfs_root_device *sysfs_open_root_device(const unsigned char *name)
  */
 struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 {
-	if (device == NULL) 
+	if (device == NULL) {
+		errno = EINVAL;
 		return NULL;
+	}
 
 	if (device->directory == NULL) {
 		device->directory = sysfs_open_directory(device->path);

@@ -197,12 +197,15 @@ struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver)
 		errno = EINVAL;
 		return NULL;
 	}
-	if (driver->directory == NULL) {
+
+	if (driver->directory == NULL) 
 		if ((open_driver_dir(driver)) == 1)
 			return NULL;
+	
+	if (driver->directory->links == NULL)
 		if ((sysfs_read_dir_links(driver->directory)) != 0) 
 			return NULL;
-	}
+		
 	return(driver->directory->links);
 }
 
@@ -224,12 +227,11 @@ struct dlist *sysfs_get_driver_devices(struct sysfs_driver *driver)
 	if (driver->devices != NULL)
 		return (driver->devices);
 
-	if (driver->directory == NULL) {
-		if ((open_driver_dir(driver)) == 1) 
-			return NULL;
-		if ((sysfs_read_dir_links(driver->directory)) != 0) 
-			return NULL;
+	if (driver->directory == NULL || driver->directory->links == NULL) {
+		struct dlist *list = NULL;
+		list = sysfs_get_driver_links(driver);
 	}
+	
 	if (driver->directory->links != NULL) {
 		dlist_for_each_data(driver->directory->links, curlink, 
 						struct sysfs_link) {
