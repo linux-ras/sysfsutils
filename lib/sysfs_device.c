@@ -89,7 +89,7 @@ int sysfs_get_device_bus(struct sysfs_device *dev)
  * 	closing children only.
  * @devroot: device root of tree.
  */
-static void sysfs_close_device_tree(struct sysfs_device *devroot)
+void sysfs_close_device_tree(struct sysfs_device *devroot)
 {
 	if (devroot != NULL) {
 		if (devroot->children != NULL) {
@@ -222,7 +222,7 @@ struct sysfs_device *sysfs_open_device_path(const unsigned char *path)
  * returns struct sysfs_device and its children with success or NULL with
  *	error.
  */
-static struct sysfs_device *sysfs_open_device_tree(const unsigned char *path)
+struct sysfs_device *sysfs_open_device_tree(const unsigned char *path)
 {
 	struct sysfs_device *rootdev = NULL, *new = NULL;
 	struct sysfs_directory *cur = NULL;

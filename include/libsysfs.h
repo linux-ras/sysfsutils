@@ -216,6 +216,8 @@ extern void sysfs_close_root_device(struct sysfs_root_device *root);
 extern struct sysfs_root_device *sysfs_open_root_device
 						(const unsigned char *name);
 extern struct dlist *sysfs_get_root_devices(struct sysfs_root_device *root);
+extern void sysfs_close_device_tree(struct sysfs_device *device);
+extern struct sysfs_device *sysfs_open_device_tree(const unsigned char *path);
 extern void sysfs_close_device(struct sysfs_device *dev);
 extern struct sysfs_device *sysfs_open_device
 		(const unsigned char *bus, const unsigned char *bus_id);

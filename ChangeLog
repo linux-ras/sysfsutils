@@ -1,4 +1,10 @@
 
+02/12/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added Nitin Vashisth to AUTHORS
+		* Removed lsbus and its manpage
+		* Updated systool for better display
+		* Updated manpage for systool
+
 02/10/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Updated docs/libsysfs.txt
 

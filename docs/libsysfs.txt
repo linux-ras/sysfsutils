@@ -1438,7 +1438,7 @@ Returns:	struct sysfs_root_device * with success
 			- EINVAL for invalid arguments
 
 Prototype:	struct sysfs_device *sysfs_open_root_device
-				(const unsigned char *name)
+					(const unsigned char *name)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -1450,6 +1450,34 @@ Description:	Function closes up the sysfs_root_device structure including the
 Arguments:	sysfs_device *root	Root device structure to close
 
 Prototype:	void sysfs_close_root_device(struct sysfs_root_device *root)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_device_tree
+
+Description:	Function opens up the device tree at the specified path.
+
+Arguments:	const unsigned char *path	Path at which to open the 
+						device tree
+
+Returns:	struct sysfs_device * with success
+		NULL with error, Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct sysfs_device *sysfs_open_device_tree
+					(const unsigned char *path)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_close_device_tree
+
+Description:	Function closes the device tree originating at the given 
+		sysfs_device.
+
+Arguments:	struct sysfs_device *devroot	Device from which the device
+						tree has to be closed
+
+Prototype:	void sysfs_close_device_tree(struct sysfs_device *devroot)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------

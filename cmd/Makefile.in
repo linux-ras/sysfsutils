@@ -83,9 +83,8 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-bin_PROGRAMS = systool lsbus
+bin_PROGRAMS = systool 
 systool_SOURCES = systool.c names.c names.h
-lsbus_SOURCES = lsbus.c names.c names.h
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
 CFLAGS = -Wall -Wshadow -W -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
@@ -93,14 +92,9 @@ subdir = cmd
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-bin_PROGRAMS = systool$(EXEEXT) lsbus$(EXEEXT)
+bin_PROGRAMS = systool$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
-am_lsbus_OBJECTS = lsbus.$(OBJEXT) names.$(OBJEXT)
-lsbus_OBJECTS = $(am_lsbus_OBJECTS)
-lsbus_LDADD = $(LDADD)
-lsbus_DEPENDENCIES = ../lib/libsysfs.la
-lsbus_LDFLAGS =
 am_systool_OBJECTS = systool.$(OBJEXT) names.$(OBJEXT)
 systool_OBJECTS = $(am_systool_OBJECTS)
 systool_LDADD = $(LDADD)
@@ -114,8 +108,7 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/lsbus.Po ./$(DEPDIR)/names.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/systool.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/names.Po ./$(DEPDIR)/systool.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
@@ -123,9 +116,9 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(lsbus_SOURCES) $(systool_SOURCES)
+DIST_SOURCES = $(systool_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(lsbus_SOURCES) $(systool_SOURCES)
+SOURCES = $(systool_SOURCES)
 
 all: all-am
 
@@ -165,9 +158,6 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-lsbus$(EXEEXT): $(lsbus_OBJECTS) $(lsbus_DEPENDENCIES) 
-	@rm -f lsbus$(EXEEXT)
-	$(LINK) $(lsbus_LDFLAGS) $(lsbus_OBJECTS) $(lsbus_LDADD) $(LIBS)
 systool$(EXEEXT): $(systool_OBJECTS) $(systool_DEPENDENCIES) 
 	@rm -f systool$(EXEEXT)
 	$(LINK) $(systool_LDFLAGS) $(systool_OBJECTS) $(systool_LDADD) $(LIBS)
@@ -178,7 +168,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lsbus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/names.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/systool.Po@am__quote@
 

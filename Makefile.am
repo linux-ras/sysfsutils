@@ -1,4 +1,4 @@
-man_MANS = lsbus.1 systool.1
+man_MANS = systool.1
 EXTRA_DIST = docs include $(man_MANS) CREDITS lib/LGPL cmd/GPL test/GPL
 SUBDIRS = lib cmd test
 include_HEADERS = include/libsysfs.h include/dlist.h

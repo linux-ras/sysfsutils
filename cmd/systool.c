@@ -40,15 +40,21 @@ static unsigned char *device_to_show = NULL;	/* show only this bus device */
 struct pci_access *pacc = NULL;
 unsigned char *show_bus = NULL;
 
+static void show_device(struct sysfs_device *device, int level);
+static void show_class_device(struct sysfs_class_device *dev, int level);
+
 #define SHOW_ATTRIBUTES		0x01	/* show attributes command option */
 #define SHOW_ATTRIBUTE_VALUE	0x02	/* show an attribute value option */
 #define SHOW_DEVICES		0x04	/* show only devices option */
 #define SHOW_DRIVERS		0x08	/* show only drivers option */
 #define SHOW_ALL_ATTRIB_VALUES	0x10	/* show all attributes with values */
+#define SHOW_CHILDREN		0x20	/* show device children */
+#define SHOW_PARENT		0x40	/* show device parent */
+#define SHOW_PATH		0x80	/* show device/driver path */
                                                                                 
 #define SHOW_ALL		0xff
 
-static unsigned char cmd_options[] = "aA:b:c:dDhr:v";
+static unsigned char cmd_options[] = "aA:b:c:CdDhpPr:v";
 
 /*
  * binary_files - defines existing sysfs binary files. These files will be
@@ -79,11 +85,14 @@ static void usage(void)
 	fprintf(stdout, "\t-c <class_name>\t\tShow a specific class\n");
 	fprintf(stdout, "\t-d\t\t\tShow only devices\n");
 	fprintf(stdout, "\t-h\t\t\tShow usage\n");
+	fprintf(stdout, "\t-p\t\t\tShow path to device/driver\n");
 	fprintf(stdout, 
 		"\t-r <root_device>\tShow a specific root device tree\n");
 	fprintf(stdout, "\t-v\t\t\tShow all attributes with values\n");
 	fprintf(stdout, "\t-A <attribute_name>\tShow attribute value\n");
+	fprintf(stdout, "\t-C\t\t\tShow device's children\n");
 	fprintf(stdout, "\t-D\t\t\tShow only drivers\n");
+	fprintf(stdout, "\t-P\t\t\tShow device's parent\n");
 }
 
 /**
@@ -95,7 +104,7 @@ static void indent(int level)
 {
 	int i;
 
-	for (i = 0; i <= level; i++)
+	for (i = 0; i < level; i++)
 		fprintf(stdout, " ");
 }
 
@@ -115,18 +124,29 @@ static void remove_end_newline(unsigned char *value)
  * show_device_children: prints out device subdirs.
  * @children: dlist of child devices.
  */
-static void show_device_children(struct dlist *children, int level)
+static void show_device_children(struct sysfs_device *device, int level)
 {
-	struct sysfs_device *child = NULL;
+	struct sysfs_device *temp_device = NULL, *child = NULL;
+	unsigned int flag = 1;
 	
-	if (children != NULL) {
-		indent(level);
-		fprintf(stdout, "Children:\n");
-		dlist_for_each_data(children, child, 
-				struct sysfs_device) {
-			indent(level+4);
-			fprintf(stdout, "%s\n", child->bus_id);
+	temp_device = sysfs_open_device_tree(device->path);
+	if (temp_device) {
+		if (temp_device->children) {
+			fprintf(stdout, "\n");
+			dlist_for_each_data(temp_device->children, child, 
+					struct sysfs_device) {
+				if (strncmp(child->name, "power", 5) == 0)
+					continue;
+				if (flag) {
+					flag--;
+					indent(level);
+					fprintf(stdout, "Device \"%s\"'s children\n", 
+							temp_device->name);
+				}
+				show_device(child, (level+2));
+			}
 		}
+		sysfs_close_device_tree(temp_device);
 	}
 }
 
@@ -161,25 +181,24 @@ static void show_attribute_value(struct sysfs_attribute *attr, int level)
 	if (attr->method & SYSFS_METHOD_SHOW) {
 		if (isbinaryvalue(attr) != 0) {
 			int i;
-			fprintf(stdout, "\t: ");
 			for (i = 0; i < attr->len; i++) {
-				if (!(i %16)) {
+				if (!(i % 16) && (i != 0)) {
 					fprintf(stdout, "\n");
-					indent(level+8);
-				} else if (!(i %8))
+					indent(level+22);
+				} else if (!(i % 8) && (i != 0))
 					fprintf(stdout, " ");
-				fprintf(stdout, "%02x ", 
+				fprintf(stdout, " %02x", 
 					(unsigned char)attr->value[i]);
 			}
 			fprintf(stdout, "\n");
 
 		} else if (attr->value != NULL && strlen(attr->value) > 0) {
 			remove_end_newline(attr->value);
-			fprintf(stdout, "\t: %s\n", attr->value);
+			fprintf(stdout, "\"%s\"\n", attr->value);
 		} else
 			fprintf(stdout, "\n");
 	} else {
-		fprintf(stdout, "\t: store method only\n");
+		fprintf(stdout, "<store method only>\n");
 	}
 }
 
@@ -194,14 +213,13 @@ static void show_attribute(struct sysfs_attribute *attr, int level)
 
 	if (show_options & SHOW_ALL_ATTRIB_VALUES) {
 		indent(level);
-		fprintf(stdout, "%s", attr->name);
+		fprintf(stdout, "%-20s= ", attr->name);
 		show_attribute_value(attr, level);
-
 	} else if ((show_options & SHOW_ATTRIBUTES) || ((show_options 
 	    & SHOW_ATTRIBUTE_VALUE) && (strcmp(attr->name, attribute_to_show) 
 	    == 0))) {
 		indent(level);
-		fprintf (stdout, "%s", attr->name);
+		fprintf (stdout, "%-20s=", attr->name);
 		if (show_options & SHOW_ATTRIBUTE_VALUE && attr->value 
 		    != NULL && (strcmp(attr->name, attribute_to_show)) == 0) 
 			show_attribute_value(attr, level);
@@ -220,15 +238,30 @@ static void show_attributes(struct dlist *attributes, int level)
 	if (attributes != NULL) {
 		struct sysfs_attribute *cur = NULL;
 		
-		indent(level);
-		fprintf (stdout, "Attributes:\n");
 		dlist_for_each_data(attributes, cur, 
 				struct sysfs_attribute) {
-			show_attribute(cur, (level+4));
+			show_attribute(cur, (level));
 		}
 	}
 }
 
+/**
+ * show_device_parent: prints device's parent (if present)
+ * @device: sysfs_device whose parent information is needed
+ */
+static void show_device_parent(struct sysfs_device *device, int level)
+{
+	struct sysfs_device *parent = NULL;
+
+	parent = sysfs_get_device_parent(device);
+	if (parent) {
+		fprintf(stdout, "\n");
+		indent(level);
+		fprintf(stdout, "Device \"%s\"'s parent\n", device->name);
+		show_device(parent, (level+2));
+	}
+}
+		
 /**
  * show_device: prints out device information.
  * @device: device to print.
@@ -242,7 +275,7 @@ static void show_device(struct sysfs_device *device, int level)
 	if (device != NULL) {
 		indent(level);
 		if (show_bus != NULL && (!(strcmp(show_bus, "pci")))) {
-			fprintf(stdout, "%s: ", device->bus_id);
+			fprintf(stdout, "%s ", device->bus_id);
 			memset(path, 0, SYSFS_PATH_MAX);
 			memset(value, 0, SYSFS_PATH_MAX);
 			strcpy(path, device->path);
@@ -260,40 +293,32 @@ static void show_device(struct sysfs_device *device, int level)
 			} else 
 				fprintf(stdout, "\n");
 		} else 
-			fprintf(stdout, "%s\n", device->bus_id);
+			fprintf(stdout, "Device = \"%s\"\n", device->bus_id);
+
+		if (show_options & (SHOW_PATH | SHOW_ALL_ATTRIB_VALUES)) {
+			indent(level);
+			fprintf(stdout, "Device path = \"%s\"\n", 
+							device->path);
+		}
 
 		if (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE |
 					SHOW_ALL_ATTRIB_VALUES)) {
 			attributes = sysfs_get_device_attributes(device);
 			if (attributes != NULL) 
-				show_attributes(attributes, (level+4));
+				show_attributes(attributes, (level+2));
 		}
-		if (device->children != NULL)
-			show_device_children(device->children, (level+4));
-		if (isalnum(device->driver_name[0])) {
-			indent(level+6);
-			fprintf (stdout, "Driver: %s\n", 
-						device->driver_name);
-		} 
-	}
-}
-
-/**
- * show_root_device: prints out sys/devices device information.
- * @device: device to print.
- */
-static void show_root_device(struct sysfs_device *device, int level)
-{
-	if (device != NULL) {
-		indent(level);
-		fprintf (stdout, "%s\n", device->bus_id);
-		if (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
-		    | SHOW_ALL_ATTRIB_VALUES)) {
-			struct dlist *attributes = NULL;
-			attributes = sysfs_get_device_attributes(device);
-			if (attributes != NULL)
-				show_attributes(attributes, (level+4));
+		if ((device_to_show != NULL) && 
+				(show_options & SHOW_CHILDREN)) {
+			show_options &= ~SHOW_CHILDREN;
+			show_device_children(device, (level+2));
 		}
+		if ((device_to_show != NULL) && (show_options & SHOW_PARENT)) {
+			show_options &= ~SHOW_PARENT;
+			show_device_parent(device, (level+2));
+		}
+		if (show_options ^ SHOW_DEVICES)
+			if (!(show_options & SHOW_DRIVERS))
+				fprintf(stdout, "\n");
 	}
 }
 
@@ -310,12 +335,11 @@ static void show_driver_attributes(struct sysfs_driver *driver, int level)
 		if (attributes != NULL) {
 			struct sysfs_attribute *cur = NULL;
 
-			indent(level);
-			fprintf (stdout, "%s Attributes:\n", driver->name);
 			dlist_for_each_data(attributes, cur,
 					struct sysfs_attribute) {
-				show_attribute(cur, (level+4));
+				show_attribute(cur, (level));
 			}
+			fprintf(stdout, "\n");
 		}
 	}
 }
@@ -330,22 +354,34 @@ static void show_driver(struct sysfs_driver *driver, int level)
 	
 	if (driver != NULL) {
 		indent(level);
-		fprintf (stdout, "%s\n", driver->name);
+		fprintf (stdout, "Driver = \"%s\"\n", driver->name);
+		if (show_options & (SHOW_PATH | SHOW_ALL_ATTRIB_VALUES)) {
+			indent(level);
+			fprintf(stdout, "Driver path = \"%s\"\n", 
+							driver->path);
+		}
+		if (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
+			    | SHOW_ALL_ATTRIB_VALUES))
+			show_driver_attributes(driver, (level+2));
 		devlist = sysfs_get_driver_devices(driver);
 		if (devlist != NULL) {
 			struct sysfs_device *cur = NULL;
 			
-			indent(level+4);
-			fprintf(stdout, "Devices:\n");
+			indent(level+2);
+			fprintf(stdout, "Devices using \"%s\" are:\n", 
+								driver->name);
 			dlist_for_each_data(devlist, cur, 
 					struct sysfs_device) {
-				indent(level+8);
-				fprintf(stdout, "%s\n", cur->bus_id);
+				if (show_options & SHOW_DRIVERS) {
+					show_device(cur, (level+4));
+					fprintf(stdout, "\n");
+				} else {
+					indent(level+4);
+					fprintf(stdout, "\"%s\"\n", cur->name);
+				}
 			}
-		}
-		if (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
-			    | SHOW_ALL_ATTRIB_VALUES))
-			show_driver_attributes(driver, (level+4));
+		} 
+		fprintf(stdout, "\n");
 	}
 }
 
@@ -360,14 +396,14 @@ static void show_device_tree(struct sysfs_device *root, int level)
 
 		if (device_to_show == NULL || (strcmp(device_to_show,
 			    root->bus_id) == 0)) {
-			show_root_device(root, level);
+			show_device(root, level);
 		}
 		if (root->children != NULL) {
 			dlist_for_each_data(root->children, cur, 
 					struct sysfs_device) {
 				if (strncmp(cur->name, "power", 5) == 0)
 					continue;
-				show_device_tree(cur, (level+6));
+				show_device_tree(cur, (level+2));
 			}
 		}
 	}
@@ -396,12 +432,12 @@ static int show_sysfs_bus(unsigned char *busname)
 		return 1;
 	}
 
-	fprintf(stdout, "Bus: %s\n", busname);
+	fprintf(stdout, "Bus = \"%s\"\n", busname);
+	if (show_options ^ (SHOW_DEVICES | SHOW_DRIVERS))
+		fprintf(stdout, "\n");
 	if (show_options & SHOW_DEVICES) {
 		devlist = sysfs_get_bus_devices(bus);
 		if (devlist != NULL) {
-			if (device_to_show == NULL)
-				fprintf(stdout, "Devices:\n");
 			dlist_for_each_data(devlist, curdev, 
 						struct sysfs_device) {
 				if (device_to_show == NULL || 
@@ -414,7 +450,6 @@ static int show_sysfs_bus(unsigned char *busname)
 	if (show_options & SHOW_DRIVERS) {
 		drvlist = sysfs_get_bus_drivers(bus);
 		if (drvlist != NULL) {
-			fprintf(stdout, "Drivers:\n");
 			dlist_for_each_data(drvlist, curdrv, 
 					struct sysfs_driver) {
 				show_driver(curdrv, 2);
@@ -423,6 +458,24 @@ static int show_sysfs_bus(unsigned char *busname)
 	}
 	sysfs_close_bus(bus);
 	return 0;
+}
+
+/**
+ * show_classdev_parent: prints the class device's parent if present
+ * @dev: class device whose parent is needed
+ */ 
+static void show_classdev_parent(struct sysfs_class_device *dev, int level)
+{
+	struct sysfs_class_device *parent = NULL;
+
+	parent = sysfs_get_classdev_parent(dev);
+	if (parent) {
+		fprintf(stdout, "\n");
+		indent(level);
+		fprintf(stdout, "Class device \"%s\"'s parent is\n", 
+								dev->name);
+		show_class_device(parent, level+2);
+	}
 }
 
 /**
@@ -437,23 +490,38 @@ static void show_class_device(struct sysfs_class_device *dev, int level)
 	
 	if (dev != NULL) {
 		indent(level);
-		fprintf(stdout, "%s\n", dev->name);
+		fprintf(stdout, "Class Device = \"%s\"\n", dev->name);
+		if (show_options & (SHOW_PATH | SHOW_ALL_ATTRIB_VALUES)) {
+			indent(level);
+			fprintf(stdout, "Class Device path = \"%s\"\n",
+								dev->path);
+		}
 		if (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
 		    | SHOW_ALL_ATTRIB_VALUES)) {
 			attributes = sysfs_get_classdev_attributes(dev);
 			if (attributes != NULL)
-				show_attributes(attributes, (level+4));
+				show_attributes(attributes, (level+2));
+			fprintf(stdout, "\n");
 		}
 		if (show_options & (SHOW_DEVICES | SHOW_ALL_ATTRIB_VALUES)) {
 			device = sysfs_get_classdev_device(dev);
-			if (device != NULL)
-				show_device(device, (level+4));
+			if (device != NULL) {
+				show_device(device, (level+2));
+			}
 		}
 		if (show_options & (SHOW_DRIVERS | SHOW_ALL_ATTRIB_VALUES)) {
 			driver = sysfs_get_classdev_driver(dev);
-			if (driver != NULL)
-				show_driver(driver, (level+4));
+			if (driver != NULL) {
+				show_driver(driver, (level+2));
+			}
 		}
+		if ((device_to_show != NULL) && (show_options & SHOW_PARENT)) {
+			show_options &= ~SHOW_PARENT;
+			show_classdev_parent(dev, level+2);
+		}
+		if (show_options & ~(SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
+		    | SHOW_ALL_ATTRIB_VALUES))
+			fprintf(stdout, "\n");
 	}
 }
 
@@ -477,11 +545,9 @@ static int show_sysfs_class(unsigned char *classname)
 		fprintf(stderr, "Error opening class %s\n", classname);
 		return 1;
 	}
-	fprintf(stdout, "Class: %s\n", classname);
+	fprintf(stdout, "Class = \"%s\"\n\n", classname);
 	clsdevlist = sysfs_get_class_devices(cls);
 	if (clsdevlist != NULL) {
-		if (device_to_show == NULL)
-			fprintf(stdout, "Class Devices:\n");
 		dlist_for_each_data(clsdevlist, cur, 
 				struct sysfs_class_device) {
 			if (device_to_show == NULL || (strcmp(device_to_show,
@@ -517,7 +583,7 @@ static int show_sysfs_root(unsigned char *rootname)
 
 	devlist = sysfs_get_root_devices(root);
 	if (devlist != NULL) {
-		fprintf(stdout, "Root Device Tree: %s\n", rootname);
+		fprintf(stdout, "Root Device = \"%s\"\n\n", rootname);
 		
 		if (devlist != NULL) {
 			dlist_for_each_data(devlist, device, 
@@ -606,6 +672,9 @@ int main(int argc, char *argv[])
 		case 'c':
 			show_class = optarg;	
 			break;
+		case 'C':
+			show_options |= SHOW_CHILDREN;
+			break;
 		case 'd':
 			show_options |= SHOW_DEVICES;
 			break;
@@ -615,6 +684,12 @@ int main(int argc, char *argv[])
 		case 'h':
 			usage();
 			exit(0);
+			break;
+		case 'p':
+			show_options |= SHOW_PATH;
+			break;
+		case 'P':
+			show_options |= SHOW_PARENT;
 			break;
 		case 'r':
 			show_root = optarg;
@@ -663,8 +738,9 @@ int main(int argc, char *argv[])
 		show_options |= SHOW_DEVICES;
 
 	if (show_bus != NULL) {
-		if ((!(strcmp(show_bus, "pci"))) && 
-				(show_options & SHOW_DEVICES)) {
+	/*	if ((!(strcmp(show_bus, "pci"))) && 
+				(show_options & SHOW_DEVICES)) { */
+		if ((!(strcmp(show_bus, "pci"))))  {
 			pacc = (struct pci_access *)
 				calloc(1, sizeof(struct pci_access));
 			pacc->pci_id_file_name = pci_id_file;
@@ -681,12 +757,16 @@ int main(int argc, char *argv[])
 		retval = show_default_info();
 
 	if (show_bus != NULL) {
-		if ((!(strcmp(show_bus, "pci"))) &&
-				(show_options & SHOW_DEVICES)) {
+		/*if ((!(strcmp(show_bus, "pci"))) &&
+				(show_options & SHOW_DEVICES)) { */
+		if ((!(strcmp(show_bus, "pci"))))  {
 			pci_free_name_list(pacc);
 			free (pacc);
 			pacc = NULL;
 		}
 	}
+	if (!(show_options ^ SHOW_DEVICES))
+		fprintf(stdout, "\n");
+
 	exit(retval);
 }

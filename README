@@ -23,7 +23,6 @@ and their attributes.
 This package currently includes:
 
 - libsysfs: a library for accessing system devices.
-- lsbus: a small application to query system bus information.
 - systool: an application to view system device information by bus, class,
 	and topology.
 - A number of example usage routines in the "test" directory.

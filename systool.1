@@ -18,17 +18,25 @@ is supplied, the information reqested by
 .I options
 is shown only for the specified device, otherwise all present devices
 are displayed.
+.P
+.B systool 
+uses APIs provided by 
+.B libsysfs 
+to gather information.
+.B systool 
+runs only on Linux systems running kernels 2.5 or later, with the sysfs 
+filesystem mounted.
 
 .SH OPTIONS
 .TP
 .B \-a
-Show attributes
+Show attributes of the requested resource
 .TP
 .B \-b \fIbus
-Show a specific bus
+Show information for a specific bus
 .TP
 .B \-c \fIclass
-Show a specific class
+Show information for a specific class
 .TP
 .B \-d
 Show only devices
@@ -36,21 +44,28 @@ Show only devices
 .B \-h
 Show usage
 .TP
+.B \-p
+Show absolute sysfs path to the resource
+.TP
 .B \-r \fIroot_device
 Show a specific root device tree
 .TP
 .B \-v
 Show all attributes with values
 .TP
-.B \-A \fI attribute
-Show attribute value
+.B \-A \fIattribute
+Show attribute value for the requested resource
+.TP
+.B \-C
+Show device's children
 .TP
 .B \-D
 Show only drivers
+.TP
+.B \-P
+Show device's parent
 
 .SH SEE ALSO
-.B lsbus
-(1)
 .P
 The web page of
 .B libsysfs
