@@ -184,8 +184,6 @@ extern void sysfs_close_driver(struct sysfs_driver *driver);
 extern struct sysfs_driver *sysfs_open_driver
 	(const unsigned char *drv_name, const unsigned char *bus_name);
 extern struct sysfs_driver *sysfs_open_driver_path(const unsigned char *path);
-extern struct sysfs_driver *sysfs_open_driver_by_name
-	(const unsigned char *drv_name, const unsigned char *bus_name);
 extern struct sysfs_attribute *sysfs_get_driver_attr
 		(struct sysfs_driver *drv, const unsigned char *name);
 extern struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver);

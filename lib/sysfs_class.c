@@ -578,12 +578,12 @@ struct sysfs_attribute *sysfs_get_classdev_attr
 	 * subdirs since class devices can have subdirs of attributes.
 	 */ 
 	attrlist = sysfs_get_classdev_attributes(clsdev);
-	if (attrlist == NULL)
-		return NULL;
-	cur = sysfs_get_directory_attribute(clsdev->directory,
+	if (attrlist != NULL) {
+		cur = sysfs_get_directory_attribute(clsdev->directory,
 						(unsigned char *)name);
-	if (cur != NULL)
-		return cur;
+		if (cur != NULL)
+			return cur;
+	}
 
 	if (clsdev->directory->subdirs == NULL) 
 		if ((sysfs_read_dir_subdirs(clsdev->directory)) != 0 ||
@@ -593,14 +593,20 @@ struct sysfs_attribute *sysfs_get_classdev_attr
 	if (clsdev->directory->subdirs != NULL) {
 		dlist_for_each_data(clsdev->directory->subdirs, sdir,
 						struct sysfs_directory) {
-			cur = sysfs_get_directory_attribute(sdir, 
-						(unsigned char *)name);
-			if (cur != NULL)
-				return cur;
+			if ((sysfs_path_is_dir(sdir->path)) != 0) 
+				continue;
+			if (sdir->attributes == NULL) {
+				cur = sysfs_get_directory_attribute(sdir,
+							(unsigned char *)name);
+			} else {
+				if ((sysfs_refresh_attributes
+						(sdir->attributes)) == 0)
+				cur = sysfs_get_directory_attribute(sdir, 
+							(unsigned char *)name);
+			}
 		}
 	}
-		
-	return NULL;
+	return cur;
 }
 
 /**

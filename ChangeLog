@@ -1,4 +1,8 @@
 
+12/17/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Updated docs/libsysfs.txt for 0.4.0
+		* Made some miscallaneous changes in library
+
 12/16/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Added sysfs_get_device_parent() function
 

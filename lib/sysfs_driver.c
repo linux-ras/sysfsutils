@@ -162,13 +162,10 @@ struct sysfs_attribute *sysfs_get_driver_attr(struct sysfs_driver *drv,
         }
 	
 	attrlist = sysfs_get_driver_attributes(drv);
-	if (attrlist != NULL) {
+	if (attrlist != NULL) 
 		cur = sysfs_get_directory_attribute(drv->directory,
 						(unsigned char *)name);
-	        if (cur != NULL)
-        	        return cur;
-	}
-        return NULL;
+        return cur;
 }
 
 /**

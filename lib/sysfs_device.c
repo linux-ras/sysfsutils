@@ -417,10 +417,8 @@ struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
 
 	cur = sysfs_get_directory_attribute(dev->directory, 
 			(unsigned char *)name);
-	if (cur != NULL)
-		return cur;
 
-	return NULL;
+	return cur;
 }
 
 /**
