@@ -1,4 +1,8 @@
 
+12/16/2004 - Kay Sievers <kay.sievers@vrfy.org>
+		* Fix sysfs_get_classdev_attr() for case when the
+			sysfs_directory vanishes from beneath us
+
 11/18/2004 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Check "driver" link under the device dir before
 			taking the "brute-force" route

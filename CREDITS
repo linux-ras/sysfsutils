@@ -29,3 +29,6 @@ have made contributions:
 		- Supplied patch to fix SEGV in dlist.c
 	o Arun Bhanu <arun@codemovers.org>
 		- Supplied patch to fix docs/libsysfs.txt
+	o Kay Sievers <kay.sievers@vrfy.org>
+		- Supplied patch to fix sysfs_get_classdir_attr when
+			the directory vanishes from under us.
