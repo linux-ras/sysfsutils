@@ -1,4 +1,8 @@
 
+12/26/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Removed unneeded functions
+		* Added APIs to get directory links, subdirs and attribs
+
 12/17/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Updated docs/libsysfs.txt for 0.4.0
 		* Made some miscallaneous changes in library

@@ -62,18 +62,20 @@ struct sysfs_link {
 };
 
 struct sysfs_directory {
+	unsigned char name[SYSFS_NAME_LEN];
+	unsigned char path[SYSFS_PATH_MAX];
+
+	/* Private: for internal use only */
 	struct dlist *subdirs;	
 	struct dlist *links;		
 	struct dlist *attributes;
-	unsigned char name[SYSFS_NAME_LEN];
-	unsigned char path[SYSFS_PATH_MAX];
 };
 
 struct sysfs_driver {
 	unsigned char name[SYSFS_NAME_LEN];
 	unsigned char path[SYSFS_PATH_MAX];
 
-	/* for internal use only */
+	/* Private: for internal use only */
 	struct dlist *devices;
 	struct sysfs_directory *directory;	
 };
@@ -85,7 +87,7 @@ struct sysfs_device {
 	unsigned char driver_name[SYSFS_NAME_LEN];
 	unsigned char path[SYSFS_PATH_MAX];
 
-	/* for internal use only */
+	/* Private: for internal use only */
 	struct sysfs_device *parent;		
 	struct dlist *children;	
 	struct sysfs_directory *directory;	
@@ -95,7 +97,7 @@ struct sysfs_root_device {
 	unsigned char name[SYSFS_NAME_LEN];
 	unsigned char path[SYSFS_PATH_MAX];
 
-	/* for internal use only */
+	/* Private: for internal use only */
 	struct dlist *devices;
 	struct sysfs_directory *directory;
 };
@@ -104,7 +106,7 @@ struct sysfs_bus {
 	unsigned char name[SYSFS_NAME_LEN];
 	unsigned char path[SYSFS_PATH_MAX];
 
-	/* internal use only */
+	/* Private: for internal use only */
 	struct dlist *drivers;
 	struct dlist *devices;
 	struct sysfs_directory *directory;	
@@ -115,7 +117,7 @@ struct sysfs_class_device {
 	unsigned char classname[SYSFS_NAME_LEN];
 	unsigned char path[SYSFS_PATH_MAX];
 
-	/* for internal use only */
+	/* Private: for internal use only */
 	struct sysfs_class_device *parent;	
 	struct sysfs_device *sysdevice;		/* NULL if virtual */
 	struct sysfs_driver *driver;		/* NULL if not implemented */
@@ -126,7 +128,7 @@ struct sysfs_class {
 	unsigned char name[SYSFS_NAME_LEN];
 	unsigned char path[SYSFS_PATH_MAX];
 
-	/* for internal use only */
+	/* Private: for internal use only */
 	struct dlist *devices;
 	struct sysfs_directory *directory;	
 };
@@ -178,6 +180,9 @@ extern struct sysfs_link *sysfs_get_subdirectory_link
 			(struct sysfs_directory *dir, unsigned char *linkname);
 extern struct sysfs_attribute *sysfs_get_directory_attribute
 			(struct sysfs_directory *dir, unsigned char *attrname);
+extern struct dlist *sysfs_get_dir_attributes(struct sysfs_directory *dir);
+extern struct dlist *sysfs_get_dir_links(struct sysfs_directory *dir);
+extern struct dlist *sysfs_get_dir_subdirs(struct sysfs_directory *dir);
 
 /* sysfs driver access */
 extern void sysfs_close_driver(struct sysfs_driver *driver);

@@ -212,7 +212,6 @@ struct dlist *sysfs_open_subsystem_list(unsigned char *name)
 	unsigned char *c = NULL;
 	struct sysfs_directory *dir = NULL, *cur = NULL;
 	struct dlist *list = NULL;
-	struct stat astats;
 	
 	if (name == NULL)
 		return NULL;

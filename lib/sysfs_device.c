@@ -105,14 +105,6 @@ static void sysfs_close_device_tree(struct sysfs_device *devroot)
 }
 
 /**
- * sysfs_del_device: routine for dlist integration
- */
-static void sysfs_del_device(void *dev)
-{
-	sysfs_close_device((struct sysfs_device *)dev);
-}
-
-/**
  * sysfs_close_dev_tree: routine for dlist integration
  */
 static void sysfs_close_dev_tree(void *dev)

@@ -464,6 +464,13 @@ struct sysfs_directory *sysfs_open_directory(const unsigned char *path)
 		errno = EINVAL;
 		return NULL;
 	}
+
+	if (sysfs_path_is_dir(path) != 0) {
+		dprintf("Invalid path directory %s\n", path);
+		errno = EINVAL;
+		return NULL;
+	}
+
 	sdir = alloc_directory();
 	if (sdir == NULL) {
 		dprintf("Error allocating directory %s\n", path);
@@ -935,4 +942,74 @@ struct sysfs_link *sysfs_get_subdirectory_link(struct sysfs_directory *dir,
 		}
 	}
 	return NULL;
+}
+
+/**
+ * sysfs_get_dir_attributes: returns dlist of directory attributes
+ * @dir: directory to retrieve attributes from
+ * returns dlist of attributes or NULL
+ */
+struct dlist *sysfs_get_dir_attributes(struct sysfs_directory *dir)
+{
+	if (dir == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (dir->attributes == NULL) {
+		if (sysfs_read_dir_attributes(dir) != 0)
+			return NULL;
+	} else {
+		if (sysfs_path_is_dir(dir->path) != 0) {
+			dprintf("Directory at %s no longer exists\n", 
+				dir->path);
+			return NULL;
+		}
+		if (sysfs_refresh_attributes(dir->attributes) != 0) {
+			dprintf("Error refreshing attributes at %s\n",
+				dir->path);
+			return NULL;
+		}
+	}
+	return (dir->attributes);
+}
+
+/**
+ * sysfs_get_dir_links: returns dlist of directory links
+ * @dir: directory to return links for
+ * returns dlist of links or NULL
+ */
+struct dlist *sysfs_get_dir_links(struct sysfs_directory *dir)
+{
+	if (dir == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (dir->links == NULL) {
+		if (sysfs_read_dir_links(dir) != 0)
+			return NULL;
+	}
+
+	return (dir->links);
+}
+
+/**
+ * sysfs_get_dir_subdirs: returns dlist of directory subdirectories
+ * @dir: directory to return subdirs for
+ * returns dlist of subdirs or NULL
+ */
+struct dlist *sysfs_get_dir_subdirs(struct sysfs_directory *dir)
+{
+	if (dir == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (dir->subdirs == NULL) {
+		if (sysfs_read_dir_subdirs(dir) != 0)
+			return NULL;
+	}
+
+	return (dir->subdirs);
 }
