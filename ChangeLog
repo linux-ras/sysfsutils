@@ -1,6 +1,10 @@
 
+09/11/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added sysfs_open_driver_by_name() to open a driver and
+			its device, given the driver name
+
 09/09/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
-		* Added sysfs_find_device_class to find what class a
+		* Added sysfs_find_device_class() to find what class a
 			device is on
 
 09/05/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>

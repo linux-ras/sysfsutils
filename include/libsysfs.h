@@ -174,6 +174,8 @@ extern void sysfs_close_driver(struct sysfs_driver *driver);
 extern struct sysfs_driver *sysfs_open_driver(const unsigned char *path);
 extern struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver);
 extern struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver);
+extern struct sysfs_driver *sysfs_open_driver_by_name
+		(unsigned char *drv_name, unsigned char *bus, size_t bsize);
 
 /* generic sysfs device access */
 extern void sysfs_close_root_device(struct sysfs_root_device *root);
