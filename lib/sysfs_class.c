@@ -236,7 +236,7 @@ struct sysfs_class_device *sysfs_open_class_device(const unsigned char *path)
 				}
 			} else if (strncmp(curl->name, 
 						SYSFS_DRIVERS_NAME, 6) == 0) {
-				drv = sysfs_open_driver(curl->target);
+				drv = sysfs_open_bus_driver(curl->target);
 				if (drv != NULL) {
 					cdev->driver = drv;
 					if (cdev->sysdevice != NULL) {
@@ -425,6 +425,10 @@ struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev)
 	if (cdev == NULL || cdev->directory == NULL)
 		return NULL;
 
+	if (cdev->directory->attributes == NULL) {
+		if ((sysfs_read_dir_attributes(cdev->directory)) != 0) 
+			return NULL;
+	}
 	return (cdev->directory->attributes);
 }
 
@@ -439,12 +443,14 @@ struct sysfs_attribute *sysfs_get_classdev_attr
 {
 	struct sysfs_attribute *cur = NULL;
 
-	if (clsdev == NULL || clsdev->directory == NULL ||
-		clsdev->directory->attributes == NULL || name == NULL) {
+	if (clsdev == NULL || clsdev->directory == NULL || name == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
-
+	if (clsdev->directory->attributes == NULL) {
+		if ((sysfs_read_dir_attributes(clsdev->directory)) != 0) 
+			return NULL;
+	}
 	cur = sysfs_get_directory_attribute(clsdev->directory,
 						(unsigned char *)name);
 	if (cur != NULL)

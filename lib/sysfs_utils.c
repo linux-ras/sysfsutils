@@ -225,7 +225,7 @@ struct dlist *sysfs_open_subsystem_list(unsigned char *name)
 		return NULL;
 	}
 
-	if (sysfs_read_directory(dir) != 0) {
+	if ((sysfs_read_directory(dir)) != 0) {
 		dprintf("Error reading sysfs_directory at %s\n", sysfs_path);
 		sysfs_close_directory(dir);
 		return NULL;
@@ -303,7 +303,7 @@ struct dlist *sysfs_open_bus_devices_list(unsigned char *name)
 		return NULL;
 	}
 
-	if (sysfs_read_directory(dir) != 0) {
+	if ((sysfs_read_directory(dir)) != 0) {
 		dprintf("Error reading sysfs_directory at %s\n", sysfs_path);
 		sysfs_close_directory(dir);
 		return NULL;

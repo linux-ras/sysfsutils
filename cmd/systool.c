@@ -243,37 +243,36 @@ void show_device(struct sysfs_device *device, int level)
 {
 	struct dlist *attributes = NULL;
         unsigned int vendor_id, device_id;
-        unsigned char buf[128], *value = NULL;
+        unsigned char buf[128], value[256], path[SYSFS_PATH_MAX];
 	
 	if (device != NULL) {
 		indent(level);
-		if (show_bus != NULL && (!(strcmp(show_bus, "pci")))) 
+		if (show_bus != NULL && (!(strcmp(show_bus, "pci")))) {
 			fprintf(stdout, "%s: ", device->bus_id);
-		else
+			memset(path, 0, SYSFS_PATH_MAX);
+			memset(value, 0, SYSFS_PATH_MAX);
+			strcpy(path, device->path);
+			strcat(path, "/config");
+			if ((sysfs_read_attribute_value(path, 
+							value, 256)) == 0) {
+				vendor_id = get_pciconfig_word
+						(PCI_VENDOR_ID, value);
+				device_id = get_pciconfig_word
+						(PCI_DEVICE_ID, value);
+				fprintf(stdout, "%s\n",
+					pci_lookup_name(pacc, buf, 128,
+					PCI_LOOKUP_VENDOR | PCI_LOOKUP_DEVICE,
+						vendor_id, device_id, 0, 0));
+			} else 
+				fprintf(stdout, "\n");
+		} else 
 			fprintf(stdout, "%s\n", device->bus_id);
-		attributes = sysfs_get_device_attributes(device);
-		if (attributes != NULL) {
-			if (show_bus != NULL && (!(strcmp(show_bus, "pci")))) {
-                                value = sysfs_get_value_from_attributes
-							(attributes, "config");
-				if (value != NULL) {
-					vendor_id = get_pciconfig_word
-							(PCI_VENDOR_ID, value);
-					device_id = get_pciconfig_word
-							(PCI_DEVICE_ID, value);
-					fprintf(stdout, "%s\n",
-						pci_lookup_name(pacc, buf, 128,
-							PCI_LOOKUP_VENDOR |
-							PCI_LOOKUP_DEVICE,
-							vendor_id, device_id, 
-							0, 0));
-				}
-			}
-			if (show_options & (SHOW_ATTRIBUTES | 
-					SHOW_ATTRIBUTE_VALUE | 
+
+		if (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE |
 					SHOW_ALL_ATTRIB_VALUES)) {
+			attributes = sysfs_get_device_attributes(device);
+			if (attributes != NULL) 
 				show_attributes(attributes, (level+4));
-			}
 		}
 		if (device->children != NULL)
 			show_device_children(device->children, (level+4));
@@ -281,7 +280,7 @@ void show_device(struct sysfs_device *device, int level)
 			indent(level+6);
 			fprintf (stdout, "Driver: %s\n", 
 						device->driver_name);
-		}
+		} 
 	}
 }
 
@@ -312,7 +311,7 @@ void show_driver_attributes(struct sysfs_driver *driver, int level)
 {
 	if (driver != NULL) {
 		struct dlist *attributes = NULL;
-		
+	
 		attributes = sysfs_get_driver_attributes(driver);
 		if (attributes != NULL) {
 			struct sysfs_attribute *cur = NULL;

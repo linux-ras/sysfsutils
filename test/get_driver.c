@@ -32,7 +32,7 @@ void print_usage(void)
 
 int main(int argc, char *argv[])
 {
-	char *bus = NULL;
+	char *bus = NULL, path[SYSFS_PATH_MAX];
 	struct sysfs_driver *driver = NULL;
 	struct sysfs_device *device = NULL;
 
@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	memset(path, 0, SYSFS_PATH_MAX);
 	bus = (char *)calloc(1, SYSFS_NAME_LEN);
 	if ((sysfs_find_driver_bus(argv[1], bus, SYSFS_NAME_LEN)) < 0) {
 		fprintf(stdout, "Driver %s not found\n", argv[1]);
@@ -48,7 +49,18 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	fprintf(stdout, "Driver %s is a member of bus %s\n", argv[1], bus);
-	driver = sysfs_open_driver_by_name(argv[1], bus, SYSFS_NAME_LEN);
+	
+	if ((sysfs_get_mnt_path(path, SYSFS_PATH_MAX)) != 0) {
+		fprintf(stdout, "Sysfs not mounted?\n");
+		return 1;
+	}
+	strcat(path, SYSFS_BUS_DIR);
+	strcat(path, "/");
+	strcat(path, bus);
+	strcat(path, SYSFS_DRIVERS_DIR);
+	strcat(path, "/");
+	strcat(path, argv[1]);
+	driver = sysfs_open_driver(path);
 	if (driver == NULL) {
 		fprintf(stdout, "Device %s not found\n", argv[1]);
 		free(bus);
@@ -61,7 +73,7 @@ int main(int argc, char *argv[])
 	} else 
 		fprintf(stdout, "%s is presently not used by any device\n", argv[1]);
 	
-	sysfs_close_driver_by_name(driver);
+	sysfs_close_driver(driver);
 	free(bus);
 	return 0;
 }

@@ -1,4 +1,11 @@
 
+11/24/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Removed getpagesize() usage (Dan)
+		* Added patch to postpone reading of attributes until 
+			absolutely necessary
+		* Cleaned up sysfs_driver.c
+		* Changed stale sysutils references to sysfsutils
+
 11/04/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added code to consider "block" part of "class"
 		* Fixed systool to show driver details (if available)

@@ -163,6 +163,7 @@ extern unsigned char *sysfs_get_value_from_attributes(struct dlist *attr,
 						const unsigned char * name);
 extern void sysfs_close_directory(struct sysfs_directory *sysdir);
 extern struct sysfs_directory *sysfs_open_directory(const unsigned char *path);
+extern int sysfs_read_dir_attributes(struct sysfs_directory *sysdir);
 extern int sysfs_read_directory(struct sysfs_directory *sysdir);
 extern int sysfs_read_all_subdirs(struct sysfs_directory *sysdir);
 extern struct sysfs_directory *sysfs_get_subdirectory
@@ -177,15 +178,16 @@ extern struct sysfs_attribute *sysfs_get_directory_attribute
 			(struct sysfs_directory *dir, unsigned char *attrname);
 
 /* sysfs driver access */
+extern void sysfs_close_bus_driver(struct sysfs_driver *driver);
+extern struct sysfs_driver *sysfs_open_bus_driver(const unsigned char *path);
 extern void sysfs_close_driver(struct sysfs_driver *driver);
 extern struct sysfs_driver *sysfs_open_driver(const unsigned char *path);
 extern struct sysfs_attribute *sysfs_get_driver_attr
 		(struct sysfs_driver *drv, const unsigned char *name);
 extern struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver);
 extern struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver);
-extern void sysfs_close_driver_by_name(struct sysfs_driver *driver);
-extern struct sysfs_driver *sysfs_open_driver_by_name
-	(const unsigned char *drv_name, const unsigned char *bus, size_t bsize);
+extern struct sysfs_device *sysfs_get_driver_device
+	(struct sysfs_driver *driver, const unsigned char *name);
 extern struct sysfs_attribute *sysfs_open_driver_attr(const unsigned char *bus, 
 		const unsigned char *drv, const unsigned char *attrib);
 

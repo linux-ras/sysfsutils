@@ -254,7 +254,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 	unsigned char *fbuf = NULL;
 	unsigned char *vbuf = NULL;
 	size_t length = 0;
-	int pgsize = 0;
+	long pgsize = 0;
 	int fd;
 
 	if (sysattr == NULL) {
@@ -266,7 +266,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 			sysattr->path);
 		return -1;
 	}
-	pgsize = getpagesize();
+	pgsize = sysconf(_SC_PAGESIZE);
 	fbuf = (unsigned char *)calloc(1, pgsize+1);
 	if (fbuf == NULL) {
 		dprintf("calloc failed\n");
@@ -423,7 +423,7 @@ int sysfs_read_all_subdirs(struct sysfs_directory *sysdir)
 	if (sysdir->subdirs == NULL)
 		return 0;
 	dlist_for_each_data(sysdir->subdirs, cursub, struct sysfs_directory) {
-		if (sysfs_read_directory(cursub) != 0) 
+		if ((sysfs_read_directory(cursub)) != 0) 
 			dprintf ("Error reading subdirectory %s\n",
 				cursub->name);
 	}
@@ -490,18 +490,16 @@ struct sysfs_link *sysfs_open_link(const unsigned char *linkpath)
 }
 
 /**
- * sysfs_read_directory: grabs attributes, links, and subdirectories
+ * sysfs_read_dir_attributes: grabs attributes for the given directory
  * @sysdir: sysfs directory to open
  * returns 0 with success and -1 with error.
  */
-int sysfs_read_directory(struct sysfs_directory *sysdir)
+int sysfs_read_dir_attributes(struct sysfs_directory *sysdir)
 {
 	DIR *dir = NULL;
 	struct dirent *dirent = NULL;
 	struct stat astats;
 	struct sysfs_attribute *attr = NULL;
-	struct sysfs_directory *subdir = NULL;
-	struct sysfs_link *ln = NULL;
 	unsigned char file_path[SYSFS_PATH_MAX];
 	int retval = 0;
 
@@ -550,7 +548,51 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 					 		sysfs_del_attribute);
 			}
 			dlist_unshift(sysdir->attributes, attr);
-		} else if (S_ISDIR(astats.st_mode)) {
+		}
+	}
+	closedir(dir);
+	return(retval);
+}
+
+/**
+ * sysfs_read_directory: grabs attributes, links, and subdirectories
+ * @sysdir: sysfs directory to open
+ * returns 0 with success and -1 with error.
+ */
+int sysfs_read_directory(struct sysfs_directory *sysdir)
+{
+	DIR *dir = NULL;
+	struct dirent *dirent = NULL;
+	struct stat astats;
+	struct sysfs_attribute *attr = NULL;
+	struct sysfs_directory *subdir = NULL;
+	struct sysfs_link *ln = NULL;
+	unsigned char file_path[SYSFS_PATH_MAX];
+	int retval = 0;
+
+	if (sysdir == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	dir = opendir(sysdir->path);
+	if (dir == NULL) {
+		dprintf("Error opening directory %s\n", sysdir->path);
+		return -1;
+	}
+	while(((dirent = readdir(dir)) != NULL) && retval == 0) {
+		if (0 == strcmp(dirent->d_name, "."))
+			 continue;
+		if (0 == strcmp(dirent->d_name, ".."))
+			continue;
+		memset(file_path, 0, SYSFS_PATH_MAX);
+		strncpy(file_path, sysdir->path, sizeof(file_path));
+		strncat(file_path, "/", sizeof(file_path));
+		strncat(file_path, dirent->d_name, sizeof(file_path));
+		if ((lstat(file_path, &astats)) != 0) {
+			dprintf("stat failed\n");
+			continue;
+		}
+		if (S_ISDIR(astats.st_mode)) {	
 			subdir = sysfs_open_directory(file_path);
 			if (subdir == NULL) {
 				dprintf("Error opening directory %s\n",
@@ -597,17 +639,20 @@ struct sysfs_attribute *sysfs_get_directory_attribute
 		errno = EINVAL;
 		return NULL;
 	}
-	
-	attr = (struct sysfs_attribute *)dlist_find_custom(dir->attributes,
-		attrname, dir_attribute_name_equal);
-	if (attr != NULL)
-		return attr;
+
+	if (dir->attributes == NULL) {
+		if ((sysfs_read_dir_attributes(dir)) != 0) {
+			return NULL;
+		}
+		attr = (struct sysfs_attribute *)dlist_find_custom
+			(dir->attributes, attrname, dir_attribute_name_equal);
+		if (attr != NULL)
+			return attr;
+	}
 	
 	if (dir->subdirs != NULL) {
 		dlist_for_each_data(dir->subdirs, sdir, 
 					struct sysfs_directory) {
-			if (sdir->attributes == NULL)
-				continue;
 			attr = sysfs_get_directory_attribute(sdir, attrname);
 			if (attr != NULL)
 				return attr;

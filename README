@@ -49,13 +49,13 @@ The commands are licensed under the GNU Public License (GPL) Version2,
 June 1991. The full text of the GPL is located in this package's "cmd"
 directory:
 
-sysutils/cmd/GPL
+sysfsutils/cmd/GPL
 
 The library is licensed under the GNU Lesser Public License (LGPL) 
 Version 2.1, February 1999. The full text of the LGPL is located in
 this package's "lib" directory:
 
-sysutils/lib/LGPL
+sysfsutils/lib/LGPL
 
 
 4. Reporting Bugs

@@ -23,17 +23,17 @@
 #include "libsysfs.h"
 #include "sysfs.h"
 
-static void sysfs_close_driver_by_name_dev(void *device)
+static void sysfs_close_driver_device(void *device)
 {
 	sysfs_close_device((struct sysfs_device *)device);
 }
 
 /**
- * sysfs_close_driver: closes and cleans up driver structure
+ * sysfs_close_bus_driver: closes and cleans up driver structure
  * NOTE: This routine does not deallocate devices list
  * @driver: driver to close
  */
-void sysfs_close_driver(struct sysfs_driver *driver)
+void sysfs_close_bus_driver(struct sysfs_driver *driver)
 {
 	if (driver != NULL) {
 		if (driver->devices != NULL) {
@@ -49,10 +49,10 @@ void sysfs_close_driver(struct sysfs_driver *driver)
 }
 
 /** 
- * sysfs_close_driver_by_name: closes driver and deletes device lists too
+ * sysfs_close_driver: closes driver and deletes device lists too
  * @driver: driver to close
  */ 
-void sysfs_close_driver_by_name(struct sysfs_driver *driver)
+void sysfs_close_driver(struct sysfs_driver *driver)
 {
 	if (driver != NULL) {
 		if (driver->devices != NULL) 
@@ -73,11 +73,11 @@ static struct sysfs_driver *alloc_driver(void)
 }
 
 /**
- * sysfs_open_driver: opens and initializes driver structure
+ * sysfs_open_bus_driver: opens and initializes driver structure
  * @path: path to driver directory
  * returns struct sysfs_driver with success and NULL with error
  */
-struct sysfs_driver *sysfs_open_driver(const unsigned char *path)
+struct sysfs_driver *sysfs_open_bus_driver(const unsigned char *path)
 {
 	struct sysfs_driver *driver = NULL;
 	struct sysfs_directory *sdir = NULL;
@@ -120,6 +120,10 @@ struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver)
 	if (driver == NULL || driver->directory == NULL)
 		return NULL;
 
+	if (driver->directory->attributes == NULL) {
+		if ((sysfs_read_dir_attributes(driver->directory)) != 0)
+			return NULL;
+	}
 	return(driver->directory->attributes);
 }
 
@@ -134,12 +138,15 @@ struct sysfs_attribute *sysfs_get_driver_attr(struct sysfs_driver *drv,
 {
 	struct sysfs_attribute *cur = NULL;
 
-        if (drv == NULL || drv->directory == NULL
-            || drv->directory->attributes == NULL || name == NULL) {
+        if (drv == NULL || drv->directory == NULL || name == NULL) {
                 errno = EINVAL;
                 return NULL;
         }
 
+	if (drv->directory->attributes == NULL) {
+		if ((sysfs_read_dir_attributes(drv->directory)) != 0)
+			return NULL;
+	}
         cur = sysfs_get_directory_attribute(drv->directory,
 		                        (unsigned char *)name);
         if (cur != NULL)
@@ -162,6 +169,109 @@ struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver)
 	return(driver->directory->links);
 }
 
+
+/**
+ * sysfs_open_driver_devices: open up the list of devices this driver supports
+ * @driver: sysfs_driver for which devices are needed
+ * Returns 0 on SUCCESS or -1 with ERROR
+ */ 
+static int sysfs_open_driver_devices(struct sysfs_driver *driver)
+{
+	struct sysfs_link *curlink = NULL;
+	struct sysfs_device *device = NULL;
+
+	if (driver == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+	
+	if (driver->devices != NULL)
+		return 0;
+	
+	if (driver->directory->links != NULL) {
+		dlist_for_each_data(driver->directory->links, curlink, 
+						struct sysfs_link) {
+			device = sysfs_open_device(curlink->target);
+			if (device == NULL) {
+				dprintf("Error opening device at %s\n", 
+						curlink->target);
+				return -1;
+			}
+			strcpy(device->driver_name, driver->name);
+			if (driver->devices == NULL) 
+				driver->devices = dlist_new_with_delete
+						(sizeof(struct sysfs_device),
+						 sysfs_close_driver_device);
+			dlist_unshift(driver->devices, device);
+		}
+	}
+	return 0;
+}
+/**
+ * sysfs_open_driver: open a driver given its path
+ * @path: path to driver to open
+ * returns struct sysfs_driver if found, NULL otherwise
+ * NOTE: 
+ * 1. Need to call sysfs_close_driver to free up memory
+ */
+struct sysfs_driver *sysfs_open_driver(const unsigned char *path)
+{
+	struct sysfs_driver *driver = NULL;
+
+	if (path == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	driver = sysfs_open_bus_driver(path);
+	if (driver == NULL) {
+		dprintf("Could not open driver %s\n", drv_name);
+		return NULL;
+	}
+	if (driver->directory->links != NULL) {
+		if ((sysfs_open_driver_devices(driver)) != 0) {
+			dprintf("Error reading driver devices\n");
+			sysfs_close_driver(driver);
+			return NULL;
+		}
+	}
+	return driver;
+}
+
+/**
+ * sysfs_get_driver_device: looks up a device from a list of driver's devices
+ * 	and returns its sysfs_device corresponding to it
+ * @driver: sysfs_driver on which to search
+ * @name: name of the device to search
+ * Returns a sysfs_device if found, NULL otherwise
+ */
+struct sysfs_device *sysfs_get_driver_device(struct sysfs_driver *driver,
+				const unsigned char *name)
+{
+	struct sysfs_device *device = NULL;
+
+	if (driver == NULL || name == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (driver->devices == NULL) {
+		if (driver->directory->links == NULL) {
+			return NULL;
+		} else {
+			if ((sysfs_open_driver_devices(driver)) != 0) {
+				dprintf("Error getting driver devices\n");
+				return NULL;
+			}
+		}
+	}
+	dlist_for_each_data(driver->devices, device, struct sysfs_device) {
+		if (!(strncmp(device->name, name, SYSFS_NAME_LEN)))
+			return device;
+	}
+	return NULL;
+}
+
 /**
  * get_driver_path: looks up the bus the driver is on and builds path to
  * 		the driver.
@@ -171,8 +281,8 @@ struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver)
  * @psize: size of "path"
  * Returns 0 on success and -1 on error
  */
-static int get_driver_path(const unsigned char *bus, const unsigned char *drv, 
-				unsigned char *path, size_t psize)
+static int get_driver_path(const unsigned char *bus, 
+		const unsigned char *drv, unsigned char *path, size_t psize)
 {
 	if (bus == NULL || drv == NULL || path == NULL) {
 		errno = EINVAL;
@@ -190,63 +300,6 @@ static int get_driver_path(const unsigned char *bus, const unsigned char *drv,
 	strcat(path, drv);
 	return 0;
 }
-
-/**
- * sysfs_open_driver_by_name: open a driver by name and return the bus
- * the driver is on.
- * @drv_name: driver to open
- * @bus: the driver bus
- * @bsize: size of bus buffer
- * returns struct sysfs_driver if found, NULL otherwise
- * NOTE: 
- * 1. Need to call sysfs_close_driver_by_name to free up memory
- * 2. Bus the driver is registered with must be supplied.
- * 	Use sysfs_find_driver_bus() to obtain the bus name
- */
-struct sysfs_driver *sysfs_open_driver_by_name(const unsigned char *drv_name,
-				const unsigned char *bus, size_t bsize)
-{
-	struct sysfs_driver *driver = NULL;
-	struct sysfs_device *device = NULL;
-	struct sysfs_link *curlink = NULL;
-	unsigned char path[SYSFS_PATH_MAX];
-
-	if (drv_name == NULL || bus == NULL) {
-		errno = EINVAL;
-		return NULL;
-	}
-
-	memset(path, 0, SYSFS_PATH_MAX);
-	if (get_driver_path(bus, drv_name, path, SYSFS_PATH_MAX) != 0) {
-		dprintf("Error getting to driver %s\n", drv_name);
-		return NULL;
-	}
-	driver = sysfs_open_driver(path);
-	if (driver == NULL) {
-		dprintf("Could not open driver %s\n", drv_name);
-		return NULL;
-	}
-	if (driver->directory->links != NULL) {
-		dlist_for_each_data(driver->directory->links, curlink, 
-							struct sysfs_link) {
-			device = sysfs_open_device(curlink->target);
-			if (device == NULL) {
-				dprintf("Error opening device at %s\n", 
-						curlink->target);
-				sysfs_close_driver_by_name(driver);
-				return NULL;
-			}
-			strcpy(device->driver_name, drv_name);
-			if (driver->devices == NULL) 
-				driver->devices = dlist_new_with_delete
-						(sizeof(struct sysfs_device),
-					 		sysfs_close_driver_by_name_dev);
-			dlist_unshift(driver->devices, device);
-		}
-	}
-	return driver;
-}
-
 
 /**
  * sysfs_open_driver_attr: read the user supplied driver attribute

@@ -30,7 +30,7 @@ static void sysfs_close_dev(void *dev)
 
 static void sysfs_close_drv(void *drv)
 {
-        sysfs_close_driver((struct sysfs_driver *)drv);
+        sysfs_close_bus_driver((struct sysfs_driver *)drv);
 }
 
 /*
@@ -202,7 +202,7 @@ static int get_all_bus_drivers(struct sysfs_bus *bus)
 			continue;
 		dlist_for_each_data(cur->subdirs, cursub,
 				struct sysfs_directory) {
-			driver = sysfs_open_driver(cursub->path);
+			driver = sysfs_open_bus_driver(cursub->path);
 			if (driver == NULL) {
 				dprintf("Error opening driver at %s\n",
 					cursub->path);
@@ -362,6 +362,10 @@ struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus)
 {
 	if (bus == NULL || bus->directory == NULL)
 		return NULL;
+	if (bus->directory->attributes == NULL) {
+		if ((sysfs_read_dir_attributes(bus->directory)) != 0) 
+			return NULL;
+	}
 	return bus->directory->attributes;
 }
 
@@ -378,6 +382,10 @@ struct sysfs_attribute *sysfs_get_bus_attribute(struct sysfs_bus *bus,
 	if (bus == NULL || bus->directory == NULL || attrname == NULL) {
 		errno = EINVAL;
 		return NULL;
+	}
+	if (bus->directory->attributes == NULL) {
+		if ((sysfs_read_dir_attributes(bus->directory)) != 0) 
+			return NULL;
 	}
 	return sysfs_get_directory_attribute(bus->directory, attrname);
 }

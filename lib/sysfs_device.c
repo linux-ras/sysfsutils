@@ -165,12 +165,16 @@ struct sysfs_attribute *sysfs_get_device_attr(struct sysfs_device *dev,
 {
 	struct sysfs_attribute *cur = NULL;
 
-	if (dev == NULL || dev->directory == NULL 
-	    || dev->directory->attributes == NULL || name == NULL) {
+	if (dev == NULL || dev->directory == NULL || name == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
 	
+	if (dev->directory->attributes == NULL) {
+		if ((sysfs_read_dir_attributes(dev->directory)) != 0)
+			return NULL;
+	}
+
 	cur = sysfs_get_directory_attribute(dev->directory, 
 			(unsigned char *)name);
 	if (cur != NULL)
@@ -316,7 +320,7 @@ static struct sysfs_directory *open_root_device_dir(const unsigned char *name)
 			name);
 		return NULL;
 	}
-	if (sysfs_read_directory(rdir) != 0) {
+	if ((sysfs_read_directory(rdir)) != 0) {
 		dprintf ("Error reading %s root device at dir %s\n", name,
 			rootpath);
 		sysfs_close_directory(rdir);
@@ -409,6 +413,10 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 	if (device == NULL || device->directory == NULL) 
 		return NULL;
 
+	if (device->directory->attributes == NULL) {
+		if ((sysfs_read_dir_attributes(device->directory)) != 0)
+			return NULL;
+	}
 	return (device->directory->attributes);
 }
 
