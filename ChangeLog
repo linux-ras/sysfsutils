@@ -1,5 +1,8 @@
 
 08/28/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+                * Changed sysfs_driver to contain a dlist of devices
+
+08/28/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
                 * Removed sysfs_driver reference from sysfs_device struct
                 * Fixed a few bugs in the commands.
 

@@ -180,8 +180,18 @@ struct sysfs_class_device *sysfs_open_class_device(const unsigned char *path)
 				drv = sysfs_open_driver(curl->target);
 				if (drv != NULL) {
 					cdev->driver = drv;
-					if (cdev->sysdevice != NULL) 
-						drv->device = cdev->sysdevice;
+					if (cdev->sysdevice != NULL) {
+						strncpy(cdev->sysdevice->name,
+								drv->name, 
+								SYSFS_NAME_LEN);
+						if (drv->devices == NULL)
+							drv->devices = 
+								dlist_new
+								(sizeof(struct 
+								sysfs_device));
+						dlist_unshift(drv->devices, 
+							cdev->sysdevice);
+					}
 				}
 			}
 		}

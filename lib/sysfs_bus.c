@@ -262,7 +262,11 @@ static void link_bus_devices_to_drivers(struct sysfs_bus *bus)
 						dev->bus_id)) != 0) {
 					strncpy(dev->driver_name, drv->name,
 							SYSFS_NAME_LEN);
-					drv->device = dev;
+					if (drv->devices == NULL)
+						drv->devices = dlist_new
+							(sizeof(struct 
+								sysfs_device));
+					dlist_unshift(drv->devices, dev);
 				}
 			}
 		}

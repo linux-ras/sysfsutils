@@ -70,7 +70,6 @@ struct sysfs_directory {
 };
 
 struct sysfs_driver {
-	struct sysfs_device *device;	
 	struct dlist *devices;
 	unsigned char name[SYSFS_NAME_LEN];
 	unsigned char path[SYSFS_PATH_MAX];

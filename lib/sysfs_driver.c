@@ -30,6 +30,11 @@
 void sysfs_close_driver(struct sysfs_driver *driver)
 {
 	if (driver != NULL) {
+		if (driver->devices != NULL) {
+			dlist_for_each(driver->devices) 
+				dlist_shift(driver->devices);
+			dlist_destroy(driver->devices);
+		}
 		if (driver->directory != NULL)
 			sysfs_close_directory(driver->directory);
 		free(driver);
