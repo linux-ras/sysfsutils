@@ -1,4 +1,7 @@
 
+01/17/2005 - Kay Sievers <kay.sievers@vrfy.org>
+		* Fix dlist.c so it compiles with older gcc versions
+
 12/16/2004 - Kay Sievers <kay.sievers@vrfy.org>
 		* Fix sysfs_get_classdev_attr() for case when the
 			sysfs_directory vanishes from beneath us
