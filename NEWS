@@ -1,6 +1,10 @@
 Version History:
 ---------------
 
+ 1.2.0 - Released September 13, 2004
+	* Added dlist_sort_custom() (Thanks to Eric Bohm)
+	* Some minor bug fixes.
+
  1.1.0 - Released March 31, 2004
 	* Added changes for C++ compatibility (Thanks to Lev Makhlis)
 	* Patched configure.ac not to check for installed headers

@@ -1,4 +1,8 @@
 
+09/10/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Changed version number in package files
+			to 1.2.0
+
 08/31/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Fix sysfs_open_link() failure path
 

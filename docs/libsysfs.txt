@@ -2,8 +2,8 @@
 	System Utilities sysfs Library - libsysfs
 	=========================================
 
-Version: 1.1.0 
-March 31, 2004
+Version: 1.2.0 
+September 13, 2004
 
 Contents
 --------
