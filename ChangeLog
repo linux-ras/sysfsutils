@@ -1,6 +1,13 @@
 
+08/16/2004 - Eric J Bohm <bohm@gate.csgeeks.org>
+		* Custom sorting dlists patch
+
 08/16/2004 - Brian King <brking@us.ibm.com>
 		* Fix sysfs write only attributes bug
+
+07/16/2004 - Daniel Stekloff <dsteklof@us.ibm.com>
+	* Merged version 1.2.0 into main tree
+	* Tagged new branch - version 1.2.0
 
 03/31/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* More updates to docs/libsysfs.txt

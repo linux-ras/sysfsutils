@@ -47,9 +47,11 @@ void complex_silly_multiply_by_two( void *a);
 int complex_equal(void *a, void *b);
 int complex_less(void *a, void *b);
 int complex_greater(void *a, void *b);
+int complex_comp(void *a, void *b);
 void simple_dump(Dlist *);
 void simple_dump_rev(Dlist *);
 void complex_dump(Dlist *);
+void complex_dump_rev(Dlist *);
 void complex_out(void *);
 void complex_del(void *);
 Complex *complex_maker(int,int,char *);
@@ -60,7 +62,7 @@ int main (int argc,char *argv[])
 {
   Dlist *list;
   Simple *s1,*s2,*s3,*stemp;
-  Complex *c1,*c2,*c3, *ctemp, *cfound;
+  Complex *c1,*c2,*c3, *c4, *ctemp, *cfound;
   while(1)
     {
 	s1=simple_maker(1,"one");
@@ -160,6 +162,27 @@ int main (int argc,char *argv[])
 	printf("descending sorted output using transform\n");
 	dlist_transform(list,complex_out);
       dlist_destroy(list);
+      c1=complex_maker(1,1,"one");
+      c2=complex_maker(2,2,"two");
+      c3=complex_maker(3,3,"three");
+      c4=complex_maker(4,4,"four");
+      if((list=dlist_new_with_delete(sizeof(Complex),complex_del))==NULL)
+	{
+	  fprintf(stderr,"ERR dlist_new fail\n");
+	  return(2);
+	}
+      dlist_push(list,c2);
+      dlist_push(list,c1);
+      dlist_push(list,c4);
+      dlist_push(list,c3);
+      printf("unsorted custom\n");
+      complex_dump(list);
+      printf("unsorted custom reversed\n");
+      complex_dump_rev(list);
+      dlist_sort_custom(list,complex_comp);
+      printf("custom sorted output\n");
+      complex_dump(list);
+      dlist_destroy(list);
     }
   return(0);
 }
@@ -246,6 +269,11 @@ int complex_greater(void *a, void *b)
 	return( ((Complex *)a)->cnumber >  ((Complex *)b)->cnumber );
 }
 
+int complex_comp(void *a, void *b)
+{
+	return( ((Complex *)a)->cnumber -  ((Complex *)b)->cnumber );
+}
+
 void complex_silly_multiply_by_two( void *a)
 {
 	((Complex *)a)->cnumber=((Complex *)a)->cnumber*2;
@@ -258,6 +286,18 @@ void complex_dump (Dlist *list)
   dlist_start(list);
   printf("count  %ld \n",list->count);
   dlist_for_each_data(list,thisone,Complex)
+    {
+      printf("cnumber %d label %s number %d \n",thisone->cnumber,thisone->sthing->label,thisone->sthing->number);
+    }
+
+}
+
+void complex_dump_rev (Dlist *list)
+{
+  Complex *thisone;
+  dlist_start(list);
+  printf("count  %ld \n",list->count);
+  dlist_for_each_data_rev(list,thisone,Complex)
     {
       printf("cnumber %d label %s number %d \n",thisone->cnumber,thisone->sthing->label,thisone->sthing->number);
     }
