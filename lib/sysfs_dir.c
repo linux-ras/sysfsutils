@@ -149,7 +149,7 @@ struct sysfs_attribute *sysfs_open_attribute(const unsigned char *path)
 	}
 	strncpy(sysattr->path, path, sizeof(sysattr->path));
 	if ((stat(sysattr->path, &fileinfo)) != 0) {
-		perror("stat");
+		dprintf("stat failed\n");
 		sysattr->method = 0;
 	} else {
 		if (fileinfo.st_mode & S_IRUSR)
@@ -196,8 +196,7 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 	 * "write" permission 
 	 */ 
 	if ((fd = open(sysattr->path, O_WRONLY)) < 0) {
-		perror("sysfs_write_attribute: open");
-		dprintf ("Error reading attribute %s\n", sysattr->path);
+		dprintf("Error reading attribute %s\n", sysattr->path);
 		return -1;
 	}
 
@@ -262,7 +261,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 	pgsize = getpagesize();
 	fbuf = (unsigned char *)calloc(1, pgsize+1);
 	if (fbuf == NULL) {
-		perror("calloc");
+		dprintf("calloc failed\n");
 		return -1;
 	}
 	if ((fd = open(sysattr->path, O_RDONLY)) < 0) {
@@ -281,7 +280,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 	close(fd);
 	vbuf = (unsigned char *)realloc(fbuf, length+1);
 	if (vbuf == NULL) {
-		perror("realloc");
+		dprintf("realloc failed\n");
 		free(fbuf);
 		return -1;
 	}
@@ -504,7 +503,7 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 	}
 	dir = opendir(sysdir->path);
 	if (dir == NULL) {
-		perror("opendir");
+		dprintf("Error opening directory %s\n", sysdir->path);
 		return -1;
 	}
 	while(((dirent = readdir(dir)) != NULL) && retval == 0) {
@@ -517,7 +516,7 @@ int sysfs_read_directory(struct sysfs_directory *sysdir)
 		strncat(file_path, "/", sizeof(file_path));
 		strncat(file_path, dirent->d_name, sizeof(file_path));
 		if ((lstat(file_path, &astats)) != 0) {
-			perror("stat");
+			dprintf("stat failed\n");
 			continue;
 		}
 		if (S_ISREG(astats.st_mode)) {	

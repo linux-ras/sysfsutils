@@ -243,7 +243,7 @@ void show_attributes(struct dlist *attributes, int level)
 void show_device(struct sysfs_device *device, int level)
 {
 	struct dlist *attributes = NULL;
-        unsigned int vendor_id, device_id, subsystem_vendor, subsystem_device;
+        unsigned int vendor_id, device_id;
         unsigned char buf[128], *value = NULL;
 	
 	if (device != NULL) {
@@ -504,16 +504,6 @@ int show_sysfs_root(unsigned char *rootname)
 		errno = EINVAL;
 		return 1;
 	}
-	if (sysfs_get_mnt_path(path, SYSFS_PATH_MAX) != 0) {
-		perror("sysfs_get_mnt_path");
-		fprintf(stderr, "Error getting sysfs mount point\n");
-		exit(1);
-	}
-
-	strcat(path, SYSFS_DEVICES_DIR);
-	strcat(path, "/");
-	strcat(path, rootname);
-
 	root = sysfs_open_root_device(rootname);
 	if (root == NULL) {
 		fprintf(stderr, "Error opening root device %s\n", rootname);

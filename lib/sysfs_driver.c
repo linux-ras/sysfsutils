@@ -177,7 +177,6 @@ struct dlist *sysfs_get_driver_links(struct sysfs_driver *driver)
 struct sysfs_driver *sysfs_open_driver_by_name(const unsigned char *drv_name,
 				const unsigned char *bus, size_t bsize)
 {
-	struct dlist *buslist = NULL, *drivers = NULL, *devices = NULL;
 	struct sysfs_driver *driver = NULL;
 	struct sysfs_device *device = NULL;
 	struct sysfs_link *curlink = NULL;

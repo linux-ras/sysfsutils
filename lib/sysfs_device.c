@@ -117,7 +117,6 @@ struct sysfs_device *sysfs_open_device(const unsigned char *path)
 {
 	struct sysfs_device *dev = NULL;
 	struct sysfs_directory *sdir = NULL;
-	unsigned char *p = NULL;
 
 	if (path == NULL) {
 		errno = EINVAL;
@@ -305,7 +304,7 @@ struct sysfs_root_device *sysfs_open_root_device(const unsigned char *name)
 	root = (struct sysfs_root_device *)calloc
 					(1, sizeof(struct sysfs_root_device));
 	if (root == NULL) {
-		perror("calloc");
+		dprintf("calloc failure\n");
 		return NULL;
 	}
 	rootdir = open_root_device_dir(name);
@@ -355,7 +354,6 @@ struct sysfs_device *sysfs_open_device_by_id(const unsigned char *bus_id,
 {
 	char sysfs_path[SYSFS_PATH_MAX], device_path[SYSFS_PATH_MAX];
 	struct sysfs_device *device = NULL;
-	struct stat astats;
 
 	if (bus_id == NULL || bus == NULL) {
 		errno = EINVAL;

@@ -246,13 +246,13 @@ pci_lookup_name(struct pci_access *a, unsigned char *buf, int size, int flags, u
   switch (flags)
     {
     case PCI_LOOKUP_VENDOR:
-      if (n = nl_lookup(a, num, NL_VENDOR, arg1, 0, 0, 0))
+      if ((n = nl_lookup(a, num, NL_VENDOR, arg1, 0, 0, 0)))
 	return n->name;
       else
 	res = snprintf(buf, size, "%04x", arg1);
       break;
     case PCI_LOOKUP_DEVICE:
-      if (n = nl_lookup(a, num, NL_DEVICE, arg1, arg2, 0, 0))
+      if ((n = nl_lookup(a, num, NL_DEVICE, arg1, arg2, 0, 0)))
 	return n->name;
       else
 	res = snprintf(buf, size, "%04x", arg2);
@@ -274,13 +274,13 @@ pci_lookup_name(struct pci_access *a, unsigned char *buf, int size, int flags, u
 	res = snprintf(buf, size, "%04x:%04x", arg1, arg2);
       break;
     case PCI_LOOKUP_VENDOR | PCI_LOOKUP_SUBSYSTEM:
-      if (n = nl_lookup(a, num, NL_VENDOR, arg3, 0, 0, 0))
+      if ((n = nl_lookup(a, num, NL_VENDOR, arg3, 0, 0, 0)))
 	return n->name;
       else
 	res = snprintf(buf, size, "%04x", arg2);
       break;
     case PCI_LOOKUP_DEVICE | PCI_LOOKUP_SUBSYSTEM:
-      if (n = nl_lookup(a, num, NL_SUBSYSTEM, arg1, arg2, arg3, arg4))
+      if ((n = nl_lookup(a, num, NL_SUBSYSTEM, arg1, arg2, arg3, arg4)))
 	return n->name;
       else if (arg1 == arg3 && arg2 == arg4 && (n = nl_lookup(a, num, NL_DEVICE, arg1, arg2, 0, 0)))
 	return n->name;
@@ -307,15 +307,15 @@ pci_lookup_name(struct pci_access *a, unsigned char *buf, int size, int flags, u
 	res = snprintf(buf, size, "%04x:%04x", arg3, arg4);
       break;
     case PCI_LOOKUP_CLASS:
-      if (n = nl_lookup(a, num, NL_SUBCLASS, arg1 >> 8, arg1 & 0xff, 0, 0))
+      if ((n = nl_lookup(a, num, NL_SUBCLASS, arg1 >> 8, arg1 & 0xff, 0, 0)))
 	return n->name;
-      else if (n = nl_lookup(a, num, NL_CLASS, arg1, 0, 0, 0))
+      else if ((n = nl_lookup(a, num, NL_CLASS, arg1, 0, 0, 0)))
 	res = snprintf(buf, size, "%s [%04x]", n->name, arg1);
       else
 	res = snprintf(buf, size, "Class %04x", arg1);
       break;
     case PCI_LOOKUP_PROGIF:
-      if (n = nl_lookup(a, num, NL_PROGIF, arg1 >> 8, arg1 & 0xff, arg2, 0))
+      if ((n = nl_lookup(a, num, NL_PROGIF, arg1 >> 8, arg1 & 0xff, arg2, 0)))
 	return n->name;
       if (arg1 == 0x0101)
 	{

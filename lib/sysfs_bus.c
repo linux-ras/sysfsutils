@@ -289,7 +289,7 @@ struct sysfs_bus *sysfs_open_bus(const unsigned char *name)
 
 	bus = alloc_bus();
 	if (bus == NULL) {
-		perror("malloc");
+		dprintf("calloc failed\n");
 		return NULL;
 	}
 	strcpy(bus->name, name);	

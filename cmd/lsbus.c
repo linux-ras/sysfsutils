@@ -199,7 +199,7 @@ void print_device_attributes(struct dlist *attributes)
 void print_device(struct sysfs_device *device)
 {
 	struct dlist *attributes = NULL;
-	unsigned int vendor_id, device_id, subsystem_vendor, subsystem_device;
+	unsigned int vendor_id, device_id;
 	unsigned char buf[128], *value = NULL;
 	
 	if (device != NULL) {
@@ -280,8 +280,6 @@ void print_driver_devices(struct sysfs_driver *driver)
  */
 void print_driver(struct sysfs_driver *driver)
 {
-	struct dlist *links = NULL, *attributes = NULL;
-	
 	if (driver != NULL) {
 		fprintf (stdout, "  %s\n", driver->name);
 		print_driver_devices(driver);

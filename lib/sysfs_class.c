@@ -153,7 +153,7 @@ struct sysfs_class_device *sysfs_open_class_device(const unsigned char *path)
 	}
 	cdev = alloc_class_device();
 	if (cdev == NULL) {
-		perror("malloc");
+		dprintf("calloc failed\n");
 		return NULL;
 	}
 	if ((sysfs_get_name_from_path(path, cdev->name, SYSFS_NAME_LEN)) != 0) {
@@ -264,7 +264,7 @@ struct sysfs_class *sysfs_open_class(const unsigned char *name)
 
 	cls = alloc_class();
 	if (cls == NULL) {
-		perror("calloc");
+		dprintf("calloc failed\n");
 		return NULL;
 	}
 	strcpy(cls->name, name);	

@@ -20,16 +20,6 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
-/*
- * NOTES:
- * 	Write functions to:
- * 		Device major/minor given a device
- * 		As of now, only the "block" device has writable attribs. 
- * 			Library has to take care of navigating to the attribute
- * 			(may be at various directory levels)
- */
-
 #include "libsysfs.h"
 #include "sysfs.h"
 
@@ -151,7 +141,7 @@ static int get_all_block_devices(struct sysfs_block_device *block)
 			default: /* these are the partitions */
 				part = alloc_block_partition();
 				if (part == NULL) {
-					perror("calloc");
+					dprintf("calloc failed\n");
 					return -1;
 				}
 				part->directory = cur;
@@ -187,7 +177,7 @@ struct sysfs_block_device *sysfs_open_block_device(unsigned char *name)
 
 	block = alloc_block_device();
 	if (block == NULL) {
-		perror("calloc");
+		dprintf("calloc failed\n");
 		return NULL;
 	}
 	strcpy(block->name, name);
@@ -278,9 +268,7 @@ struct dlist *sysfs_get_partition_attributes
  */
 struct dlist *sysfs_get_queue_attributes(struct sysfs_block_device *block)
 {
-	struct dlist *list = NULL;
 	struct sysfs_directory *dir = NULL;
-	unsigned int found = 0;
 
 	dlist_for_each_data(block->directory->subdirs, dir, 
 					struct sysfs_directory) {
