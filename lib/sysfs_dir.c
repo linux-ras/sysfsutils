@@ -327,7 +327,7 @@ int sysfs_read_attribute_value(const unsigned char *attrpath,
 	struct sysfs_attribute *attr = NULL;
 	size_t length = 0;
 
-	if (attrpath == NULL || value == NULL) {
+	if (attrpath == NULL || value == NULL || vsize == 0) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -466,7 +466,7 @@ struct sysfs_directory *sysfs_open_directory(const unsigned char *path)
 	}
 
 	if (sysfs_path_is_dir(path) != 0) {
-		dprintf("Invalid path directory %s\n", path);
+		dprintf("Invalid path to directory %s\n", path);
 		errno = EINVAL;
 		return NULL;
 	}
@@ -544,7 +544,7 @@ static int add_attribute(struct sysfs_directory *sysdir,
 		sysdir->attributes = dlist_new_with_delete
 			(sizeof(struct sysfs_attribute), sysfs_del_attribute);
 	}
-	dlist_unshift(sysdir->attributes, attr);
+	dlist_unshift_sorted(sysdir->attributes, attr, sort_list);
 
 	return 0;
 }
@@ -568,7 +568,7 @@ static int add_subdirectory(struct sysfs_directory *sysdir,
 	if (sysdir->subdirs == NULL)
 		sysdir->subdirs = dlist_new_with_delete
 			(sizeof(struct sysfs_directory), sysfs_del_directory);
-	dlist_unshift(sysdir->subdirs, subdir);
+	dlist_unshift_sorted(sysdir->subdirs, subdir, sort_list);
 	return 0;
 }
 
@@ -590,7 +590,7 @@ static int add_link(struct sysfs_directory *sysdir, const unsigned char *path)
 	if (sysdir->links == NULL)
 		sysdir->links = dlist_new_with_delete
 				(sizeof(struct sysfs_link), sysfs_del_link);
-	dlist_unshift(sysdir->links, ln);
+	dlist_unshift_sorted(sysdir->links, ln, sort_list);
 	return 0;
 }
 

@@ -23,6 +23,12 @@
 #include "libsysfs.h"
 #include "sysfs.h"
 
+static int sort_char(void *new, void *old)
+{
+	return ((strncmp((unsigned char *)new, (unsigned char *)old, 
+			strlen((unsigned char *)new))) < 0 ? 1 : 0);
+}
+
 /**
  * sysfs_remove_trailing_slash: Removes any trailing '/' in the given path
  * @path: Path to look for the trailing '/'
@@ -48,7 +54,7 @@ int sysfs_remove_trailing_slash(unsigned char *path)
 }
 
 /**
- * sysfs_get_mnt_path: Gets the mount point for specified filesystem.
+ * sysfs_get_fs_mnt_path: Gets the mount point for specified filesystem.
  * @fs_type: filesystem type to retrieve mount point
  * @mnt_path: place to put the retrieved mount path
  * @len: size of mnt_path
@@ -63,7 +69,7 @@ static int sysfs_get_fs_mnt_path(const unsigned char *fs_type,
 	size_t dirlen = 0;
 
 	/* check arg */
-	if (fs_type == NULL || mnt_path == NULL) {
+	if (fs_type == NULL || mnt_path == NULL || len == 0) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -106,7 +112,7 @@ int sysfs_get_mnt_path(unsigned char *mnt_path, size_t len)
 	char *sysfs_path = NULL;
 	int ret = 0;
 
-	if (mnt_path == NULL) {
+	if (mnt_path == NULL || len == 0) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -133,7 +139,7 @@ int sysfs_get_name_from_path(const unsigned char *path, unsigned char *name,
 	unsigned char tmp[SYSFS_PATH_MAX];
 	unsigned char *n = NULL;
                                                                                 
-	if (path == NULL || name == NULL) {
+	if (path == NULL || name == NULL || len == 0) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -167,16 +173,18 @@ int sysfs_get_link(const unsigned char *path, unsigned char *target, size_t len)
 {
 	unsigned char devdir[SYSFS_PATH_MAX];
 	unsigned char linkpath[SYSFS_PATH_MAX];
+	unsigned char temp_path[SYSFS_PATH_MAX];
 	unsigned char *d = NULL, *s = NULL;
 	int slashes = 0, count = 0;
 
-	if (path == NULL || target == NULL) {
+	if (path == NULL || target == NULL || len == 0) {
 		errno = EINVAL;
 		return -1;
 	}
 
 	memset(devdir, 0, SYSFS_PATH_MAX);
 	memset(linkpath, 0, SYSFS_PATH_MAX);
+	memset(temp_path, 0, SYSFS_PATH_MAX);
 	strncpy(devdir, path, SYSFS_PATH_MAX);
 
 	if ((readlink(path, linkpath, SYSFS_PATH_MAX)) < 0) {
@@ -194,18 +202,19 @@ int sysfs_get_link(const unsigned char *path, unsigned char *target, size_t len)
 			/* 
 			 * handle the case where link is of type ./abcd/xxx
 			 */
-			strncpy(target, devdir, len);
+			strncpy(temp_path, devdir, SYSFS_PATH_MAX);
 			if (*(d+1) == '/')
 				d += 2;
 			else if (*(d+1) == '.')
 				goto parse_path;
-			s = strrchr(target, '/');
+			s = strrchr(temp_path, '/');
 			if (s != NULL) {
 				*(s+1) = '\0';
-				strcat(target, d);
+				strcat(temp_path, d);
 			} else {
-				strcpy(target, d);
+				strcpy(temp_path, d);
 			}
+			strncpy(target, temp_path, len);
 			break;
 			/* 
 			 * relative path  
@@ -233,14 +242,15 @@ parse_path:
 			break;
 		default:
 			/* relative path from this directory */
-			strncpy(target, devdir, len);
-			s = strrchr(target, '/');
+			strncpy(temp_path, devdir, len);
+			s = strrchr(temp_path, '/');
 			if (s != NULL) {
 				*(s+1) = '\0';
-				strcat(target, linkpath);
+				strcat(temp_path, linkpath);
 			} else {
-				strcpy(target, linkpath);
-			}			
+				strncpy(temp_path, linkpath, len);
+			}
+			strncpy(target, temp_path, len);
 	}
 	return 0;
 }
@@ -314,7 +324,7 @@ struct dlist *sysfs_open_subsystem_list(unsigned char *name)
 				struct sysfs_directory) {
 			subsys_name = (char *)calloc(1, SYSFS_NAME_LEN);
 			strcpy(subsys_name, cur->name);
-			dlist_unshift(list, subsys_name);
+			dlist_unshift_sorted(list, subsys_name, sort_char);
 		}
 	}
 	sysfs_close_directory(dir);
@@ -331,7 +341,7 @@ struct dlist *sysfs_open_subsystem_list(unsigned char *name)
 		if ((sysfs_path_is_dir(sysfs_path)) == 0) {
 			subsys_name = (char *)calloc(1, SYSFS_NAME_LEN);
 			strcpy(subsys_name, SYSFS_BLOCK_NAME);
-			dlist_unshift(list, subsys_name);
+			dlist_unshift_sorted(list, subsys_name, sort_char);
 		}
 	}
 out:
@@ -390,7 +400,7 @@ struct dlist *sysfs_open_bus_devices_list(unsigned char *name)
 				struct sysfs_link) {
 			device_name = (char *)calloc(1, SYSFS_NAME_LEN);
 			strcpy(device_name, cur->name);
-			dlist_unshift(list, device_name);
+			dlist_unshift_sorted(list, device_name, sort_char);
 		}
 	}
 	sysfs_close_directory(dir);

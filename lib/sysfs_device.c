@@ -24,12 +24,12 @@
 #include "sysfs.h"
 
 /**
- * get_device_bus: retrieves the bus name the device is on, checks path to
- *	bus' link to make sure it has correct device.
+ * sysfs_get_device_bus: retrieves the bus name the device is on, checks path 
+ * 	to bus' link to make sure it has correct device.
  * @dev: device to get busname.
  * returns 0 with success and -1 with error.
  */
-static int get_device_bus(struct sysfs_device *dev)
+int sysfs_get_device_bus(struct sysfs_device *dev)
 {
 	unsigned char subsys[SYSFS_NAME_LEN], path[SYSFS_PATH_MAX];
 	unsigned char target[SYSFS_PATH_MAX], *bus = NULL, *c = NULL;
@@ -209,8 +209,8 @@ struct sysfs_device *sysfs_open_device_path(const unsigned char *path)
 	 */
 	strncpy(dev->name, dev->bus_id, SYSFS_NAME_LEN);
 	
-	if (get_device_bus(dev) != 0)
-		strcpy(dev->bus, SYSFS_UNKNOWN);
+	if (sysfs_get_device_bus(dev) != 0)
+		dprintf("Could not get device bus\n");
 
 	return dev;
 }
@@ -255,7 +255,8 @@ static struct sysfs_device *sysfs_open_device_tree(const unsigned char *path)
 				rootdev->children = dlist_new_with_delete
 					(sizeof(struct sysfs_device),
 					sysfs_close_dev_tree);
-			dlist_unshift(rootdev->children, new);
+			dlist_unshift_sorted(rootdev->children, 
+							new, sort_list);
 		}
 	}
 
@@ -311,7 +312,7 @@ struct dlist *sysfs_get_root_devices(struct sysfs_root_device *root)
 			root->devices = dlist_new_with_delete
 				(sizeof(struct sysfs_device), 
 				sysfs_close_dev_tree);
-		dlist_unshift(root->devices, dev);
+		dlist_unshift_sorted(root->devices, dev, sort_list);
 	}
 
 	return root->devices;

@@ -133,7 +133,7 @@ struct dlist *sysfs_get_bus_devices(struct sysfs_bus *bus)
 				bus->devices = dlist_new_with_delete
 					(sizeof(struct sysfs_device), 
 					 		sysfs_close_dev);
-			dlist_unshift(bus->devices, bdev);
+			dlist_unshift_sorted(bus->devices, bdev, sort_list);
 		}
 	}
 	sysfs_close_directory(devdir);
@@ -182,7 +182,7 @@ struct dlist *sysfs_get_bus_drivers(struct sysfs_bus *bus)
 				bus->drivers = dlist_new_with_delete
 					(sizeof(struct sysfs_driver), 
 					 		sysfs_close_drv);
-			dlist_unshift(bus->drivers, driver);
+			dlist_unshift_sorted(bus->drivers, driver, sort_list);
 		}
 	}
 	sysfs_close_directory(drvdir);
@@ -351,49 +351,6 @@ struct sysfs_attribute *sysfs_get_bus_attribute(struct sysfs_bus *bus,
 		return NULL;
 	
 	return sysfs_get_directory_attribute(bus->directory, attrname);
-}
-
-/**
- * sysfs_open_bus_device: locates a device on a bus and returns it. Device
- * 	must be closed using sysfs_close_device.
- * @busname: Name of bus to search
- * @dev_id: Id of device on bus.
- * returns sysfs_device if found or NULL if not.
- */
-struct sysfs_device *sysfs_open_bus_device(unsigned char *busname, 
-							unsigned char *dev_id)
-{
-	struct sysfs_device *rdev = NULL;
-	char path[SYSFS_PATH_MAX];
-
-	if (busname == NULL || dev_id == NULL) {
-		errno = EINVAL;
-		return NULL;
-	}
-
-	memset(path, 0, SYSFS_PATH_MAX);
-	if (sysfs_get_mnt_path(path, SYSFS_PATH_MAX) != 0) {
-		dprintf("Error getting sysfs mount point\n");
-		return NULL;
-	}
-
-	strcat(path, "/");
-	strcat(path, SYSFS_BUS_NAME);
-	strcat(path, "/");
-	strcat(path, busname);
-	strcat(path, "/");
-	strcat(path, SYSFS_DEVICES_NAME);
-	strcat(path, "/");
-	strcat(path, dev_id);
-
-	rdev = sysfs_open_device_path(path);
-	if (rdev == NULL) {
-		dprintf("Error getting device %s on bus %s\n",
-				dev_id, busname);
-		return NULL;
-	}
-	
-	return rdev;
 }
 
 /**

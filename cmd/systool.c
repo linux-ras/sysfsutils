@@ -365,6 +365,8 @@ static void show_device_tree(struct sysfs_device *root, int level)
 		if (root->children != NULL) {
 			dlist_for_each_data(root->children, cur, 
 					struct sysfs_device) {
+				if (strncmp(cur->name, "power", 5) == 0)
+					continue;
 				show_device_tree(cur, (level+6));
 			}
 		}
@@ -520,6 +522,8 @@ static int show_sysfs_root(unsigned char *rootname)
 		if (devlist != NULL) {
 			dlist_for_each_data(devlist, device, 
 						struct sysfs_device) {
+				if (strncmp(device->name, "power", 5) == 0)
+					continue;
 				show_device_tree(device, 2);
 			}
 		}

@@ -178,7 +178,7 @@ struct sysfs_attribute *sysfs_get_driver_attr(struct sysfs_driver *drv,
         }
 	
 	attrlist = sysfs_get_driver_attributes(drv);
-	if (attrlist != NULL) 
+	if (attrlist == NULL) 
 		return NULL;
 
 	return sysfs_get_directory_attribute(drv->directory,
@@ -244,7 +244,8 @@ struct dlist *sysfs_get_driver_devices(struct sysfs_driver *driver)
 				driver->devices = dlist_new_with_delete
 						(sizeof(struct sysfs_device),
 						 sysfs_close_driver_device);
-			dlist_unshift(driver->devices, device);
+			dlist_unshift_sorted(driver->devices, device, 
+								sort_list);
 		}
 	}
 	return (driver->devices);

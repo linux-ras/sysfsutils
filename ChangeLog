@@ -1,17 +1,23 @@
 
-01/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+02/04/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added list sorting support
+		* Exported get_device_bus()
+		* Removed sysfs_open_bus_device()
+		* Other cosmetic changes
+
+01/07/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Modified parameter order for "open" functions to make them
 			consistent
 
-01/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+01/07/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added additional CFLAGS for building lib and apps
 
-01/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+01/07/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added numerous "refresh" functions
 		* Added funtion to remove trailing slash from paths
 		* Fixed sysfs_get_link() to handle different possibilities
 
-01/07/2003 - Martin Hicks <mort@bork.org>
+01/07/2004 - Martin Hicks <mort@bork.org>
 		* Fixed sysfs_get_class_device()
 
 12/26/2003 - Daniel Stekloff <dsteklof@us.ibm.com>

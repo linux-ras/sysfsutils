@@ -24,6 +24,7 @@
 #define _LIBSYSFS_H_
 
 #include <sys/types.h>
+#include <string.h>
 #include "dlist.h"
 
 /*
@@ -47,12 +48,17 @@
 #define SYSFS_METHOD_SHOW	0x01	/* attr can be read by user */
 #define SYSFS_METHOD_STORE	0x02	/* attr can be changed by user */
 
+/*
+ * NOTE: We have the statically allocated "name" as the first element of all 
+ * the structures. This feature is used in the "sorter" function for dlists
+ */
+
 struct sysfs_attribute {
+	unsigned char name[SYSFS_NAME_LEN];
+	unsigned char path[SYSFS_PATH_MAX];
 	unsigned char *value;
 	unsigned short len;		/* value length */
 	unsigned short method;		/* show and store */
-	unsigned char name[SYSFS_NAME_LEN];
-	unsigned char path[SYSFS_PATH_MAX];
 };
 
 struct sysfs_link {
@@ -215,6 +221,7 @@ extern struct sysfs_device *sysfs_open_device
 		(const unsigned char *bus, const unsigned char *bus_id);
 extern struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev);
 extern struct sysfs_device *sysfs_open_device_path(const unsigned char *path);
+extern int sysfs_get_device_bus(struct sysfs_device *dev);
 extern struct sysfs_attribute *sysfs_get_device_attr
 			(struct sysfs_device *dev, const unsigned char *name);
 extern struct dlist *sysfs_get_device_attributes(struct sysfs_device *device);
@@ -236,8 +243,6 @@ extern struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus);
 extern struct dlist *sysfs_refresh_bus_attributes(struct sysfs_bus *bus);
 extern struct sysfs_attribute *sysfs_get_bus_attribute(struct sysfs_bus *bus,
 						unsigned char *attrname);
-extern struct sysfs_device *sysfs_open_bus_device(unsigned char *busname, 
-							unsigned char *dev_id);
 extern int sysfs_find_driver_bus(const unsigned char *driver, 
 					unsigned char *busname,	size_t bsize);
 
@@ -267,6 +272,24 @@ extern struct sysfs_attribute *sysfs_get_classdev_attr
 extern struct sysfs_attribute *sysfs_open_classdev_attr
 	(const unsigned char *classname, const unsigned char *dev, 
 	 					const unsigned char *attrib); 
+
+/**
+ * sort_list: sorter function to keep list elements sorted in alphabetical 
+ * 	order. Just does a strncmp as you can see :)
+ * 	
+ * Returns 1 if less than 0 otherwise
+ *
+ * NOTE: We take care to have a statically allocated "name" as the first 
+ * 	lement of all libsysfs structures. Hence, this function will work 
+ * 	AS IS for _ALL_ the lists that have to be sorted.
+ */
+static inline int sort_list(void *new, void *old)
+{
+        return ((strncmp(((struct sysfs_attribute *)new)->name,
+		((struct sysfs_attribute *)old)->name,
+		strlen(((struct sysfs_attribute *)new)->name))) < 0 ? 1 : 0);
+}
+
 
 #ifdef __cplusplus
 }

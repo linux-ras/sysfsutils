@@ -84,6 +84,7 @@ void dlist_delete(Dlist *,int);
 void dlist_push(Dlist *,void *);
 
 void dlist_unshift(Dlist *,void *);
+void dlist_unshift_sorted(Dlist *,void *,int (*sorter)(void *, void *));
 
 void *dlist_pop(Dlist *);
 

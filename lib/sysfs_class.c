@@ -210,7 +210,7 @@ struct dlist *sysfs_get_class_devices(struct sysfs_class *cls)
 				cls->devices = dlist_new_with_delete
 					(sizeof(struct sysfs_class_device),
 					 		sysfs_close_cls_dev);
-			dlist_unshift(cls->devices, dev);
+			dlist_unshift_sorted(cls->devices, dev, sort_list);
 		}
 	}
 	return cls->devices;
