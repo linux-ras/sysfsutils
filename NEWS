@@ -1,6 +1,16 @@
 Version History:
 ---------------
 
+ 1.0.0 - Released February 24, 2004
+	* Libsysfs now ships with a comprehensive testsuite.
+	* List elements are now maintained in sorted order.
+	* Updated systool for better output and removed lsbus 
+		from the package.
+	* Populated sysfs_device->drivername field correctly.
+		If device does not have a driver, field reflects 
+		"unknown".
+	* Added additional CFLAGS while building the package.
+
  0.4.0 - Released December 18, 2003
 	* Lots of optimizations. Structure elements that are dlists
 		or structs themselves are not populated by default.

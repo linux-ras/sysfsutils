@@ -1898,9 +1898,9 @@ the tests are built.
 To use the testsuite:
 
 a. Modify the variables libsysfs.conf file to appropriate values for your
-system. (The libsysfs.conf file contains comments describing what each variable
-stands for and, in some cases, how to determine an appropriate value for the
-system under test).
+   system. (The libsysfs.conf file contains comments describing what each
+   variable stands for and, in some cases, how to determine an appropriate 
+   value for the system under test).
 
 b. Build and install the testsuite.
 
@@ -1909,6 +1909,9 @@ c. Run the testsuite:
 	testlibsysfs <number of iterations> <logfile>
 
 The default logfile is stdout.
+
+NOTE: If the libsysfs.conf file is changed, make sure to run "make clean" in 
+the test directory and then a "make" for the changes to take effect.
 
 
 10. Conclusion

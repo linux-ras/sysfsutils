@@ -37,6 +37,8 @@
 #include "dlist.h"
 #include "test.h"
 
+#define val_drv1_dev_name	"dummy1"
+#define val_drv1_attr_name	"dummy2"
 #define inval_name 		"invalid_name"
 #define inval_path 		"/sys/invalid/path"
 #define FUNC_TABLE_SIZE  	81

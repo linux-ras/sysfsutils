@@ -18,3 +18,5 @@ have made contributions:
 		- Supplied initial makefiles for lsbus and systool
 	o Martin Hicks <mort@bork.org>
 		- Supplied patch to fix class_device functions
+	o Brian King <brking@us.ibm.com>
+		- Supplied patch to fix a memory leak in sysfs_dir.c

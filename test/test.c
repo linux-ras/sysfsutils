@@ -196,6 +196,145 @@ int (*func_table[81])(int) = {
 	test_sysfs_open_classdev_attr,
 };
 
+unsigned char *dir_paths[] = {
+	val_dir_path,
+	val_root_dev_path,
+	val_class_dev_path,
+	val_block_class_dev_path,
+	val_drv_path,
+	val_drv1_path,
+	NULL
+};
+
+unsigned char *file_paths[] = {
+	val_file_path,
+	val_write_attr_path,
+	NULL
+};
+
+unsigned char *link_paths[] = {
+	val_link_path,
+	NULL
+};
+
+static int path_is_dir(const unsigned char *path)
+{
+	struct stat astats;
+
+	if ((lstat(path, &astats)) != 0)
+		goto direrr;
+	
+	if (S_ISDIR(astats.st_mode))
+		return 0;
+
+direrr:
+	fprintf(stdout, "Config error: %s not a directory\n", path);
+	return 1;
+}
+
+static int path_is_file(const unsigned char *path)
+{
+	struct stat astats;
+
+	if ((lstat(path, &astats)) != 0)
+		goto fileerr;
+	
+	if (S_ISREG(astats.st_mode))
+		return 0;
+
+fileerr:
+	fprintf(stdout, "Config error: %s not a file\n", path);
+	return 1;
+}
+
+static int path_is_link(const unsigned char *path)
+{
+	struct stat astats;
+
+	if ((lstat(path, &astats)) != 0)
+		goto linkerr;
+
+	if (S_ISLNK(astats.st_mode))
+		return 0;
+
+linkerr:
+	fprintf(stdout, "Config error: %s not a link\n", path);
+	return 1;
+}
+
+/*
+ * Check validity of the test.h file entries
+ */
+static int check_header(void)
+{
+	unsigned char *var_path = NULL;
+	unsigned char path1[SYSFS_PATH_MAX];
+	unsigned int i = 0;
+
+	for (i = 0; dir_paths[i] != NULL; i++) {
+		var_path = dir_paths[i];
+		if (path_is_dir(var_path) != 0)
+			return 1;
+	}
+	
+	for (i = 0; file_paths[i] != NULL; i++) {
+		var_path = file_paths[i];
+		if (path_is_file(var_path) != 0)
+			return 1;
+	}
+	
+	for (i = 0; link_paths[i] != NULL; i++) {
+		var_path = link_paths[i];
+		if (path_is_link(var_path) != 0)
+			return 1;
+	}
+	
+	memset(path1, 0, SYSFS_PATH_MAX);
+	strcpy(path1, val_root_dev_path);
+	strcat(path1, "/");
+	strcat(path1, val_subdir_name);
+	if (path_is_dir(path1) != 0)
+		return 1;
+	
+	memset(path1, 0, SYSFS_PATH_MAX);
+	strcpy(path1, val_drv_path);
+	strcat(path1, "/");
+	strcat(path1, val_drv_dev_name);
+	if (path_is_link(path1) != 0)
+		return 1;
+	
+	memset(path1, 0, SYSFS_PATH_MAX);
+	strcpy(path1, val_dir_path);
+	strcat(path1, "/devices");
+	strcat(path1, "/");
+	strcat(path1, val_subdir_link_name);
+	if (path_is_link(path1) != 0)
+		return 1;
+	
+	memset(path1, 0, SYSFS_PATH_MAX);
+	strcpy(path1, val_class_dev_path);
+	strcat(path1, "/");
+	strcat(path1, val_class_dev_attr);
+	if (path_is_file(path1) != 0)
+		return 1;
+	
+	memset(path1, 0, SYSFS_PATH_MAX);
+	strcpy(path1, val_dev_path);
+	strcat(path1, "/");
+	strcat(path1, val_dev_attr);
+	if (path_is_file(path1) != 0)
+		return 1;
+	
+	memset(path1, 0, SYSFS_PATH_MAX);
+	strcpy(path1, val_drv_path);
+	strcat(path1, "/");
+	strcat(path1, val_drv_attr_name);
+	if (path_is_file(path1) != 0)
+		return 1;
+
+	return 0;
+}
+
 static void usage(void)
 {
 	fprintf(stdout, "testlibsysfs <no-of-times> [log-file]\n");
@@ -219,6 +358,9 @@ int main(int argc, char *argv[])
 		return 0;
 	} else 
 		num = strtol(argv[1], NULL, 0);
+
+	if (check_header() != 0)
+		return 1;
 
 	dbg_print("\nTest running %d times\n", num);
 

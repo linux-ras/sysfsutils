@@ -1,11 +1,8 @@
 Library:
 --------
 - Rework debugging error messages and look into better logging on error.
-- Need to properly set errno. 
 
 Commands:
 ---------
 - Add topology tree view.
-- Need to clean up error messages.
-- Clean up how attribute values are printed.
 
