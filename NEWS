@@ -1,6 +1,18 @@
 Version History:
 ---------------
 
+ 0.4.0 - Released December 18, 2003
+	* Lots of optimizations. Structure elements that are dlists
+		or structs themselves are not populated by default.
+	* Provided APIs for applications to obtain dlists
+		and structure elements.
+	* Modified API prototypes to be more meaningful.
+	* Included manpages for systool and lsbus.
+	* Added support functions to obtain "parent" of
+		sysfs_device and sysfs_class_device.
+	* Modified Makefile.am to make use of Libtool's versioning
+		facility.
+
  0.3.0 - Released November 6, 2003
 	* Added support to build shared library
 	* Added patch to consider "block" as a class
