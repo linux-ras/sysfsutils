@@ -1,5 +1,9 @@
 
 10/15/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Changed get_devices_list to get_bus_devices_list
+		* Fixed usage messages in tests
+
+10/15/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added support for building shared library
 
 10/14/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>

@@ -27,7 +27,7 @@
 
 void print_usage(void)
 {
-        fprintf(stdout, "Usage: get_dev_class [device]\n");
+        fprintf(stdout, "Usage: get_dev_class [class_device]\n");
 }
 
 int main(int argc, char *argv[])

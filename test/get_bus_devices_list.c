@@ -1,5 +1,5 @@
 /*
- * get_devices_list.c
+ * get_bus_devices_list.c
  *
  * Utility to get the list of devices on a given bus
  *
@@ -27,7 +27,7 @@
 
 void print_usage(void)
 {
-        fprintf(stdout, "Usage: get_devices_list [bus]\n");
+        fprintf(stdout, "Usage: get_bus_devices_list [bus]\n");
 }
 
 int main(int argc, char *argv[])
