@@ -1,4 +1,8 @@
 
+11/18/2004 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Check "driver" link under the device dir before
+			taking the "brute-force" route
+
 10/03/2004 - Arun Bhanu <arun@codemovers.org>
 		* docs - fix wrong return type in sysfs_read_dir_subdirs
 
