@@ -1,4 +1,8 @@
 
+09/13/2004 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Patch systool to print error if sysfs 
+			is not mounted
+
 09/10/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Changed version number in package files
 			to 1.2.0

@@ -617,8 +617,8 @@ static int show_default_info(void)
 		fprintf(stdout, "Supported sysfs buses:\n");
 		dlist_for_each_data(list, cur, char)
 			fprintf(stdout, "\t%s\n", cur);
+		sysfs_close_list(list);
 	}
-	sysfs_close_list(list);
 
 	safestrcpy(subsys, SYSFS_CLASS_NAME);
 	list = sysfs_open_subsystem_list(subsys);
@@ -626,8 +626,8 @@ static int show_default_info(void)
 		fprintf(stdout, "Supported sysfs classes:\n");
 		dlist_for_each_data(list, cur, char)
 			fprintf(stdout, "\t%s\n", cur);
+		sysfs_close_list(list);
 	}
-	sysfs_close_list(list);
 
 	safestrcpy(subsys, SYSFS_DEVICES_NAME);
 	list = sysfs_open_subsystem_list(subsys);
@@ -635,12 +635,25 @@ static int show_default_info(void)
 		fprintf(stdout, "Supported sysfs devices:\n");
 		dlist_for_each_data(list, cur, char)
 			fprintf(stdout, "\t%s\n", cur);
+		sysfs_close_list(list);
 	}
-	sysfs_close_list(list);
 			
 	return retval;
 }
 	
+/**
+ * check_sysfs_mounted: Checks to see if sysfs is mounted.
+ * returns 0 if not and 1 if true.
+ */
+static int check_sysfs_is_mounted(void)
+{
+	char path[SYSFS_PATH_MAX];
+
+	if (sysfs_get_mnt_path(path, SYSFS_PATH_MAX) != 0) 
+		return 0;
+	return 1;
+}
+
 /* MAIN */
 int main(int argc, char *argv[])
 {
@@ -721,6 +734,11 @@ int main(int argc, char *argv[])
 		break;
 	default:
 		usage();
+		exit(1);
+	}
+
+	if (check_sysfs_is_mounted() == 0) {
+		fprintf(stderr, "Unable to find sysfs mount point!\n");
 		exit(1);
 	}
 
