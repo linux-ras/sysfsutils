@@ -1,5 +1,8 @@
 
 01/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Added additional CFLAGS for building lib and apps
+
+01/07/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added numerous "refresh" functions
 		* Added funtion to remove trailing slash from paths
 		* Fixed sysfs_get_link() to handle different possibilities

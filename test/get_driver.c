@@ -22,10 +22,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "libsysfs.h"
 
-void print_usage(void)
+static void print_usage(void)
 {
         fprintf(stdout, "Usage: get_driver [driver]\n");
 }

@@ -88,7 +88,8 @@ libsysfs_la_SOURCES = sysfs_utils.c sysfs_dir.c sysfs_bus.c sysfs_class.c \
 	sysfs_device.c sysfs_driver.c sysfs.h dlist.c
 
 INCLUDES = -I../include
-libsysfs_la_LDFLAGS = -version-info 0:4:0
+libsysfs_la_LDFLAGS = -version-info 1:0:0
+libsysfs_la_CFLAGS = -Wall -W -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
 subdir = lib
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -96,8 +97,10 @@ CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libsysfs_la_LIBADD =
-am_libsysfs_la_OBJECTS = sysfs_utils.lo sysfs_dir.lo sysfs_bus.lo \
-	sysfs_class.lo sysfs_device.lo sysfs_driver.lo dlist.lo
+am_libsysfs_la_OBJECTS = libsysfs_la-sysfs_utils.lo \
+	libsysfs_la-sysfs_dir.lo libsysfs_la-sysfs_bus.lo \
+	libsysfs_la-sysfs_class.lo libsysfs_la-sysfs_device.lo \
+	libsysfs_la-sysfs_driver.lo libsysfs_la-dlist.lo
 libsysfs_la_OBJECTS = $(am_libsysfs_la_OBJECTS)
 
 DEFS = @DEFS@
@@ -107,12 +110,13 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/dlist.Plo ./$(DEPDIR)/sysfs_bus.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sysfs_class.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sysfs_device.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sysfs_dir.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sysfs_driver.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sysfs_utils.Plo
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/libsysfs_la-dlist.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/libsysfs_la-sysfs_bus.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/libsysfs_la-sysfs_class.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/libsysfs_la-sysfs_device.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/libsysfs_la-sysfs_dir.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/libsysfs_la-sysfs_driver.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/libsysfs_la-sysfs_utils.Plo
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
@@ -162,6 +166,13 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+libsysfs_la-sysfs_utils.lo: sysfs_utils.c
+libsysfs_la-sysfs_dir.lo: sysfs_dir.c
+libsysfs_la-sysfs_bus.lo: sysfs_bus.c
+libsysfs_la-sysfs_class.lo: sysfs_class.c
+libsysfs_la-sysfs_device.lo: sysfs_device.c
+libsysfs_la-sysfs_driver.lo: sysfs_driver.c
+libsysfs_la-dlist.lo: dlist.c
 libsysfs.la: $(libsysfs_la_OBJECTS) $(libsysfs_la_DEPENDENCIES) 
 	$(LINK) -rpath $(libdir) $(libsysfs_la_LDFLAGS) $(libsysfs_la_OBJECTS) $(libsysfs_la_LIBADD) $(LIBS)
 
@@ -171,13 +182,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlist.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysfs_bus.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysfs_class.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysfs_device.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysfs_dir.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysfs_driver.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysfs_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-dlist.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_bus.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_class.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_device.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_dir.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_driver.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_utils.Plo@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)
@@ -199,6 +210,132 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(LTCOMPILE) -c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<
+
+libsysfs_la-sysfs_utils.o: sysfs_utils.c
+@AMDEP_TRUE@	source='sysfs_utils.c' object='libsysfs_la-sysfs_utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_utils.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_utils.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_utils.o `test -f 'sysfs_utils.c' || echo '$(srcdir)/'`sysfs_utils.c
+
+libsysfs_la-sysfs_utils.obj: sysfs_utils.c
+@AMDEP_TRUE@	source='sysfs_utils.c' object='libsysfs_la-sysfs_utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_utils.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_utils.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_utils.obj `cygpath -w sysfs_utils.c`
+
+libsysfs_la-sysfs_utils.lo: sysfs_utils.c
+@AMDEP_TRUE@	source='sysfs_utils.c' object='libsysfs_la-sysfs_utils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_utils.Plo' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_utils.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_utils.lo `test -f 'sysfs_utils.c' || echo '$(srcdir)/'`sysfs_utils.c
+
+libsysfs_la-sysfs_dir.o: sysfs_dir.c
+@AMDEP_TRUE@	source='sysfs_dir.c' object='libsysfs_la-sysfs_dir.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_dir.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_dir.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_dir.o `test -f 'sysfs_dir.c' || echo '$(srcdir)/'`sysfs_dir.c
+
+libsysfs_la-sysfs_dir.obj: sysfs_dir.c
+@AMDEP_TRUE@	source='sysfs_dir.c' object='libsysfs_la-sysfs_dir.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_dir.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_dir.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_dir.obj `cygpath -w sysfs_dir.c`
+
+libsysfs_la-sysfs_dir.lo: sysfs_dir.c
+@AMDEP_TRUE@	source='sysfs_dir.c' object='libsysfs_la-sysfs_dir.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_dir.Plo' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_dir.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_dir.lo `test -f 'sysfs_dir.c' || echo '$(srcdir)/'`sysfs_dir.c
+
+libsysfs_la-sysfs_bus.o: sysfs_bus.c
+@AMDEP_TRUE@	source='sysfs_bus.c' object='libsysfs_la-sysfs_bus.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_bus.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_bus.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_bus.o `test -f 'sysfs_bus.c' || echo '$(srcdir)/'`sysfs_bus.c
+
+libsysfs_la-sysfs_bus.obj: sysfs_bus.c
+@AMDEP_TRUE@	source='sysfs_bus.c' object='libsysfs_la-sysfs_bus.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_bus.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_bus.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_bus.obj `cygpath -w sysfs_bus.c`
+
+libsysfs_la-sysfs_bus.lo: sysfs_bus.c
+@AMDEP_TRUE@	source='sysfs_bus.c' object='libsysfs_la-sysfs_bus.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_bus.Plo' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_bus.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_bus.lo `test -f 'sysfs_bus.c' || echo '$(srcdir)/'`sysfs_bus.c
+
+libsysfs_la-sysfs_class.o: sysfs_class.c
+@AMDEP_TRUE@	source='sysfs_class.c' object='libsysfs_la-sysfs_class.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_class.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_class.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_class.o `test -f 'sysfs_class.c' || echo '$(srcdir)/'`sysfs_class.c
+
+libsysfs_la-sysfs_class.obj: sysfs_class.c
+@AMDEP_TRUE@	source='sysfs_class.c' object='libsysfs_la-sysfs_class.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_class.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_class.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_class.obj `cygpath -w sysfs_class.c`
+
+libsysfs_la-sysfs_class.lo: sysfs_class.c
+@AMDEP_TRUE@	source='sysfs_class.c' object='libsysfs_la-sysfs_class.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_class.Plo' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_class.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_class.lo `test -f 'sysfs_class.c' || echo '$(srcdir)/'`sysfs_class.c
+
+libsysfs_la-sysfs_device.o: sysfs_device.c
+@AMDEP_TRUE@	source='sysfs_device.c' object='libsysfs_la-sysfs_device.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_device.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_device.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_device.o `test -f 'sysfs_device.c' || echo '$(srcdir)/'`sysfs_device.c
+
+libsysfs_la-sysfs_device.obj: sysfs_device.c
+@AMDEP_TRUE@	source='sysfs_device.c' object='libsysfs_la-sysfs_device.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_device.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_device.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_device.obj `cygpath -w sysfs_device.c`
+
+libsysfs_la-sysfs_device.lo: sysfs_device.c
+@AMDEP_TRUE@	source='sysfs_device.c' object='libsysfs_la-sysfs_device.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_device.Plo' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_device.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_device.lo `test -f 'sysfs_device.c' || echo '$(srcdir)/'`sysfs_device.c
+
+libsysfs_la-sysfs_driver.o: sysfs_driver.c
+@AMDEP_TRUE@	source='sysfs_driver.c' object='libsysfs_la-sysfs_driver.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_driver.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_driver.o `test -f 'sysfs_driver.c' || echo '$(srcdir)/'`sysfs_driver.c
+
+libsysfs_la-sysfs_driver.obj: sysfs_driver.c
+@AMDEP_TRUE@	source='sysfs_driver.c' object='libsysfs_la-sysfs_driver.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_driver.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_driver.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_driver.obj `cygpath -w sysfs_driver.c`
+
+libsysfs_la-sysfs_driver.lo: sysfs_driver.c
+@AMDEP_TRUE@	source='sysfs_driver.c' object='libsysfs_la-sysfs_driver.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-sysfs_driver.Plo' tmpdepfile='$(DEPDIR)/libsysfs_la-sysfs_driver.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_driver.lo `test -f 'sysfs_driver.c' || echo '$(srcdir)/'`sysfs_driver.c
+
+libsysfs_la-dlist.o: dlist.c
+@AMDEP_TRUE@	source='dlist.c' object='libsysfs_la-dlist.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-dlist.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-dlist.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-dlist.o `test -f 'dlist.c' || echo '$(srcdir)/'`dlist.c
+
+libsysfs_la-dlist.obj: dlist.c
+@AMDEP_TRUE@	source='dlist.c' object='libsysfs_la-dlist.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-dlist.Po' tmpdepfile='$(DEPDIR)/libsysfs_la-dlist.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-dlist.obj `cygpath -w dlist.c`
+
+libsysfs_la-dlist.lo: dlist.c
+@AMDEP_TRUE@	source='dlist.c' object='libsysfs_la-dlist.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libsysfs_la-dlist.Plo' tmpdepfile='$(DEPDIR)/libsysfs_la-dlist.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-dlist.lo `test -f 'dlist.c' || echo '$(srcdir)/'`dlist.c
 CCDEPMODE = @CCDEPMODE@
 
 mostlyclean-libtool:

@@ -215,7 +215,7 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 			sysattr->name);
 		close(fd);
 		return -1;
-	} else if (length != len) {
+	} else if ((unsigned int)length != len) {
 		dprintf("Could not write %d bytes to attribute %s\n", 
 					len, sysattr->name);
 		/* 

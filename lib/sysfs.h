@@ -34,8 +34,6 @@
 #include <errno.h>
 
 /* external library functions */
-extern int lstat(const char *file_name, struct stat *buf);
-extern int readlink(const char *path, char *buf, size_t bufsize);
 extern int isascii(int c);
 
 /* Debugging */

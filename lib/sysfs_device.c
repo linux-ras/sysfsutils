@@ -472,7 +472,7 @@ static int get_device_absolute_path(const unsigned char *device,
 	 * We now are at /sys/bus/"bus_name"/devices/"device" which is a link.
 	 * Now read this link to reach to the device.
 	 */ 
-	if ((sysfs_get_link(bus_path, path, SYSFS_PATH_MAX)) != 0) {
+	if ((sysfs_get_link(bus_path, path, psize)) != 0) {
 		dprintf("Error getting to device %s\n", device);
 		return -1;
 	}

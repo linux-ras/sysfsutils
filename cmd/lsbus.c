@@ -68,16 +68,10 @@ static unsigned int get_pciconfig_word(int offset, unsigned char *buf)
         return val;
 }
 
-static unsigned char get_pciconfig_byte(int offset, unsigned char *buf)
-{
-        return((unsigned char)buf[offset]);
-}
-
-
 /**
  * usage: prints utility usage.
  */
-void usage(void)
+static void usage(void)
 {
 	fprintf(stdout, "Usage: lsbus [<options> bus [device]]\n");
 	fprintf(stdout, "\t-a\t\t\tShow attributes\n");
@@ -92,7 +86,7 @@ void usage(void)
  * remove_end_newline: removes newline on the end of an attribute value
  * @value: string to remove newline from
  */
-void remove_end_newline(unsigned char *value)
+static void remove_end_newline(unsigned char *value)
 {
 	unsigned char *p = value + (strlen(value) - 1);
 
@@ -105,7 +99,7 @@ void remove_end_newline(unsigned char *value)
  * @attr: attribute to check.
  * returns 1 if binary or 0 if not.
  */
-int isbinaryvalue(struct sysfs_attribute *attr)
+static int isbinaryvalue(struct sysfs_attribute *attr)
 {
 	int i;
 
@@ -123,7 +117,7 @@ int isbinaryvalue(struct sysfs_attribute *attr)
  * print_attribute_value: prints out single attribute value.
  * @attr: attricute to print.
  */
-void print_attribute_value(struct sysfs_attribute *attr)
+static void print_attribute_value(struct sysfs_attribute *attr)
 {
 	if (attr == NULL)
 		return;
@@ -155,7 +149,7 @@ void print_attribute_value(struct sysfs_attribute *attr)
  * print_attribute: prints out a single attribute
  * @attr: attribute to print.
  */
-void print_attribute(struct sysfs_attribute *attr)
+static void print_attribute(struct sysfs_attribute *attr)
 {
 	if (attr == NULL) 
 		return;
@@ -181,7 +175,7 @@ void print_attribute(struct sysfs_attribute *attr)
  * print_device_attributes: prints out device attributes.
  * @sdir: print this device's attributes/files.
  */
-void print_device_attributes(struct dlist *attributes)
+static void print_device_attributes(struct dlist *attributes)
 {
 	struct sysfs_attribute *cur = NULL;;
 
@@ -196,7 +190,7 @@ void print_device_attributes(struct dlist *attributes)
  * print_device: prints out device information.
  * @device: device to print.
  */
-void print_device(struct sysfs_device *device)
+static void print_device(struct sysfs_device *device)
 {
 	struct dlist *attributes = NULL;
 	unsigned int vendor_id, device_id;
@@ -240,7 +234,7 @@ void print_device(struct sysfs_device *device)
  * print_driver_attributes: prints out driver attributes .
  * @driver: print this driver's attributes.
  */
-void print_driver_attributes(struct sysfs_driver *driver)
+static void print_driver_attributes(struct sysfs_driver *driver)
 {
 	struct dlist *attributes = NULL;
 	
@@ -262,7 +256,7 @@ void print_driver_attributes(struct sysfs_driver *driver)
  * print_driver: prints out driver information.
  * @driver: driver to print.
  */
-void print_driver(struct sysfs_driver *driver)
+static void print_driver(struct sysfs_driver *driver)
 {
 	struct dlist *devlist = NULL;
 	
@@ -287,7 +281,7 @@ void print_driver(struct sysfs_driver *driver)
  * @busname: bus to print.
  * returns 0 with success or 1 with error.
  */
-int print_sysfs_bus(unsigned char *busname)
+static int print_sysfs_bus(unsigned char *busname)
 {
 	struct sysfs_bus *bus = NULL;
 	struct sysfs_device *curdev = NULL;
@@ -338,7 +332,7 @@ int print_sysfs_bus(unsigned char *busname)
  * @buses: list of supported system buses.
  * returns 0 with success or 1 with error.
  */
-int print_sysfs_buses(void)
+static int print_sysfs_buses(void)
 {
         unsigned char subsys[SYSFS_NAME_LEN];
         struct dlist *list = NULL;
@@ -364,8 +358,7 @@ int main(int argc, char *argv[])
 	//unsigned char *bus_to_print = NULL;
 	int retval = 0;
 	int opt;
-	extern int optind;
-	extern char *optarg;
+
 	/*pci ids*/
 	unsigned char *pci_id_file = "/usr/local/share/pci.ids";
 

@@ -68,16 +68,10 @@ static unsigned int get_pciconfig_word(int offset, unsigned char *buf)
         return val;
 }
 
-static unsigned char get_pciconfig_byte(int offset, unsigned char *buf)
-{
-        return((unsigned char)buf[offset]);
-}
-
-
 /**
  * usage: prints utility usage.
  */
-void usage(void)
+static void usage(void)
 {
 	fprintf(stdout, "Usage: systool [<options> [device]]\n");
 	fprintf(stdout, "\t-a\t\t\tShow attributes\n");
@@ -97,7 +91,7 @@ void usage(void)
  *	level passed in.
  * @level: number of spaces to indent.
  */
-void indent(int level)
+static void indent(int level)
 {
 	int i;
 
@@ -109,7 +103,7 @@ void indent(int level)
  * remove_end_newline: removes newline on the end of an attribute value
  * @value: string to remove newline from
  */
-void remove_end_newline(unsigned char *value)
+static void remove_end_newline(unsigned char *value)
 {
 	unsigned char *p = value + (strlen(value) - 1);
 
@@ -121,7 +115,7 @@ void remove_end_newline(unsigned char *value)
  * show_device_children: prints out device subdirs.
  * @children: dlist of child devices.
  */
-void show_device_children(struct dlist *children, int level)
+static void show_device_children(struct dlist *children, int level)
 {
 	struct sysfs_device *child = NULL;
 	
@@ -141,7 +135,7 @@ void show_device_children(struct dlist *children, int level)
  * @attr: attribute to check.
  * returns 1 if binary, 0 if not.
  */
-int isbinaryvalue(struct sysfs_attribute *attr)
+static int isbinaryvalue(struct sysfs_attribute *attr)
 {
 	int i;
 
@@ -159,7 +153,7 @@ int isbinaryvalue(struct sysfs_attribute *attr)
  * show_attribute_value: prints out single attribute value.
  * @attr: attricute to print.
  */
-void show_attribute_value(struct sysfs_attribute *attr, int level)
+static void show_attribute_value(struct sysfs_attribute *attr, int level)
 {
 	if (attr == NULL)
 		return;
@@ -193,7 +187,7 @@ void show_attribute_value(struct sysfs_attribute *attr, int level)
  * show_attribute: prints out a single attribute
  * @attr: attribute to print.
  */
-void show_attribute(struct sysfs_attribute *attr, int level)
+static void show_attribute(struct sysfs_attribute *attr, int level)
 {
 	if (attr == NULL) 
 		return;
@@ -221,7 +215,7 @@ void show_attribute(struct sysfs_attribute *attr, int level)
  * show_attributes: prints out a list of attributes.
  * @attributes: print this dlist of attributes/files.
  */
-void show_attributes(struct dlist *attributes, int level)
+static void show_attributes(struct dlist *attributes, int level)
 {
 	if (attributes != NULL) {
 		struct sysfs_attribute *cur = NULL;
@@ -239,7 +233,7 @@ void show_attributes(struct dlist *attributes, int level)
  * show_device: prints out device information.
  * @device: device to print.
  */
-void show_device(struct sysfs_device *device, int level)
+static void show_device(struct sysfs_device *device, int level)
 {
 	struct dlist *attributes = NULL;
         unsigned int vendor_id, device_id;
@@ -288,7 +282,7 @@ void show_device(struct sysfs_device *device, int level)
  * show_root_device: prints out sys/devices device information.
  * @device: device to print.
  */
-void show_root_device(struct sysfs_device *device, int level)
+static void show_root_device(struct sysfs_device *device, int level)
 {
 	if (device != NULL) {
 		indent(level);
@@ -307,7 +301,7 @@ void show_root_device(struct sysfs_device *device, int level)
  * show_driver_attributes: prints out driver attributes .
  * @driver: print this driver's attributes.
  */
-void show_driver_attributes(struct sysfs_driver *driver, int level)
+static void show_driver_attributes(struct sysfs_driver *driver, int level)
 {
 	if (driver != NULL) {
 		struct dlist *attributes = NULL;
@@ -330,7 +324,7 @@ void show_driver_attributes(struct sysfs_driver *driver, int level)
  * show_driver: prints out driver information.
  * @driver: driver to print.
  */
-void show_driver(struct sysfs_driver *driver, int level)
+static void show_driver(struct sysfs_driver *driver, int level)
 {
 	struct dlist *devlist = NULL;
 	
@@ -359,7 +353,7 @@ void show_driver(struct sysfs_driver *driver, int level)
  * show_device_tree: prints out device tree.
  * @root: root device
  */
-void show_device_tree(struct sysfs_device *root, int level)
+static void show_device_tree(struct sysfs_device *root, int level)
 {
 	if (root != NULL) {
 		struct sysfs_device *cur = NULL;
@@ -382,7 +376,7 @@ void show_device_tree(struct sysfs_device *root, int level)
  * @busname: bus to print.
  * returns 0 with success or 1 with error.
  */
-int show_sysfs_bus(unsigned char *busname)
+static int show_sysfs_bus(unsigned char *busname)
 {
 	struct sysfs_bus *bus = NULL;
 	struct sysfs_device *curdev = NULL;
@@ -433,7 +427,7 @@ int show_sysfs_bus(unsigned char *busname)
  * show_class_device: prints out class device.
  * @dev: class device to print.
  */
-void show_class_device(struct sysfs_class_device *dev, int level)
+static void show_class_device(struct sysfs_class_device *dev, int level)
 {
 	struct dlist *attributes = NULL;
 	struct sysfs_device *device = NULL;
@@ -466,7 +460,7 @@ void show_class_device(struct sysfs_class_device *dev, int level)
  * @classname: class to print.
  * returns 0 with success and 1 with error.
  */
-int show_sysfs_class(unsigned char *classname)
+static int show_sysfs_class(unsigned char *classname)
 {
 	struct sysfs_class *cls = NULL;
 	struct sysfs_class_device *cur = NULL;
@@ -503,12 +497,11 @@ int show_sysfs_class(unsigned char *classname)
  * @rootname: device root to print.
  * returns 0 with success and 1 with error.
  */
-int show_sysfs_root(unsigned char *rootname)
+static int show_sysfs_root(unsigned char *rootname)
 {
 	struct sysfs_root_device *root = NULL;
 	struct sysfs_device *device = NULL;
 	struct dlist *devlist = NULL;
-	unsigned char path[SYSFS_PATH_MAX];
 
 	if (rootname == NULL) {
 		errno = EINVAL;
@@ -541,12 +534,12 @@ int show_sysfs_root(unsigned char *rootname)
  *	supported by sysfs.
  * returns 0 with success or 1 with error.
  */
-int show_default_info(void)
+static int show_default_info(void)
 {
 	unsigned char subsys[SYSFS_NAME_LEN];
 	struct dlist *list = NULL;
 	unsigned char *cur = NULL;
-	int retval = 0, i;
+	int retval = 0;
 
 	strcpy(subsys, SYSFS_BUS_NAME);
 	list = sysfs_open_subsystem_list(subsys);
@@ -586,8 +579,6 @@ int main(int argc, char *argv[])
 	unsigned char *show_root = NULL;
 	int retval = 0;
 	int opt;
-	extern int optind;
-	extern char *optarg;
         unsigned char *pci_id_file = "/usr/local/share/pci.ids";
 	
 	while((opt = getopt(argc, argv, cmd_options)) != EOF) {

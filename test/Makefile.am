@@ -9,3 +9,5 @@ write_attr_SOURCES = write_attr.c
 get_classdev_parent_SOURCES = get_classdev_parent.c
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
+CFLAGS = -Wall -Wshadow -W -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
+

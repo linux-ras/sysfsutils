@@ -25,7 +25,7 @@
 
 #include "libsysfs.h"
 
-void print_usage(void)
+static void print_usage(void)
 {
         fprintf(stdout, "Usage: get_class_dev [class name] [class_device]\n");
 }

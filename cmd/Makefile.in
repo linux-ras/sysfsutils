@@ -88,6 +88,7 @@ systool_SOURCES = systool.c names.c names.h
 lsbus_SOURCES = lsbus.c names.c names.h
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
+CFLAGS = -Wall -Wshadow -W -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
 subdir = cmd
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -122,7 +123,6 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-CFLAGS = @CFLAGS@
 DIST_SOURCES = $(lsbus_SOURCES) $(systool_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
 SOURCES = $(lsbus_SOURCES) $(systool_SOURCES)

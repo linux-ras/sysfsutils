@@ -95,6 +95,7 @@ write_attr_SOURCES = write_attr.c
 get_classdev_parent_SOURCES = get_classdev_parent.c
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
+CFLAGS = -Wall -Wshadow -W -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
 subdir = test
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -161,7 +162,6 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-CFLAGS = @CFLAGS@
 DIST_SOURCES = $(dlist_test_SOURCES) $(get_bus_devices_list_SOURCES) \
 	$(get_class_dev_SOURCES) $(get_classdev_parent_SOURCES) \
 	$(get_device_SOURCES) $(get_driver_SOURCES) \
