@@ -150,7 +150,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 		errno = EACCES;
 		return -1;
 	}
-	pgsize = sysconf(_SC_PAGESIZE);
+	pgsize = getpagesize();
 	fbuf = (char *)calloc(1, pgsize+1);
 	if (!fbuf) {
 		dprintf("calloc failed\n");
@@ -244,7 +244,7 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 		close(fd);
 		return -1;
 	} else if ((unsigned int)length != len) {
-		dprintf("Could not write %d bytes to attribute %s\n", 
+		dprintf("Could not write %zd bytes to attribute %s\n", 
 					len, sysattr->name);
 		/* 
 		 * since we could not write user supplied number of bytes,

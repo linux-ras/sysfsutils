@@ -1,3 +1,6 @@
+04/11/2005 - Kay Sievers <kay.sievers@vrfy.org>
+		* Update for building with klibc and udev, plus other small
+			fixes.
 
 03/06/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* sysfs_directory, sysfs_link baggage is gone

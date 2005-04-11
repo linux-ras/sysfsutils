@@ -27,6 +27,7 @@
  * delete function.  Otherwise dlist will just use free.
 
 */
+#include "stdlib.h"
 #include "dlist.h"
 
 /*
@@ -553,6 +554,7 @@ void dlist_sort_custom(struct dlist *list, int (*compare)(void *, void *))
   
   dlist_start(list);
   templist = dlist_new(list->data_size);
+
   // do nothing if there isn't anything to sort
   listsource = list;
   listdest = templist;

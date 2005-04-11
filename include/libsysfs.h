@@ -43,13 +43,13 @@
 #define	SYSFS_NAME_LEN		64
 #define SYSFS_BUS_ID_SIZE	32
 
+/* mount path for sysfs, can be overridden by exporting SYSFS_PATH */
+#define SYSFS_MNT_PATH		"/sys"
+
 enum sysfs_attribute_method {
 	SYSFS_METHOD_SHOW =	0x01,	/* attr can be read by user */
 	SYSFS_METHOD_STORE =	0x02,	/* attr can be changed by user */
 };
-
-/* NOTE: statically define mnt path for sysfs */
-#define SYSFS_MNT_PATH		"/sys"
 
 /*
  * NOTE: 
@@ -136,7 +136,7 @@ extern int sysfs_path_is_dir(const char *path);
 extern int sysfs_path_is_link(const char *path);
 extern int sysfs_path_is_file(const char *path);
 extern int sysfs_get_link(const char *path, char *target, size_t len);
-extern struct dlist *sysfs_open_directory_list(const char *name);
+extern struct dlist *sysfs_open_directory_list(const char *path);
 extern void sysfs_close_list(struct dlist *list);
 
 /* sysfs directory and file access */
