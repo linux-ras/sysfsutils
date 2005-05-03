@@ -1,3 +1,16 @@
+05/03/2005 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Added modules support to systool
+		* Renamed get_attributes_list() function to 
+			get_dev_attributes_list() function
+		* Added new get_attributes_list() function that takes 
+			a dlist and a path to directory of attributes
+		* Modified sysfs_module to grab parameters and sections
+			using new get_attributes_list() function
+		* Removed device children support from systool
+
+05/03/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+	 	* Implemented /sys/modules support
+
 04/11/2005 - Kay Sievers <kay.sievers@vrfy.org>
 		* Update for building with klibc and udev, plus other small
 			fixes.
