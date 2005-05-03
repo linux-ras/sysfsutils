@@ -340,7 +340,7 @@ struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *clsdev)
 		errno = EINVAL;
 		return NULL;
 	}
-	return get_attributes_list(clsdev);
+	return get_dev_attributes_list(clsdev);
 }
 
 /**

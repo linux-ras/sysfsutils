@@ -294,7 +294,7 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *dev)
 		errno = EINVAL;
 		return NULL;
 	}
-	return get_attributes_list(dev);
+	return get_dev_attributes_list(dev);
 }
 
 /**

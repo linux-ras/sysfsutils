@@ -51,7 +51,8 @@ do { \
 extern struct sysfs_attribute *get_attribute(void *dev, const char *name);
 extern struct dlist *read_dir_subdirs(const char *path);
 extern struct dlist *read_dir_links(const char *path);
-extern struct dlist *get_attributes_list(void *dev);
+extern struct dlist *get_dev_attributes_list(void *dev);
+extern struct dlist *get_attributes_list(struct dlist *alist, const char *path);
 
 /* Debugging */
 #ifdef DEBUG

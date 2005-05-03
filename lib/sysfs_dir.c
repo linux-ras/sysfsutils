@@ -279,6 +279,38 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 }
 
 /**
+ * add_attribute_to_list: open and add attribute at path to given dlist
+ * @list: dlist attribute is to be added
+ * @path: path to attribute
+ * returns pointer to attr added with success and NULL with error.
+ */
+static struct sysfs_attribute *add_attribute_to_list(struct dlist *alist, 
+							const char *path)
+{
+	struct sysfs_attribute *attr;
+
+	attr = sysfs_open_attribute(path);
+	if (!attr) {
+		dprintf("Error opening attribute %s\n",	path);
+		return NULL;
+	}
+	if (attr->method & SYSFS_METHOD_SHOW) {
+		if (sysfs_read_attribute(attr)) {
+			dprintf("Error reading attribute %s\n",	path);
+			sysfs_close_attribute(attr);
+			return NULL;
+		}
+	}
+
+	if (!alist) {
+		alist = dlist_new_with_delete
+			(sizeof(struct sysfs_attribute), sysfs_del_attribute);
+	}
+	dlist_unshift_sorted(alist, attr, sort_list);
+	return attr;
+}
+
+/**
  * add_attribute: open and add attribute at path to given directory
  * @dev: device whose attribute is to be added
  * @path: path to attribute
@@ -440,11 +472,59 @@ struct dlist *read_dir_subdirs(const char *path)
 }
 
 /**
- * get_attributes_list: build a list of attributes for the given device
+ * get_attributes_list: build a list of attributes for the given path
+ * @path: grab attributes at the given path
+ * returns dlist of attributes on success and NULL on failure
+ */
+struct dlist *get_attributes_list(struct dlist *alist, const char *path)
+{
+	DIR *dir = NULL;
+	struct dirent *dirent = NULL;
+	struct sysfs_attribute *attr = NULL;
+	char file_path[SYSFS_PATH_MAX];
+
+	if (!path) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	dir = opendir(path);
+	if (!dir) {
+		dprintf("Error opening directory %s\n", path);
+		return NULL;
+	}
+	while ((dirent = readdir(dir)) != NULL) {
+		if (0 == strcmp(dirent->d_name, "."))
+			 continue;
+		if (0 == strcmp(dirent->d_name, ".."))
+			continue;
+		memset(file_path, 0, SYSFS_PATH_MAX);
+		safestrcpy(file_path, path);
+		safestrcat(file_path, "/");
+		safestrcat(file_path, dirent->d_name);
+		if (!sysfs_path_is_file(file_path)) {
+			if (!alist) {
+				alist = dlist_new_with_delete
+					(sizeof(struct sysfs_attribute),
+							sysfs_del_attribute);
+				if (!alist) {
+					dprintf("Error creating list\n");
+					return NULL;
+				}
+			}
+			add_attribute_to_list(alist, file_path);
+		}
+	}
+	closedir(dir);
+	return alist;
+}
+
+/**
+ * get_dev_attributes_list: build a list of attributes for the given device
  * @dev: devices whose attributes list is required
  * returns dlist of attributes on success and NULL on failure
  */
-struct dlist *get_attributes_list(void *dev)
+struct dlist *get_dev_attributes_list(void *dev)
 {
 	DIR *dir = NULL;
 	struct dirent *dirent = NULL;
