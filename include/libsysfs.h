@@ -36,6 +36,8 @@
 #define SYSFS_DRIVERS_NAME	"drivers"
 #define SYSFS_MODULE_NAME	"module"
 #define SYSFS_NAME_ATTRIBUTE	"name"
+#define SYSFS_MOD_PARM_NAME	"parameters"
+#define SYSFS_MOD_SECT_NAME	"sections"
 #define SYSFS_UNKNOWN		"unknown"
 #define SYSFS_PATH_ENV		"SYSFS_PATH"
 
@@ -90,7 +92,6 @@ struct sysfs_device {
 	struct dlist *children;	
 };
 
-/* NOTE: not used as of now */
 struct sysfs_bus {
 	char name[SYSFS_NAME_LEN];
 	char path[SYSFS_PATH_MAX];
@@ -112,7 +113,6 @@ struct sysfs_class_device {
 	struct sysfs_device *sysdevice;		/* NULL if virtual */
 };
 
-/* NOTE: not used as of now */
 struct sysfs_class {
 	char name[SYSFS_NAME_LEN];
 	char path[SYSFS_PATH_MAX];
@@ -120,6 +120,14 @@ struct sysfs_class {
 
 	/* Private: for internal use only */
 	struct dlist *devices;
+};
+
+struct sysfs_module {
+	char name[SYSFS_NAME_LEN];
+	char path[SYSFS_PATH_MAX];
+	struct dlist *attrlist;
+	struct dlist *parmlist;
+	struct dlist *sections;
 };
 
 #ifdef __cplusplus
@@ -199,6 +207,20 @@ extern struct sysfs_device *sysfs_get_bus_device
 	(struct sysfs_bus *bus, const char *id);
 extern struct sysfs_driver *sysfs_get_bus_driver
 	(struct sysfs_bus *bus, const char *drvname);
+
+/* generic sysfs module access */
+extern void sysfs_close_module(struct sysfs_module *module);
+extern struct sysfs_module *sysfs_open_module_path(const char *path);
+extern struct sysfs_module *sysfs_open_module(const char *name);
+extern struct dlist *sysfs_get_module_parms(struct sysfs_module *module);
+extern struct dlist *sysfs_get_module_sections(struct sysfs_module *module);
+extern struct dlist *sysfs_get_module_attributes(struct sysfs_module *module);
+extern struct sysfs_attribute *sysfs_get_module_attr
+	(struct sysfs_module *module, const char *name);
+extern struct sysfs_attribute *sysfs_get_module_parm
+	(struct sysfs_module *module, const char *parm);
+extern struct sysfs_attribute *sysfs_get_module_section
+	(struct sysfs_module *module, const char *section);
 
 /**
  * sort_list: sorter function to keep list elements sorted in alphabetical 
