@@ -70,8 +70,7 @@ static void show_class_device(struct sysfs_class_device *dev, int level);
                                                                                 
 #define SHOW_ALL		0xff
 
-static char cmd_options[] = "aA:b:c:dDhpP:v";
-//static char cmd_options[] = "aA:b:c:CdDhpPr:v";
+static char cmd_options[] = "aA:b:c:dDhm:pP:v";
 
 /*
  * binary_files - defines existing sysfs binary files. These files will be
@@ -102,16 +101,10 @@ static void usage(void)
 	fprintf(stdout, "\t-c <class_name>\t\tShow a specific class\n");
 	fprintf(stdout, "\t-d\t\t\tShow only devices\n");
 	fprintf(stdout, "\t-h\t\t\tShow usage\n");
+	fprintf(stdout, "\t-m <module_name>\tShow a specific module\n");
 	fprintf(stdout, "\t-p\t\t\tShow path to device/driver\n");
-#if 0
-	fprintf(stdout, 
-		"\t-r <root_device>\tShow a specific root device tree\n");
-#endif
 	fprintf(stdout, "\t-v\t\t\tShow all attributes with values\n");
 	fprintf(stdout, "\t-A <attribute_name>\tShow attribute value\n");
-#if 0
-	fprintf(stdout, "\t-C\t\t\tShow device's children\n");
-#endif
 	fprintf(stdout, "\t-D\t\t\tShow only drivers\n");
 	fprintf(stdout, "\t-P\t\t\tShow device's parent\n");
 }
@@ -140,38 +133,6 @@ static void remove_end_newline(char *value)
 	if (p && *p == '\n')
 		*p = '\0';
 }
-
-#if 0
-/**
- * show_device_children: prints out device subdirs.
- * @children: dlist of child devices.
- */
-static void show_device_children(struct sysfs_device *device, int level)
-{
-	struct sysfs_device *temp_device = NULL, *child = NULL;
-	int flag = 1;
-	
-	temp_device = sysfs_open_device_tree(device->path);
-	if (temp_device) {
-		if (temp_device->children) {
-			fprintf(stdout, "\n");
-			dlist_for_each_data(temp_device->children, child, 
-					struct sysfs_device) {
-				if (strncmp(child->name, "power", 5) == 0)
-					continue;
-				if (flag) {
-					flag--;
-					indent(level);
-					fprintf(stdout, "Device \"%s\"'s children\n", 
-							temp_device->name);
-				}
-				show_device(child, (level+2));
-			}
-		}
-		sysfs_close_device_tree(temp_device);
-	}
-}
-#endif
 
 /**
  * isbinaryvalue: checks to see if attribute is binary or not.
@@ -335,12 +296,7 @@ static void show_device(struct sysfs_device *device, int level)
 			if (attributes) 
 				show_attributes(attributes, (level+2));
 		}
-#if 0
-		if ((device_to_show) && (show_options & SHOW_CHILDREN)) {
-			show_options &= ~SHOW_CHILDREN;
-			show_device_children(device, (level+2));
-		}
-#endif
+
 		if ((device_to_show) && (show_options & SHOW_PARENT)) {
 			show_options &= ~SHOW_PARENT;
 			show_device_parent(device, (level+2));
@@ -413,32 +369,6 @@ static void show_driver(struct sysfs_driver *driver, int level)
 		fprintf(stdout, "\n");
 	}
 }
-
-#if 0
-/**
- * show_device_tree: prints out device tree.
- * @root: root device
- */
-static void show_device_tree(struct sysfs_device *root, int level)
-{
-	if (root != NULL) {
-		struct sysfs_device *cur = NULL;
-
-		if (device_to_show == NULL || (strcmp(device_to_show,
-			    root->bus_id) == 0)) {
-			show_device(root, level);
-		}
-		if (root->children != NULL) {
-			dlist_for_each_data(root->children, cur, 
-					struct sysfs_device) {
-				if (strncmp(cur->name, "power", 5) == 0)
-					continue;
-				show_device_tree(cur, (level+2));
-			}
-		}
-	}
-}
-#endif
 
 /**
  * show_sysfs_bus: prints out everything on a bus.
@@ -583,46 +513,70 @@ static int show_sysfs_class(char *classname)
 	return 0;
 }
 
-#if 0
-/**
- * show_sysfs_root: prints out sysfs root device tree 
- * @rootname: device root to print.
- * returns 0 with success and 1 with error.
- */
-static int show_sysfs_root(char *rootname)
+static int show_sysfs_module(char *module)
 {
-	struct sysfs_root_device *root = NULL;
-	struct sysfs_device *device = NULL;
-	struct dlist *devlist = NULL;
+	struct sysfs_module *mod = NULL;
 
-	if (rootname == NULL) {
+	if (!module) {	
 		errno = EINVAL;
 		return 1;
 	}
-	root = sysfs_open_root_device(rootname);
-	if (root == NULL) {
-		fprintf(stderr, "Error opening root device %s\n", rootname);
+
+	mod = sysfs_open_module(module);
+	if (mod == NULL) {
+		fprintf(stderr, "Error opening module %s\n", module);
 		return 1;
 	}
+	fprintf(stdout, "Module = \"%s\"\n\n", module);
+	if (show_options & (SHOW_ATTRIBUTES | SHOW_ATTRIBUTE_VALUE
+	    | SHOW_ALL_ATTRIB_VALUES)) {
+		struct dlist *attributes = NULL;
+		struct sysfs_attribute *cur;
 
-	devlist = sysfs_get_root_devices(root);
-	if (devlist != NULL) {
-		fprintf(stdout, "Root Device = \"%s\"\n\n", rootname);
-		
-		if (devlist != NULL) {
-			dlist_for_each_data(devlist, device, 
-						struct sysfs_device) {
-				if (strncmp(device->name, "power", 5) == 0)
-					continue;
-				show_device_tree(device, 2);
+		attributes = sysfs_get_module_attributes(mod);
+		if (attributes) {
+			if (show_options & (SHOW_ATTRIBUTES
+			    | SHOW_ALL_ATTRIB_VALUES)) {
+				indent(2);
+				fprintf(stdout, "Attributes:\n");
+			}
+			dlist_for_each_data(attributes, cur,
+					struct sysfs_attribute) {
+				show_attribute(cur, (4));
 			}
 		}
+		attributes = sysfs_get_module_parms(mod);
+		if (attributes) {
+			if (show_options & (SHOW_ATTRIBUTES 
+			    | SHOW_ALL_ATTRIB_VALUES)) {
+				fprintf(stdout, "\n");
+				indent(2);
+				fprintf(stdout, "Parameters:\n");
+			}
+			dlist_for_each_data(attributes, cur,
+					struct sysfs_attribute) {
+				show_attribute(cur, (4));
+			}
+		}
+		attributes = sysfs_get_module_sections(mod);
+		if (attributes) {
+			if (show_options & (SHOW_ATTRIBUTES
+			    | SHOW_ALL_ATTRIB_VALUES)) {
+				fprintf(stdout, "\n");
+				indent(2);
+				fprintf(stdout, "Sections:\n");
+			}
+			dlist_for_each_data(attributes, cur,
+					struct sysfs_attribute) {
+				show_attribute(cur, (4));
+			}
+			fprintf(stdout, "\n");
+		}
 	}
-	sysfs_close_root_device(root);
-	
+
+	sysfs_close_module(mod);
 	return 0;
 }
-#endif
 
 /**
  * show_default_info: prints current buses, classes, and root devices
@@ -669,6 +623,17 @@ static int show_default_info(void)
 		sysfs_close_list(list);
 	}
 			
+	safestrcpy(subsys, sysfs_mnt_path);
+	safestrcat(subsys, "/");
+	safestrcat(subsys, SYSFS_MODULE_NAME);
+	list = sysfs_open_directory_list(subsys);
+	if (list) {
+		fprintf(stdout, "Supported sysfs modules:\n");
+		dlist_for_each_data(list, cur, char)
+			fprintf(stdout, "\t%s\n", cur);
+		sysfs_close_list(list);
+	}
+
 	return retval;
 }
 	
@@ -686,8 +651,8 @@ static int check_sysfs_is_mounted(void)
 /* MAIN */
 int main(int argc, char *argv[])
 {
-/*	char *show_bus = NULL;*/
 	char *show_class = NULL;
+	char *show_module = NULL;
 	char *show_root = NULL;
 	int retval = 0;
 	int opt;
@@ -714,11 +679,6 @@ int main(int argc, char *argv[])
 		case 'c':
 			show_class = optarg;	
 			break;
-#if 0
-		case 'C':
-			show_options |= SHOW_CHILDREN;
-			break;
-#endif
 		case 'd':
 			show_options |= SHOW_DEVICES;
 			break;
@@ -729,17 +689,14 @@ int main(int argc, char *argv[])
 			usage();
 			exit(0);
 			break;
+		case 'm':
+			show_module = optarg;
 		case 'p':
 			show_options |= SHOW_PATH;
 			break;
 		case 'P':
 			show_options |= SHOW_PARENT;
 			break;
-#if 0
-		case 'r':
-			show_root = optarg;
-			break;
-#endif
 		case 'v':
 			show_options |= SHOW_ALL_ATTRIB_VALUES;
 			break;
@@ -775,12 +732,12 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if ((!show_bus && !show_class && !show_root) && 
+	if ((!show_bus && !show_class && !show_module && !show_root) && 
 			(show_options & (SHOW_ATTRIBUTES | 
 				SHOW_ATTRIBUTE_VALUE | SHOW_DEVICES | 
 				SHOW_DRIVERS | SHOW_ALL_ATTRIB_VALUES))) {
 		fprintf(stderr, 
-			"Please specify a bus, class, or root device\n");
+			"Please specify a bus, class, module, or root device\n");
 		usage();
 		exit(1);
 	}
@@ -789,8 +746,6 @@ int main(int argc, char *argv[])
 		show_options |= SHOW_DEVICES;
 
 	if (show_bus) {
-	/*	if ((!(strcmp(show_bus, "pci"))) && 
-				(show_options & SHOW_DEVICES)) { */
 		if ((!(strcmp(show_bus, "pci"))))  {
 			pacc = (struct pci_access *)
 				calloc(1, sizeof(struct pci_access));
@@ -801,17 +756,14 @@ int main(int argc, char *argv[])
 	}
 	if (show_class)
 		retval = show_sysfs_class(show_class);
-#if 0
-	if (show_root)
-		retval = show_sysfs_root(show_root);
-#endif
 
-	if (!show_bus && !show_class && !show_root) 
+	if (show_module)
+		retval = show_sysfs_module(show_module);
+
+	if (!show_bus && !show_class && !show_module && !show_root) 
 		retval = show_default_info();
 
 	if (show_bus) {
-		/*if ((!(strcmp(show_bus, "pci"))) &&
-				(show_options & SHOW_DEVICES)) { */
 		if ((!(strcmp(show_bus, "pci"))))  {
 			pci_free_name_list(pacc);
 			free (pacc);
