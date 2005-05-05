@@ -58,7 +58,7 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libsysfs_la_LIBADD =
 am_libsysfs_la_OBJECTS = libsysfs_la-sysfs_utils.lo \
-	libsysfs_la-sysfs_dir.lo libsysfs_la-sysfs_class.lo \
+	libsysfs_la-sysfs_attr.lo libsysfs_la-sysfs_class.lo \
 	libsysfs_la-dlist.lo libsysfs_la-sysfs_device.lo \
 	libsysfs_la-sysfs_driver.lo libsysfs_la-sysfs_bus.lo \
 	libsysfs_la-sysfs_module.lo
@@ -176,7 +176,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 lib_LTLIBRARIES = libsysfs.la
-libsysfs_la_SOURCES = sysfs_utils.c sysfs_dir.c sysfs_class.c dlist.c \
+libsysfs_la_SOURCES = sysfs_utils.c sysfs_attr.c sysfs_class.c dlist.c \
       sysfs_device.c sysfs_driver.c sysfs_bus.c sysfs_module.c sysfs.h
 
 INCLUDES = -I../include
@@ -252,10 +252,10 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-dlist.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_attr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_bus.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_class.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_device.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_dir.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_driver.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsysfs_la-sysfs_utils.Plo@am__quote@
@@ -288,12 +288,12 @@ libsysfs_la-sysfs_utils.lo: sysfs_utils.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_utils.lo `test -f 'sysfs_utils.c' || echo '$(srcdir)/'`sysfs_utils.c
 
-libsysfs_la-sysfs_dir.lo: sysfs_dir.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile --tag=CC $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -MT libsysfs_la-sysfs_dir.lo -MD -MP -MF "$(DEPDIR)/libsysfs_la-sysfs_dir.Tpo" -c -o libsysfs_la-sysfs_dir.lo `test -f 'sysfs_dir.c' || echo '$(srcdir)/'`sysfs_dir.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libsysfs_la-sysfs_dir.Tpo" "$(DEPDIR)/libsysfs_la-sysfs_dir.Plo"; else rm -f "$(DEPDIR)/libsysfs_la-sysfs_dir.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sysfs_dir.c' object='libsysfs_la-sysfs_dir.lo' libtool=yes @AMDEPBACKSLASH@
+libsysfs_la-sysfs_attr.lo: sysfs_attr.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile --tag=CC $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -MT libsysfs_la-sysfs_attr.lo -MD -MP -MF "$(DEPDIR)/libsysfs_la-sysfs_attr.Tpo" -c -o libsysfs_la-sysfs_attr.lo `test -f 'sysfs_attr.c' || echo '$(srcdir)/'`sysfs_attr.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libsysfs_la-sysfs_attr.Tpo" "$(DEPDIR)/libsysfs_la-sysfs_attr.Plo"; else rm -f "$(DEPDIR)/libsysfs_la-sysfs_attr.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sysfs_attr.c' object='libsysfs_la-sysfs_attr.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_dir.lo `test -f 'sysfs_dir.c' || echo '$(srcdir)/'`sysfs_dir.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -c -o libsysfs_la-sysfs_attr.lo `test -f 'sysfs_attr.c' || echo '$(srcdir)/'`sysfs_attr.c
 
 libsysfs_la-sysfs_class.lo: sysfs_class.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile --tag=CC $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsysfs_la_CFLAGS) $(CFLAGS) -MT libsysfs_la-sysfs_class.lo -MD -MP -MF "$(DEPDIR)/libsysfs_la-sysfs_class.Tpo" -c -o libsysfs_la-sysfs_class.lo `test -f 'sysfs_class.c' || echo '$(srcdir)/'`sysfs_class.c; \
