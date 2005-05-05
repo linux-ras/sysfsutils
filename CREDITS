@@ -33,3 +33,9 @@ have made contributions:
 		- Supplied patch to fix sysfs_get_classdir_attr when
 			the directory vanishes from under us.
 		- Updates for building with udev and klibc.
+	o Dominik Brodowski <linux@dominikbrodowski.net>
+		- Fix feature in sysfs_write_attribute(), will now
+			write new value to attribute if attribute
+			is a show method and previously had nothing
+			to be read.
+			

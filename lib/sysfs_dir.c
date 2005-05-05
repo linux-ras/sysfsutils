@@ -222,7 +222,8 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 			dprintf("Error reading attribute\n");
 			return -1;
 		}
-		if ((strncmp(sysattr->value, new_value, sysattr->len)) == 0) {
+		if ((strncmp(sysattr->value, new_value, sysattr->len)) == 0 &&
+				(len == sysattr->len)) {
 			dprintf("Attr %s already has the requested value %s\n",
 					sysattr->name, new_value);
 			return 0;	
@@ -480,7 +481,6 @@ struct dlist *get_attributes_list(struct dlist *alist, const char *path)
 {
 	DIR *dir = NULL;
 	struct dirent *dirent = NULL;
-	struct sysfs_attribute *attr = NULL;
 	char file_path[SYSFS_PATH_MAX];
 
 	if (!path) {
