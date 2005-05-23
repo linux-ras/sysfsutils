@@ -608,7 +608,7 @@ struct sysfs_device *sysfs_open_device(const char *bus,	const char *bus_id)
  */
 struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev)
 {
-	char ppath[SYSFS_PATH_MAX], *tmp = NULL;
+	char ppath[SYSFS_PATH_MAX], dpath[SYSFS_PATH_MAX], *tmp = NULL;
 
 	if (dev == NULL) {
 		errno = EINVAL;
@@ -619,6 +619,7 @@ struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev)
 		return (dev->parent);
 
 	memset(ppath, 0, SYSFS_PATH_MAX);
+	memset(dpath, 0, SYSFS_PATH_MAX);
 	safestrcpy(ppath, dev->path);
 	tmp = strrchr(ppath, '/');
 	if (tmp == NULL) {
@@ -634,17 +635,20 @@ struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev)
 		}
 	}
 	*tmp = '\0';
-	
-	/*
-	 * All "devices" have the "detach_state" attribute - validate here
-	 */
-	safestrcat(ppath, "/detach_state");
-	if ((sysfs_path_is_file(ppath)) != 0) {
+
+	/* Make sure we are not at the top of the device tree */
+	if (sysfs_get_mnt_path(dpath, SYSFS_PATH_MAX) != 0) {
+		dprintf("Sysfs not supported on this system\n");
+		return NULL;
+	}
+	safestrcat(dpath, "/");
+	safestrcat(dpath, SYSFS_DEVICES_NAME);
+
+	if (strcmp(dpath, ppath) == 0) {
 		dprintf("Device at %s does not have a parent\n", dev->path);
 		return NULL;
 	}
-	tmp = strrchr(ppath, '/');
-	*tmp = '\0';
+
 	dev->parent = sysfs_open_device_path(ppath);
 	if (dev->parent == NULL) {
 		dprintf("Error opening device %s's parent at %s\n", 

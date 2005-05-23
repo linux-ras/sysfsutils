@@ -1,4 +1,8 @@
 
+05/18/2005 - Daniel Stekloff <dsteklof@us.ibm.com>
+		* Remove dependency on "detach_state" attribute
+			while looking up a device's parent
+
 02/21/2005 - Dominik Brodowski <linux@dominikbrodowski.net>
 		* Fix sysfs_write_attribute() to check if the attribute
 			already has the value to be written
