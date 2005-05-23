@@ -52,9 +52,9 @@ static struct nl_entry *nl_lookup(struct pci_access *a, int num, int cat, int id
     return NULL;
   h = nl_calc_hash(cat, id1, id2, id3, id4);
   n = a->nl_hash[h];
-  while (n && (n->id1 != id1 || n->id2 != id2 || n->id3 != id3 || n->id4 != id4 || n->cat != cat)) 
+  while (n && (n->id1 != id1 || n->id2 != id2 || n->id3 != id3 || n->id4 != id4 || n->cat != cat))
 	 n = n->next;
-  
+
   return n;
 }
 
@@ -132,7 +132,7 @@ parse_name_list(struct pci_access *a)
 	  id2 = id3 = id4 = 0;
 	  q += 4;
 	}
-      else if (q == r+1) 
+      else if (q == r+1)
 	switch (cat)
 	  {
 	  case NL_VENDOR:
@@ -222,7 +222,7 @@ pci_free_name_list(struct pci_access *a)
 {
   int i = 0;
   struct nl_entry *n = NULL, *temp = NULL;
-	
+
   free(a->nl_list);
   a->nl_list = NULL;
   if (a->nl_hash != NULL) {
@@ -351,8 +351,8 @@ pci_lookup_name(struct pci_access *a, unsigned char *buf, int size, int flags, u
     default:
       return "<pci_lookup_name: invalid request>";
     }
-    if (res == size) 
+    if (res == size)
       return "<too-large>";
     else
-      return buf; 
+      return buf;
 }

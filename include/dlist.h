@@ -22,7 +22,7 @@
 #define _DLIST_H_
 
 /* Double linked list header.
-   
+
 * navigate your list with DLIST_PREV and DLIST_NEXT.  These are macros
 * so function call overhead is minimized.
 
@@ -30,7 +30,7 @@
 
 * You allocate the data and give dlist the pointer.  If your data is
 * complex set the dlist->del_func to a an appropriate delete using
-* dlist_new_with_delete.  Your delete function must match 
+* dlist_new_with_delete.  Your delete function must match
 (void * )(del(void *)
 *Otherwise dlist will just use free.
 
@@ -104,7 +104,7 @@ void _dlist_swap(struct dlist *list, struct dl_node *a, struct dl_node *b);
 void dlist_transform(struct dlist *list, void (*node_operation)(void *));
 
 
-/* 
+/*
  * _dlist_remove is for internal use only
  * _dlist_mark_move is for internal use only
  */

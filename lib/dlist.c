@@ -42,7 +42,7 @@ inline void *dlist_mark(Dlist *list)
     return(NULL);
 }
 
-/* 
+/*
  * Set marker to start.
  */
 
@@ -51,7 +51,7 @@ inline void dlist_start(Dlist *list)
   list->marker=list->head;
 }
 
-/* 
+/*
  * Set marker to end.
  */
 
@@ -64,10 +64,10 @@ inline void dlist_end(Dlist *list)
  * quickie inline to consolidate the marker movement logic
  * in one place
  *
- * when direction true it moves marker after 
+ * when direction true it moves marker after
  * when direction false it moves marker before.
  * return pointer to data at new marker
- * if nowhere to move the marker in desired direction return null 
+ * if nowhere to move the marker in desired direction return null
  */
 inline void *_dlist_mark_move(Dlist *list,int direction)
 {
@@ -131,14 +131,14 @@ Dlist *dlist_new_with_delete(size_t datasize,void (*del_func)(void*))
  * remove marker node from list
  * call data_delete function on data if registered.
  * otherwise call free.
- * when direction true it moves marker after 
+ * when direction true it moves marker after
  * when direction false it moves marker before.
  * free marker node
  * return nothing.
  */
 void dlist_delete(Dlist *list,int direction)
 {
-  if((list->marker != list->head)&&(list->marker!=NULL)) 
+  if((list->marker != list->head)&&(list->marker!=NULL))
     {
       DL_node *corpse;
       corpse=list->marker;
@@ -220,7 +220,7 @@ void *_dlist_insert_dlnode(struct dlist *list,struct dl_node *new_node,int direc
   if(list->marker==NULL) //in case the marker ends up unset
     list->marker=list->head;
   list->count++;
-  if(list->head->next==NULL) 
+  if(list->head->next==NULL)
     {
       list->head->next=list->head->prev=new_node;
       new_node->prev=list->head;
@@ -246,10 +246,10 @@ void *_dlist_insert_dlnode(struct dlist *list,struct dl_node *new_node,int direc
 
 
 
-/* 
+/*
  * Remove DL_node from list without deallocating data.
  * if marker == killme .
- *  when direction true it moves marker after 
+ *  when direction true it moves marker after
  *  when direction false it moves marker before.
  * to previous if there is no next.
  */
@@ -263,7 +263,7 @@ void *_dlist_remove(Dlist *list,DL_node *killme,int direction)
 	_dlist_mark_move(list,direction);
       if(killme ==list->head->next)
 	list->head->next=killme->next;
-      if(killme==list->head->prev)  
+      if(killme==list->head->prev)
 	list->head->prev=killme->prev;
       // remove from list
       if(killme->prev !=NULL)
@@ -278,10 +278,10 @@ void *_dlist_remove(Dlist *list,DL_node *killme,int direction)
     return (NULL);
 }
 
-/* 
+/*
  * move dl_node from source to dest
  * if marker == target .
- *  when direction true it moves marker after 
+ *  when direction true it moves marker after
  *  when direction false it moves marker before.
  * to previous if there is no next.
  */
@@ -301,7 +301,7 @@ void dlist_move(struct dlist *source, struct dlist *dest, struct dl_node *target
 	    _dlist_mark_move(source,direction);
 	  if(target ==source->head->next)
 	    source->head->next=target->next;
-	  if(target==source->head->prev)  
+	  if(target==source->head->prev)
 	    source->head->prev=target->prev;
 	  // remove from list
 	  if(source->count==1)
@@ -347,7 +347,7 @@ void dlist_unshift(Dlist *list,void *data)
   dlist_insert(list,data,0);
 }
 
-void dlist_unshift_sorted(Dlist *list, void *data, 
+void dlist_unshift_sorted(Dlist *list, void *data,
 			int (*sorter)(void *new_elem, void *old_elem))
 {
 	if (list->count == 0)
@@ -358,7 +358,7 @@ void dlist_unshift_sorted(Dlist *list, void *data,
 	}
 }
 
-/* 
+/*
  * Remove end node from list.
  * Return pointer to data in removed node.
  * Null if no nodes.
@@ -369,7 +369,7 @@ void *dlist_pop(Dlist *list)
   return(_dlist_remove(list,list->head->prev,0));
 }
 
-/* 
+/*
  * Remove start node from list.
  * Return pointer to data in removed node.
  * Null if no nodes.
@@ -381,7 +381,7 @@ void *dlist_shift(Dlist *list)
 }
 
 
-/* 
+/*
  * destroy the list freeing all memory
  */
 
@@ -462,7 +462,7 @@ int _dlist_merge(struct dlist *listsource, struct dlist *listdest, unsigned int 
 	  l1count++;
 	}
       // so now we have two lists to merge
-      
+
       if(l2head==listsource->head)
 	{// l2count
 	  l2count=0;
@@ -529,7 +529,7 @@ int _dlist_merge(struct dlist *listsource, struct dlist *listdest, unsigned int 
 	  else
 	    { //nothing left and this should be unreachable
 	    }
-	}  
+	}
     }
   return(mergecount);
 }
@@ -596,7 +596,7 @@ void dlist_sort_custom(struct dlist *list, int (*compare)(void *, void *))
     }
   else
     {// no need to copy
-      
+
     }
 
   dlist_destroy(templist);
@@ -615,6 +615,6 @@ void _dlist_swap(struct dlist *list, struct dl_node *a, struct dl_node *b)
   void *swap=a->data;
   a->data=b->data;
   b->data=swap;
-  
+
 }
-  
+

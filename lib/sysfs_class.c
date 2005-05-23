@@ -72,7 +72,7 @@ void sysfs_close_class(struct sysfs_class *cls)
 	if (cls != NULL) {
 		if (cls->directory != NULL)
 			sysfs_close_directory(cls->directory);
-		if (cls->devices != NULL) 
+		if (cls->devices != NULL)
 			dlist_destroy(cls->devices);
 		free(cls);
 	}
@@ -97,7 +97,7 @@ static struct sysfs_class *alloc_class(void)
 	return (struct sysfs_class *)calloc(1, sizeof(struct sysfs_class));
 }
 
-/** 
+/**
  * set_classdev_classname: Grabs classname from path
  * @cdev: class device to set
  * Returns nothing
@@ -183,24 +183,24 @@ struct dlist *sysfs_get_class_devices(struct sysfs_class *cls)
 		return NULL;
 	}
 
-	if (cls->devices != NULL) 
+	if (cls->devices != NULL)
 		return cls->devices;
 
 	if (cls->directory == NULL) {
 		cls->directory = sysfs_open_directory(cls->path);
-		if (cls->directory == NULL) 
+		if (cls->directory == NULL)
 			return NULL;
 	}
 
-	if ((sysfs_read_dir_subdirs(cls->directory)) != 0) 
+	if ((sysfs_read_dir_subdirs(cls->directory)) != 0)
 		return NULL;
 
 	if (cls->directory->subdirs != NULL) {
-		dlist_for_each_data(cls->directory->subdirs, cur, 
+		dlist_for_each_data(cls->directory->subdirs, cur,
 						struct sysfs_directory) {
 			dev = sysfs_open_class_device_path(cur->path);
 			if (dev == NULL) {
-				dprintf("Error opening device at %s\n",	
+				dprintf("Error opening device at %s\n",
 								cur->path);
 				continue;
 			}
@@ -234,7 +234,7 @@ struct sysfs_class *sysfs_open_class(const char *name)
                 return NULL;
         }
 
-	/* 
+	/*
 	 * We shall now treat "block" also as a class. Hence, check here
 	 * if "name" is "block" and proceed accordingly
 	 */
@@ -257,14 +257,14 @@ struct sysfs_class *sysfs_open_class(const char *name)
 		dprintf("calloc failed\n");
 		return NULL;
 	}
-	safestrcpy(cls->name, name);	
+	safestrcpy(cls->name, name);
 	safestrcpy(cls->path, classpath);
 	if ((sysfs_remove_trailing_slash(cls->path)) != 0) {
 		dprintf("Invalid path to class device %s\n", cls->path);
 		sysfs_close_class(cls);
 		return NULL;
 	}
-	
+
 	return cls;
 }
 
@@ -272,7 +272,7 @@ struct sysfs_class *sysfs_open_class(const char *name)
  * sysfs_get_class_device: Get specific class device using the device's id
  * @class: class to find device on
  * @name: class name of the device
- */ 
+ */
 struct sysfs_class_device *sysfs_get_class_device(struct sysfs_class *cls,
 					char *name)
 {
@@ -283,7 +283,7 @@ struct sysfs_class_device *sysfs_get_class_device(struct sysfs_class *cls,
 
 	if (cls->devices == NULL) {
 		cls->devices = sysfs_get_class_devices(cls);
-		if (cls->devices == NULL) 
+		if (cls->devices == NULL)
 			return NULL;
 	}
 	return (struct sysfs_class_device *)dlist_find_custom(cls->devices,
@@ -296,13 +296,13 @@ struct sysfs_class_device *sysfs_get_class_device(struct sysfs_class *cls,
  * @clsdev: class device whose sysfs_device is required
  * Returns sysfs_device on success, NULL on error or if device is not
  * implemented
- */ 
+ */
 struct sysfs_device *sysfs_get_classdev_device
 			(struct sysfs_class_device *clsdev)
 {
 	struct sysfs_link *devlink = NULL;
 	char devpath[SYSFS_PATH_MAX];
-	
+
 	if (clsdev == NULL) {
 		errno = EINVAL;
 		return NULL;
@@ -316,7 +316,7 @@ struct sysfs_device *sysfs_get_classdev_device
 		}
 		return NULL;
 	}
-	
+
 	if (clsdev->directory == NULL) {
 		clsdev->directory = sysfs_open_directory(clsdev->path);
 		if (clsdev->directory == NULL)
@@ -334,10 +334,10 @@ struct sysfs_device *sysfs_get_classdev_device
 
 	if (clsdev->sysdevice != NULL) {
 		if (!strncmp(devlink->target, clsdev->sysdevice->path,
-						SYSFS_PATH_MAX)) 
+						SYSFS_PATH_MAX))
 			/* sysdevice hasn't changed */
 			return (clsdev->sysdevice);
-		else 
+		else
 			/* come here only if the device link for has changed */
 			sysfs_close_device(clsdev->sysdevice);
 	}
@@ -348,20 +348,20 @@ struct sysfs_device *sysfs_get_classdev_device
 
 	return (clsdev->sysdevice);
 }
-				
+
 /**
  * sysfs_get_classdev_driver: returns the sysfs_driver corresponding to
  * 		sysfs_class_device, if present
  * @clsdev: class device whose sysfs_device is required
  * Returns sysfs_driver on success, NULL on error or if driver is not
  * implemented
- */ 
+ */
 struct sysfs_driver *sysfs_get_classdev_driver
 			(struct sysfs_class_device *clsdev)
 {
 	struct sysfs_link *drvlink = NULL;
 	char drvpath[SYSFS_PATH_MAX];
-	
+
 	if (clsdev == NULL) {
 		errno = EINVAL;
 		return NULL;
@@ -375,7 +375,7 @@ struct sysfs_driver *sysfs_get_classdev_driver
 		}
 		return NULL;
 	}
-	 
+
 	if (clsdev->directory == NULL) {
 		clsdev->directory = sysfs_open_directory(clsdev->path);
 		if (clsdev->directory == NULL)
@@ -399,7 +399,7 @@ struct sysfs_driver *sysfs_get_classdev_driver
 			/* come here only if the device link for has changed */
 			sysfs_close_driver(clsdev->driver);
 	}
-		
+
 	clsdev->driver = sysfs_open_driver_path(drvlink->target);
 	if (clsdev->driver == NULL)
 		return NULL;
@@ -407,8 +407,8 @@ struct sysfs_driver *sysfs_get_classdev_driver
 	return (clsdev->driver);
 }
 
-/** 
- * get_blockdev_parent: Get the parent class device for a "block" subsystem 
+/**
+ * get_blockdev_parent: Get the parent class device for a "block" subsystem
  * 		device if present
  * @clsdev: block subsystem class device whose parent needs to be found
  * Returns 0 on success and 1 on error
@@ -435,16 +435,16 @@ static int get_blockdev_parent(struct sysfs_class_device *clsdev)
                 dprintf("%s not a partition\n", clsdev->name);
                 return 1;
         }
-		      
+
       	c = strchr(c, '/');
 	if (c == NULL)
 		goto errout;
 
 	*c = '\0';
-					
+
 	clsdev->parent = sysfs_open_class_device_path(parent_path);
 	if (clsdev->parent == NULL) {
-		dprintf("Error opening the parent class device at %s\n", 
+		dprintf("Error opening the parent class device at %s\n",
 								parent_path);
 		return 1;
 	}
@@ -456,13 +456,13 @@ errout:
 }
 
 /**
- * sysfs_get_classdev_parent: Retrieves the parent of a class device. 
+ * sysfs_get_classdev_parent: Retrieves the parent of a class device.
  * 	eg., when working with hda1, this function can be used to retrieve the
  * 		sysfs_class_device for hda
- * 		
+ *
  * @clsdev: class device whose parent details are required.
  * Returns sysfs_class_device of the parent on success, NULL on failure
- */ 
+ */
 struct sysfs_class_device *sysfs_get_classdev_parent
 				(struct sysfs_class_device *clsdev)
 {
@@ -472,16 +472,16 @@ struct sysfs_class_device *sysfs_get_classdev_parent
 	}
 	if (clsdev->parent != NULL)
 		return (clsdev->parent);
-	
-	/* 
+
+	/*
 	 * As of now, only block devices have a parent child heirarchy in sysfs
 	 * We do not know, if, in the future, more classes will have a similar
 	 * structure. Hence, we now call a specialized function for block and
 	 * later we can add support functions for other subsystems as required.
-	 */ 
-	if (!(strncmp(clsdev->classname, SYSFS_BLOCK_NAME, 
+	 */
+	if (!(strncmp(clsdev->classname, SYSFS_BLOCK_NAME,
 					sizeof(SYSFS_BLOCK_NAME)))) {
-		if ((get_blockdev_parent(clsdev)) == 0) 
+		if ((get_blockdev_parent(clsdev)) == 0)
 			return (clsdev->parent);
 	}
 	return NULL;
@@ -496,7 +496,7 @@ struct sysfs_class_device *sysfs_get_classdev_parent
  * @psize: size of "path"
  * Returns 0 on SUCCESS or -1 on error
  */
-static int get_classdev_path(const char *classname, const char *clsdev, 
+static int get_classdev_path(const char *classname, const char *clsdev,
 		char *path, size_t len)
 {
 	if (classname == NULL || clsdev == NULL || path == NULL) {
@@ -527,7 +527,7 @@ static int get_classdev_path(const char *classname, const char *clsdev,
  * Class_device must be closed using sysfs_close_class_device
  * @classname: Class to search
  * @name: name of the class_device
- * 
+ *
  * NOTE:
  * 	Call sysfs_close_class_device() to close the class device
  */
@@ -541,15 +541,15 @@ struct sysfs_class_device *sysfs_open_class_device
 		errno = EINVAL;
 		return NULL;
 	}
-	
+
 	memset(devpath, 0, SYSFS_PATH_MAX);
-	if ((get_classdev_path(classname, name, devpath, 
+	if ((get_classdev_path(classname, name, devpath,
 					SYSFS_PATH_MAX)) != 0) {
 		dprintf("Error getting to device %s on class %s\n",
 							name, classname);
 		return NULL;
 	}
-	
+
 	cdev = sysfs_open_class_device_path(devpath);
 	if (cdev == NULL) {
 		dprintf("Error getting class device %s from class %s\n",
@@ -572,11 +572,11 @@ struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev)
 
 	if (cdev->directory == NULL) {
 		cdev->directory = sysfs_open_directory(cdev->path);
-		if (cdev->directory == NULL) 
+		if (cdev->directory == NULL)
 			return NULL;
 	}
 	if (cdev->directory->attributes == NULL) {
-		if ((sysfs_read_dir_attributes(cdev->directory)) != 0) 
+		if ((sysfs_read_dir_attributes(cdev->directory)) != 0)
 			return NULL;
 	}
 	return (cdev->directory->attributes);
@@ -622,16 +622,16 @@ struct sysfs_attribute *sysfs_get_classdev_attr
 	struct sysfs_attribute *cur = NULL;
 	struct sysfs_directory *sdir = NULL;
 	struct dlist *attrlist = NULL;
-	
+
 	if (clsdev == NULL || name == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
-	
-	/* 
-	 * First, see if it's in the current directory. Then look at 
+
+	/*
+	 * First, see if it's in the current directory. Then look at
 	 * subdirs since class devices can have subdirs of attributes.
-	 */ 
+	 */
 	attrlist = sysfs_get_classdev_attributes(clsdev);
 	if (attrlist != NULL) {
 		cur = sysfs_get_directory_attribute(clsdev->directory,
@@ -643,15 +643,15 @@ struct sysfs_attribute *sysfs_get_classdev_attr
 	if (clsdev->directory == NULL)
 		return NULL;
 
-	if (clsdev->directory->subdirs == NULL) 
+	if (clsdev->directory->subdirs == NULL)
 		if ((sysfs_read_dir_subdirs(clsdev->directory)) != 0 ||
-		    clsdev->directory->subdirs == NULL) 
+		    clsdev->directory->subdirs == NULL)
 			return NULL;
 
 	if (clsdev->directory->subdirs != NULL) {
 		dlist_for_each_data(clsdev->directory->subdirs, sdir,
 						struct sysfs_directory) {
-			if ((sysfs_path_is_dir(sdir->path)) != 0) 
+			if ((sysfs_path_is_dir(sdir->path)) != 0)
 				continue;
 			cur = sysfs_get_directory_attribute(sdir,
 							(char *)name);
@@ -668,7 +668,7 @@ struct sysfs_attribute *sysfs_get_classdev_attr
  * @dev: class device name for which the attribute has to be read
  * @attrib: attribute to read
  * Returns sysfs_attribute * on SUCCESS and NULL on error
- * 
+ *
  * NOTE:
  * 	A call to sysfs_close_attribute() is required to close the
  * 	attribute returned and to free memory

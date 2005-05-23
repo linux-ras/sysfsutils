@@ -42,12 +42,12 @@ int main(int argc, char *argv[])
 
 	attr = sysfs_open_classdev_attr(argv[1], argv[2], argv[3]);
 	if (attr == NULL) {
-		fprintf(stdout, "Attribute %s not defined for classdev %s\n", 
+		fprintf(stdout, "Attribute %s not defined for classdev %s\n",
 					argv[3], argv[2]);
 		return 1;
 	}
 
-	fprintf(stdout, "Attribute %s presently has a value %s\n", 
+	fprintf(stdout, "Attribute %s presently has a value %s\n",
 					attr->name, attr->value);
 	if ((sysfs_write_attribute(attr, argv[4], strlen(argv[4]))) != 0) {
 		fprintf(stdout, "Error writing attribute value\n");

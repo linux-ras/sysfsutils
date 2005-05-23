@@ -42,8 +42,8 @@
  * extern struct dlist *sysfs_refresh_device_attributes
  * 					(struct sysfs_device *device);
  * extern struct sysfs_attribute *sysfs_open_device_attr
- * 				(const char *bus, 
- * 				const char *bus_id, 
+ * 				(const char *bus,
+ * 				const char *bus_id,
  * 				const char *attrib);
  *
  ******************************************************************************
@@ -57,7 +57,7 @@
  *
  * flag:
  * 	0:	root -> valid
- * 	1:	root -> NULL 
+ * 	1:	root -> NULL
  */
 int test_sysfs_close_root_device(int flag)
 {
@@ -79,15 +79,15 @@ int test_sysfs_close_root_device(int flag)
 		break;
 	default:
 		return -1;
-		
+
 	}
 	sysfs_close_root_device(root);
 
 	dbg_print("%s: returns void\n", __FUNCTION__);
 	return 0;
 }
-	
-/** 
+
+/**
  * extern struct sysfs_root_device *sysfs_open_root_device
  * 						(const char *name);
  *
@@ -137,7 +137,7 @@ int test_sysfs_open_root_device(int flag)
 			if (errno == EINVAL)
 				dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
-			else 
+			else
 				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		}
@@ -177,7 +177,7 @@ int test_sysfs_get_root_devices(int flag)
 		break;
 	default:
 		return -1;
-		
+
 	}
 	list = sysfs_get_root_devices(root);
 
@@ -185,7 +185,7 @@ int test_sysfs_get_root_devices(int flag)
 	case 0:
 		if (list == NULL) {
 			if (errno == 0)
-				dbg_print("%s: Root device %s does not have any devices under it\n", 
+				dbg_print("%s: Root device %s does not have any devices under it\n",
 						__FUNCTION__, root_name);
 			else
 				dbg_print("%s: FAILED with flag = %d errno = %d\n",
@@ -201,24 +201,24 @@ int test_sysfs_get_root_devices(int flag)
 		if (list != NULL)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else 
+		else
 			if (errno == EINVAL)
 				dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
-			else 
+			else
 				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 	default:
 		break;
 	}
-	
+
 	if (root != NULL)
 		sysfs_close_root_device(root);
-	
+
 	return 0;
 }
 
-/** 
+/**
  * extern void sysfs_close_device(struct sysfs_device *dev);
  *
  * flag:
@@ -255,7 +255,7 @@ int test_sysfs_close_device(int flag)
 /**
  * extern struct sysfs_device *sysfs_open_device
  * 		(const char *bus, const char *bus_id);
- * 
+ *
  * flag:
  * 	0:	bus -> valid, bus_id -> valid
  * 	1:	bus -> valid, bus_id -> invalid
@@ -274,39 +274,39 @@ int test_sysfs_open_device(int flag)
 	char *bus_id = NULL;
 
 	switch (flag) {
-	case 0:	
+	case 0:
 		bus = val_bus_name;
 		bus_id = val_bus_id;
 		break;
-	case 1:	
+	case 1:
 		bus = val_bus_name;
 		bus_id = inval_name;
 		break;
-	case 2:	
+	case 2:
 		bus = val_bus_name;
 		bus_id = NULL;
 		break;
-	case 3:	
+	case 3:
 		bus = inval_name;
 		bus_id = val_bus_id;
 		break;
-	case 4:	
+	case 4:
 		bus = inval_name;
 		bus_id = inval_name;
 		break;
-	case 5:	
+	case 5:
 		bus = inval_name;
 		bus_id = NULL;
 		break;
-	case 6:	
+	case 6:
 		bus = NULL;
 		bus_id = val_bus_id;
 		break;
-	case 7:	
+	case 7:
 		bus = NULL;
 		bus_id = inval_name;
 		break;
-	case 8:	
+	case 8:
 		bus = NULL;
 		bus_id = NULL;
 		break;
@@ -314,7 +314,7 @@ int test_sysfs_open_device(int flag)
 		return -1;
 	}
 	dev = sysfs_open_device(bus, bus_id);
-	
+
 	switch (flag) {
 	case 0:
 		if (dev == NULL)
@@ -334,7 +334,7 @@ int test_sysfs_open_device(int flag)
 	case 6:
 	case 7:
 	case 8:
-		if (dev == NULL) 
+		if (dev == NULL)
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		else
@@ -342,7 +342,7 @@ int test_sysfs_open_device(int flag)
 						__FUNCTION__, flag, errno);
 		break;
 	}
-	
+
 	if (dev != NULL)
 		sysfs_close_device(dev);
 	return 0;
@@ -377,7 +377,7 @@ int test_sysfs_get_device_parent(int flag)
 		break;
 	default:
 		return -1;
-		
+
 	}
 	pdev = sysfs_get_device_parent(dev);
 
@@ -385,9 +385,9 @@ int test_sysfs_get_device_parent(int flag)
 	case 0:
 		if (pdev == NULL) {
 			if (errno == 0)
-				dbg_print("%s: Device at %s does not have a parent\n", 
+				dbg_print("%s: Device at %s does not have a parent\n",
 						__FUNCTION__, dev_path);
-			else 
+			else
 				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		} else {
@@ -413,7 +413,7 @@ int test_sysfs_get_device_parent(int flag)
 	return 0;
 }
 
-/** 
+/**
  * extern struct sysfs_device *sysfs_open_device_path
  * 					(const char *path);
  *
@@ -442,7 +442,7 @@ int test_sysfs_open_device_path(int flag)
 		return -1;
 	}
 	dev = sysfs_open_device_path(path);
-	
+
 	switch (flag) {
 	case 0:
 		if (dev == NULL)
@@ -457,7 +457,7 @@ int test_sysfs_open_device_path(int flag)
 		break;
 	case 1:
 	case 2:
-		if (dev == NULL) 
+		if (dev == NULL)
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		else
@@ -471,7 +471,7 @@ int test_sysfs_open_device_path(int flag)
 	return 0;
 }
 
-/** 
+/**
  * extern struct sysfs_attribute *sysfs_get_device_attr
  * 		(struct sysfs_device *dev, const char *name);
  *
@@ -491,7 +491,7 @@ int test_sysfs_get_device_attr(int flag)
 	struct sysfs_attribute *attr = NULL;
 
 	switch (flag) {
-	case 0:	
+	case 0:
 		path = val_dev_path;
 		dev = sysfs_open_device_path(path);
 		if (dev == NULL) {
@@ -503,11 +503,11 @@ int test_sysfs_get_device_attr(int flag)
 		break;
 	case 1:
 		dev = sysfs_open_device_path(path);
-		name = inval_name;	
+		name = inval_name;
 		break;
 	case 2:
 		dev = sysfs_open_device_path(path);
-		name = NULL;	
+		name = NULL;
 		break;
 	case 3:
 		dev = NULL;
@@ -515,11 +515,11 @@ int test_sysfs_get_device_attr(int flag)
 		break;
 	case 4:
 		dev = NULL;
-		name = inval_name;	
+		name = inval_name;
 		break;
 	case 5:
 		dev = NULL;
-		name = NULL;	
+		name = NULL;
 		break;
 	default:
 		return -1;
@@ -541,7 +541,7 @@ int test_sysfs_get_device_attr(int flag)
 			else
 				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-						
+
 		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
@@ -564,7 +564,7 @@ int test_sysfs_get_device_attr(int flag)
 			else
 				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		}	
+		}
 	default:
 		break;
 	}
@@ -574,7 +574,7 @@ int test_sysfs_get_device_attr(int flag)
 	return 0;
 }
 
-/** 
+/**
  * extern struct dlist *sysfs_get_device_attributes
  * 					(struct sysfs_device *device);
  *
@@ -626,7 +626,7 @@ int test_sysfs_get_device_attributes(int flag)
 		if (errno != EINVAL)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else 
+		else
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 	default:
@@ -640,7 +640,7 @@ int test_sysfs_get_device_attributes(int flag)
 /**
  * extern struct dlist *sysfs_refresh_device_attributes
  * 					(struct sysfs_device *device);
- * 
+ *
  * flag:
  * 	0:	device -> valid
  * 	1:	device -> NULL
@@ -704,7 +704,7 @@ int test_sysfs_refresh_device_attributes(int flag)
 			else
 				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		}	
+		}
 	default:
 		break;
 	}
@@ -715,8 +715,8 @@ int test_sysfs_refresh_device_attributes(int flag)
 
 /**
  * extern struct sysfs_attribute *sysfs_open_device_attr
- * 				(const char *bus, 
- * 				const char *bus_id, 
+ * 				(const char *bus,
+ * 				const char *bus_id,
  * 				const char *attrib);
  *
  * flag:
@@ -912,7 +912,7 @@ int  test_sysfs_open_device_attr(int flag)
 			else
 				dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-						
+
 		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
@@ -928,7 +928,7 @@ int  test_sysfs_open_device_attr(int flag)
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
-			
+
 	}
 	if (attr != NULL)
 		sysfs_close_attribute(attr);

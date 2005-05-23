@@ -22,7 +22,7 @@
 
 /**
  * Display routines for test functions
- */ 
+ */
 
 #include <test-defs.h>
 
@@ -37,14 +37,14 @@ static void remove_end_newline(char *value)
 void show_device(struct sysfs_device *device)
 {
 	if (device != NULL)
-		dbg_print("Device is \"%s\" at \"%s\"\n", 
+		dbg_print("Device is \"%s\" at \"%s\"\n",
 				device->name, device->path);
 }
 
 void show_driver(struct sysfs_driver *driver)
 {
 	if (driver != NULL)
-		dbg_print("Driver is \"%s\" at \"%s\"\n", 
+		dbg_print("Driver is \"%s\" at \"%s\"\n",
 				driver->name, driver->path);
 }
 
@@ -52,7 +52,7 @@ void show_device_list(struct dlist *devlist)
 {
 	if (devlist != NULL) {
 		struct sysfs_device *dev = NULL;
-		
+
 		dlist_for_each_data(devlist, dev, struct sysfs_device)
 			show_device(dev);
 	}
@@ -62,7 +62,7 @@ void show_driver_list(struct dlist *drvlist)
 {
 	if (drvlist != NULL) {
 		struct sysfs_driver *drv = NULL;
-		
+
 		dlist_for_each_data(drvlist, drv, struct sysfs_driver)
 			show_driver(drv);
 	}
@@ -71,7 +71,7 @@ void show_driver_list(struct dlist *drvlist)
 void show_root_device(struct sysfs_root_device *root)
 {
 	if (root != NULL)
-		dbg_print("Device is \"%s\" at \"%s\"\n", 
+		dbg_print("Device is \"%s\" at \"%s\"\n",
 				root->name, root->path);
 }
 
@@ -89,7 +89,7 @@ void show_attribute_list(struct dlist *attrlist)
 {
 	if (attrlist != NULL) {
 		struct sysfs_attribute *attr = NULL;
-		
+
 		dlist_for_each_data(attrlist, attr, struct sysfs_attribute)
 			show_attribute(attr);
 	}
@@ -97,7 +97,7 @@ void show_attribute_list(struct dlist *attrlist)
 
 void show_link(struct sysfs_link *ln)
 {
-	if (ln != NULL) 
+	if (ln != NULL)
 		dbg_print("Link at \"%s\" points to \"%s\"\n",
 				ln->path, ln->target);
 }
@@ -106,7 +106,7 @@ void show_links_list(struct dlist *linklist)
 {
 	if (linklist != NULL) {
 		struct sysfs_link *ln = NULL;
-		
+
 		dlist_for_each_data(linklist, ln, struct sysfs_link)
 			show_link(ln);
 	}
@@ -133,7 +133,7 @@ void show_directory(struct sysfs_directory *dir)
 {
 	if (dir != NULL) {
 		show_dir(dir);
-		
+
 		if (dir->attributes)
 			show_attribute_list(dir->attributes);
 		if (dir->links)
@@ -157,7 +157,7 @@ void show_dir_tree(struct sysfs_directory *dir)
 		}
 	}
 }
-		
+
 void show_class_device(struct sysfs_class_device *dev)
 {
 	if (dev != NULL)
@@ -169,7 +169,7 @@ void show_class_device_list(struct dlist *devlist)
 {
 	if (devlist != NULL) {
 		struct sysfs_class_device *dev = NULL;
-		
+
 		dlist_for_each_data(devlist, dev, struct sysfs_class_device)
 			show_class_device(dev);
 	}
@@ -179,7 +179,7 @@ void show_list(struct dlist *list)
 {
 	if (list != NULL) {
 		char *name = NULL;
-		
+
 		dlist_for_each_data(list, name, char)
 			dbg_print("%s\n", name);
 	}

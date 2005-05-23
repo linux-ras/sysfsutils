@@ -68,7 +68,7 @@ int main (int argc,char *argv[])
 	s1=simple_maker(1,"one");
 	s2=simple_maker(2,"two");
 	s3=simple_maker(3,"three");
-      if((list=dlist_new(sizeof(Simple)))==NULL)	
+      if((list=dlist_new(sizeof(Simple)))==NULL)
 	{
 	   fprintf(stderr,"ERR dlist_new fail\n");
 	  return(2);

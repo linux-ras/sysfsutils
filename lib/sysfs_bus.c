@@ -44,7 +44,7 @@ static int bus_device_id_equal(void *a, void *b)
 	if (a == NULL || b == NULL)
 		return 0;
 
-	if (strcmp(((char *)a), ((struct sysfs_device *)b)->bus_id) 
+	if (strcmp(((char *)a), ((struct sysfs_device *)b)->bus_id)
 	    == 0)
 		return 1;
 	return 0;
@@ -113,7 +113,7 @@ struct dlist *sysfs_get_bus_devices(struct sysfs_bus *bus)
 	safestrcat(path, "/");
 	safestrcat(path, SYSFS_DEVICES_NAME);
 	devdir = sysfs_open_directory(path);
-	if (devdir == NULL) 
+	if (devdir == NULL)
 		return NULL;
 
 	if (sysfs_read_dir_links(devdir) != 0) {
@@ -125,13 +125,13 @@ struct dlist *sysfs_get_bus_devices(struct sysfs_bus *bus)
 		dlist_for_each_data(devdir->links, curl, struct sysfs_link) {
 			bdev = sysfs_open_device_path(curl->target);
 			if (bdev == NULL) {
-				dprintf("Error opening device at %s\n",	
+				dprintf("Error opening device at %s\n",
 								curl->target);
 				continue;
 			}
 			if (bus->devices == NULL)
 				bus->devices = dlist_new_with_delete
-					(sizeof(struct sysfs_device), 
+					(sizeof(struct sysfs_device),
 					 		sysfs_close_dev);
 			dlist_unshift_sorted(bus->devices, bdev, sort_list);
 		}
@@ -162,7 +162,7 @@ struct dlist *sysfs_get_bus_drivers(struct sysfs_bus *bus)
 	safestrcat(path, "/");
 	safestrcat(path, SYSFS_DRIVERS_NAME);
 	drvdir = sysfs_open_directory(path);
-	if (drvdir == NULL) 
+	if (drvdir == NULL)
 		return NULL;
 
 	if (sysfs_read_dir_subdirs(drvdir) != 0) {
@@ -170,17 +170,17 @@ struct dlist *sysfs_get_bus_drivers(struct sysfs_bus *bus)
 		return NULL;
 	}
 	if (drvdir->subdirs != NULL) {
-		dlist_for_each_data(drvdir->subdirs, cursub, 
+		dlist_for_each_data(drvdir->subdirs, cursub,
 						struct sysfs_directory) {
 			driver = sysfs_open_driver_path(cursub->path);
 			if (driver == NULL) {
-				dprintf("Error opening driver at %s\n",	
+				dprintf("Error opening driver at %s\n",
 								cursub->path);
 				continue;
 			}
 			if (bus->drivers == NULL)
 				bus->drivers = dlist_new_with_delete
-					(sizeof(struct sysfs_driver), 
+					(sizeof(struct sysfs_driver),
 					 		sysfs_close_drv);
 			dlist_unshift_sorted(bus->drivers, driver, sort_list);
 		}
@@ -222,7 +222,7 @@ struct sysfs_bus *sysfs_open_bus(const char *name)
 		dprintf("calloc failed\n");
 		return NULL;
 	}
-	safestrcpy(bus->name, name);	
+	safestrcpy(bus->name, name);
 	safestrcpy(bus->path, buspath);
 	if ((sysfs_remove_trailing_slash(bus->path)) != 0) {
 		dprintf("Incorrect path to bus %s\n", bus->path);
@@ -251,7 +251,7 @@ struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus, char *id)
 		if (bus->devices == NULL)
 			return NULL;
 	}
-		
+
 	return (struct sysfs_device *)dlist_find_custom(bus->devices, id,
 		bus_device_id_equal);
 }
@@ -262,7 +262,7 @@ struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus, char *id)
  * @drvname: name of driver
  * returns struct sysfs_driver reference or NULL if not found.
  */
-struct sysfs_driver *sysfs_get_bus_driver(struct sysfs_bus *bus, 
+struct sysfs_driver *sysfs_get_bus_driver(struct sysfs_bus *bus,
 							char *drvname)
 {
 	if (bus == NULL || drvname == NULL) {
@@ -275,7 +275,7 @@ struct sysfs_driver *sysfs_get_bus_driver(struct sysfs_bus *bus,
 		if (bus->drivers == NULL)
 			return NULL;
 	}
-	
+
 	return (struct sysfs_driver *)dlist_find_custom(bus->drivers, drvname,
 		bus_driver_name_equal);
 }
@@ -296,7 +296,7 @@ struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus)
 			return NULL;
 	}
 	if (bus->directory->attributes == NULL) {
-		if ((sysfs_read_dir_attributes(bus->directory)) != 0) 
+		if ((sysfs_read_dir_attributes(bus->directory)) != 0)
 			return NULL;
 	}
 	return bus->directory->attributes;
@@ -305,10 +305,10 @@ struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus)
 /**
  * sysfs_refresh_bus_attributes: refreshes the bus's list of attributes
  * @bus: sysfs_bus whose attributes to refresh
- * 
+ *
  * NOTE: Upon return, prior references to sysfs_attributes for this bus
  * 		_may_ not be valid
- * 
+ *
  * Returns list of attributes on success and NULL on failure
  */
 struct dlist *sysfs_refresh_bus_attributes(struct sysfs_bus *bus)
@@ -320,7 +320,7 @@ struct dlist *sysfs_refresh_bus_attributes(struct sysfs_bus *bus)
 
 	if (bus->directory == NULL)
 		return (sysfs_get_bus_attributes(bus));
-	
+
 	if ((sysfs_refresh_dir_attributes(bus->directory)) != 0) {
 		dprintf("Error refreshing bus attributes\n");
 		return NULL;
@@ -340,7 +340,7 @@ struct sysfs_attribute *sysfs_get_bus_attribute(struct sysfs_bus *bus,
 						char *attrname)
 {
 	struct dlist *attrlist = NULL;
-	
+
 	if (bus == NULL) {
 		errno = EINVAL;
 		return NULL;
@@ -348,7 +348,7 @@ struct sysfs_attribute *sysfs_get_bus_attribute(struct sysfs_bus *bus,
 	attrlist = sysfs_get_bus_attributes(bus);
 	if (attrlist == NULL)
 		return NULL;
-	
+
 	return sysfs_get_directory_attribute(bus->directory, attrname);
 }
 
@@ -384,7 +384,7 @@ int sysfs_find_driver_bus(const char *driver, char *busname, size_t bsize)
 			if (drivers != NULL) {
 				dlist_for_each_data(drivers, curdrv, char) {
 					if (strcmp(driver, curdrv) == 0) {
-						safestrcpymax(busname, 
+						safestrcpymax(busname,
 								bus, bsize);
 						sysfs_close_list(drivers);
 						sysfs_close_list(buslist);
