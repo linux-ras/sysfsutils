@@ -194,7 +194,8 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 			dprintf("Error reading attribute\n");
 			return -1;
 		}
-		if ((strncmp(sysattr->value, new_value, sysattr->len)) == 0) {
+		if (((strncmp(sysattr->value, new_value, sysattr->len)) == 0)
+				&& (len == sysattr->len)) {
 			dprintf("Attr %s already has the requested value %s\n",
 					sysattr->name, new_value);
 			return 0;	

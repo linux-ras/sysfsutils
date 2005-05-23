@@ -1,4 +1,8 @@
 
+02/21/2005 - Dominik Brodowski <linux@dominikbrodowski.net>
+		* Fix sysfs_write_attribute() to check if the attribute
+			already has the value to be written
+
 01/17/2005 - Kay Sievers <kay.sievers@vrfy.org>
 		* Fix dlist.c so it compiles with older gcc versions
 
