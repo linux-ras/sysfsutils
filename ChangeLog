@@ -1,4 +1,8 @@
 
+05/31/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Simplify sysfs_get_device_bus() now that we
+			have the "bus" symlink under the device dirs
+
 05/26/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Updated tools in package to reflect v1.3.0
 

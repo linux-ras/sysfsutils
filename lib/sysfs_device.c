@@ -111,7 +111,8 @@ static int get_device_driver_name(struct sysfs_device *dev)
 int sysfs_get_device_bus(struct sysfs_device *dev)
 {
 	char subsys[SYSFS_NAME_LEN], path[SYSFS_PATH_MAX];
-	char target[SYSFS_PATH_MAX], *bus = NULL, *c = NULL;
+	char target[SYSFS_PATH_MAX], devpath[SYSFS_PATH_MAX];
+        char *bus = NULL, *c = NULL;
 	struct dlist *buslist = NULL;
 
 	if (dev == NULL) {
@@ -119,6 +120,23 @@ int sysfs_get_device_bus(struct sysfs_device *dev)
 		return -1;
 	}
 
+	memset(path, 0, SYSFS_PATH_MAX);
+	memset(devpath, 0, SYSFS_PATH_MAX);
+	safestrcpymax(path, dev->path, SYSFS_PATH_MAX);
+	safestrcatmax(path, "/bus", SYSFS_PATH_MAX);
+	if (sysfs_path_is_link(path) == 0) {
+		if (sysfs_get_link(path, devpath, SYSFS_PATH_MAX) == 0) {
+			if (sysfs_get_name_from_path(devpath,
+					dev->bus, SYSFS_NAME_LEN))
+				return -1;
+		}
+		return 0;
+	}
+
+	/*
+	 * Devices on earlier kernels do not have the "bus"link
+	 * Look it up in the bus directory
+	 */
 	memset(subsys, 0, SYSFS_NAME_LEN);
 	safestrcpy(subsys, SYSFS_BUS_NAME);  /* subsys = bus */
 	buslist = sysfs_open_subsystem_list(subsys);
