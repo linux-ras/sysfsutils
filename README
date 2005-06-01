@@ -55,7 +55,11 @@ options and builds the package, and tries to install it, "make install" will
 return an error since the non-root user will not have "write" permission to 
 /usr/include/sysfs to install the headers. 
 
-However, the library and binaries will be installed at the requested location.
+The default install location for the library and utilities (under test/ and
+cmd/) is /usr/local/lib/ and /usr/local/bin/ respectively. Please use the 
+--libdir and --bindir parameters during configure time to change this as 
+needed.
+
 The header files will have to be manually copied over by the user to the 
 desired directory.
 
