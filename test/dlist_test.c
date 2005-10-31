@@ -55,6 +55,7 @@ void complex_dump_rev(Dlist *);
 void complex_out(void *);
 void complex_del(void *);
 Complex *complex_maker(int,int,char *);
+int complex_filter(void *a);
 
 Simple *simple_maker(int ,char *);
 
@@ -182,6 +183,10 @@ int main (int argc,char *argv[])
       dlist_sort_custom(list,complex_comp);
       printf("custom sorted output\n");
       complex_dump(list);
+
+	dlist_filter_sort(list, complex_filter, complex_comp);
+	printf("custom filtered and sorted output\n");
+	complex_dump(list);
       dlist_destroy(list);
     }
   return(0);
@@ -310,4 +315,14 @@ void complex_del (void *item)
   printf("freeing complex\n");
   free(corpse->sthing);
   free(corpse);
+}
+
+int complex_filter(void *a)
+{
+	Complex *c = (Complex *)a;
+
+	if (c->cnumber >= 2 && c->cnumber <= 3)
+		return 1;
+	else
+		return 0;
 }

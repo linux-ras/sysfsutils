@@ -100,6 +100,8 @@ void *dlist_find_custom(struct dlist *list, void *target, int (*comp)(void *, vo
 
 void dlist_sort_custom(struct dlist *list, int (*compare)(void *, void *));
 
+void dlist_filter_sort(struct dlist *list, int (*filter) (void *),
+				int (*compare) (void *, void *));
 
 void _dlist_swap(struct dlist *list, struct dl_node *a, struct dl_node *b);
 

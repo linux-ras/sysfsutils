@@ -1,19 +1,22 @@
 10/31/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Check-in Mohan's dlist custom sorter + dlist memory leak fix
+
+10/31/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Check-in Dan's detach_state removal patch for 2_0_0 tag
 
 05/05/2005 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Moved sysfs_dir.c to sysfs_attr.c
 
 05/05/2005 - Dominik Brodowski <linux@dominikbrodowski.net>
-		* The check which tests whether the value to be written 
-			into a sysfs attribute is already there should only 
+		* The check which tests whether the value to be written
+			into a sysfs attribute is already there should only
 			trigger if the length of both strings is the same.
 
 05/03/2005 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Added modules support to systool
-		* Renamed get_attributes_list() function to 
+		* Renamed get_attributes_list() function to
 			get_dev_attributes_list() function
-		* Added new get_attributes_list() function that takes 
+		* Added new get_attributes_list() function that takes
 			a dlist and a path to directory of attributes
 		* Modified sysfs_module to grab parameters and sections
 			using new get_attributes_list() function
@@ -53,7 +56,7 @@
 		* docs - fix wrong return type in sysfs_read_dir_subdirs
 
 09/13/2004 - Daniel Stekloff <dsteklof@us.ibm.com>
-		* Patch systool to print error if sysfs 
+		* Patch systool to print error if sysfs
 			is not mounted
 
 09/10/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
@@ -88,7 +91,7 @@
 			of potential buffer overflow issues
 
 03/08/2004 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
-		* Remove "unsigned" declarations for prototype 
+		* Remove "unsigned" declarations for prototype
 			compatibility per Lev Makhlis' suggestion
 
 03/08/2004 - Lev Makhlis <mlev@despammed.com>
@@ -184,7 +187,7 @@
 12/12/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Changed function prototypes for sysfs_open_* calls that
 			accept absolute path to have _path suffix
-		* Changed function prototypes that take the device/driver 
+		* Changed function prototypes that take the device/driver
 			bus/class and name to be normal sysfs_open_xxx()
 		* Changed sysfs_close_cls_dev() to be a static function
 
@@ -206,7 +209,7 @@
 		* Simplified routine to get bus a device is on
 
 12/02/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
-		* Patched code to use already available functions for 
+		* Patched code to use already available functions for
 			optimization.
 
 12/02/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
@@ -223,7 +226,7 @@
 
 11/24/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Removed getpagesize() usage (Dan)
-		* Added patch to postpone reading of attributes until 
+		* Added patch to postpone reading of attributes until
 			absolutely necessary
 		* Cleaned up sysfs_driver.c
 		* Changed stale sysutils references to sysfsutils
@@ -235,7 +238,7 @@
 		* Added bus to struct sysfs_device
 		* Modified "read_attr" functions for device/driver/classdev
 			to return a sysfs_attribute
-		* Modified test functions, added a test function to 
+		* Modified test functions, added a test function to
 			demonstrate usage of "write" attribute functions
 		* Updated libsysfs.txt to reflect latest updates to the
 			library
@@ -283,7 +286,7 @@
 10/09/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Updated docs/libsysfs.txt
 		* Fixed warning in cmd/names.c
-		* Modified "write" attribute functions to accept 
+		* Modified "write" attribute functions to accept
 			length to write as a parameter
 		* Added functions sysfs_get_driver_attr(),
 			sysfs_get_blockdev_attr(), sysfs_get_classdev_attr()
@@ -303,7 +306,7 @@
 
 09/30/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Modified routines to find device/driver on a bus
-		* Made some miscellaneous changes to use #defines 
+		* Made some miscellaneous changes to use #defines
 			instead of hardcoding values
 
 09/29/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
@@ -313,9 +316,9 @@
 09/24/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Added "write" attribute functions specific to device,
 			driver and class device.
-		* Removed generic write function 
+		* Removed generic write function
 			sysfs_change_attribue_value()
-		* Changed sysfs_open_device_by_name() to 
+		* Changed sysfs_open_device_by_name() to
 			sysfs_change_device_by_id()
 
 09/23/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
@@ -399,7 +402,7 @@
 
 07/23/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Changed sysfs_dlink to sysfs_link, got rid of
-			sysfs_directory link for target char path. 
+			sysfs_directory link for target char path.
 
 07/18/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Changed default systool and lsbus to just print

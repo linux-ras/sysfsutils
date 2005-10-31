@@ -552,18 +552,17 @@ void dlist_sort_custom(struct dlist *list, int (*compare)(void *, void *))
   unsigned int passcount = 1;
   unsigned int mergecount = 1;
   
+	if(list->count<2)
+      		return;
+
   dlist_start(list);
   templist = dlist_new(list->data_size);
+
+	templist->del_func = list->del_func;
 
   // do nothing if there isn't anything to sort
   listsource = list;
   listdest = templist;
-  if(listsource->count<2)
-    { //nothing to do
-      return;
-    }
-  else
-    {
       while(mergecount>0)
 	{
 	  mergecount=_dlist_merge(listsource, listdest, passcount, compare);
@@ -576,7 +575,6 @@ void dlist_sort_custom(struct dlist *list, int (*compare)(void *, void *))
 	      listdest=swap;
 	    }
 	}
-    }
   // now put the input list pointers right
   // list pointers = newlist pointers
   // including the forward and next nodes prev and back pointers
@@ -603,6 +601,44 @@ void dlist_sort_custom(struct dlist *list, int (*compare)(void *, void *))
   dlist_destroy(templist);
 }
 
+/*
+ * The dlist_filter_sort() function scans the list, calling
+ * filter() on each list entry. Entries for which filter()
+ * returns zero are discarded from the list. Then the list is
+ * sorted using mergesort() with the comparison function compare()
+ * and returned. If filter is NULL, all entries are selected.
+*/
+void dlist_filter_sort(struct dlist *list, int (*filter) (void *),
+				int (*compare) (void *, void *))
+{
+	struct dl_node *nodepointer,*temp;
+	void *data;
+
+	if(!list->count)
+		return;
+
+	/* if there is no filter function, directly sort all the entries */
+	if (!filter)
+		goto sort;
+
+	/* filter the unwanted entries in the list */
+	nodepointer = list->head->next;
+	while(nodepointer!=list->head) {
+		if (!filter(nodepointer->data)) {
+			temp = nodepointer->next;
+			data = _dlist_remove(list, nodepointer, 0);
+			if(data)
+				list->del_func(data);
+			nodepointer = temp;
+		}
+		else
+			nodepointer=nodepointer->next;
+	}
+
+sort:
+	/* sort out the entries */
+	dlist_sort_custom(list, compare);
+}
 
 
 /* internal use function
