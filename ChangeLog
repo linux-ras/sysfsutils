@@ -1,3 +1,6 @@
+10/31/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Check-in Dan's detach_state removal patch for 2_0_0 tag
+
 05/05/2005 - Daniel Stekloff <dsteklof@us.ibm.com>
 		* Moved sysfs_dir.c to sysfs_attr.c
 
