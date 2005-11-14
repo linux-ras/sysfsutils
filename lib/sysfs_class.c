@@ -177,55 +177,6 @@ struct sysfs_class_device *sysfs_open_class_device_path(const char *path)
 	return cdev;
 }
 
-/** 
- * get_blockdev_parent: Get the parent class device for a "block" subsystem 
- * 		device if present
- * @clsdev: block subsystem class device whose parent needs to be found
- * Returns 0 on success and 1 on error
- */
-static int get_blockdev_parent(struct sysfs_class_device *clsdev)
-{
-	char parent_path[SYSFS_PATH_MAX];
-	char *c;
-
-	safestrcpy(parent_path, clsdev->path);
-	c = strstr(parent_path, SYSFS_BLOCK_NAME);
-	if (c == NULL) {
-		dprintf("Class device %s does not belong to BLOCK subsystem\n",
-				clsdev->name);
-		return 1;
-	}
-	c += strlen(SYSFS_BLOCK_NAME);
-	if (*c == '/')
-		c++;
-	else
-		goto errout;
-
-	/* validate whether the given class device is a partition or not */
-	if ((strncmp(c, clsdev->name, strlen(clsdev->name))) == 0) {
-		dprintf("%s not a partition\n", clsdev->name);
-		return 1;
-	}
-
-	c = strchr(c, '/');
-	if (c == NULL)
-		goto errout;
-
-	*c = '\0';
-
-	clsdev->parent = sysfs_open_class_device_path(parent_path);
-	if (!clsdev->parent) {
-		dprintf("Error opening the parent class device at %s\n", 
-								parent_path);
-		return 1;
-	}
-	return 0;
-
-errout:
-	dprintf("Invalid path %s\n", clsdev->path);
-	return 1;
-}
-
 /**
  * sysfs_get_classdev_parent: Retrieves the parent of a class device. 
  * 	eg., when working with hda1, this function can be used to retrieve the
@@ -237,25 +188,38 @@ errout:
 struct sysfs_class_device *sysfs_get_classdev_parent
 				(struct sysfs_class_device *clsdev)
 {
+	char abs_path[SYSFS_PATH_MAX], tmp_path[SYSFS_PATH_MAX];
+	char *c;
+
 	if (!clsdev) {
 		errno = EINVAL;
 		return NULL;
 	}
+
 	if (clsdev->parent)
 		return (clsdev->parent);
 
-	/*
-	 * As of now, only block devices have a parent child heirarchy in sysfs
-	 * We do not know, if, in the future, more classes will have a similar
-	 * structure. Hence, we now call a specialized function for block and
-	 * later we can add support functions for other subsystems as required.
-	 */
-	if (!(strncmp(clsdev->classname, SYSFS_BLOCK_NAME, 
-					sizeof(SYSFS_BLOCK_NAME)))) {
-		if ((get_blockdev_parent(clsdev)) == 0) 
-			return (clsdev->parent);
+	memset(abs_path, 0, SYSFS_PATH_MAX);
+	memset(tmp_path, 0, SYSFS_PATH_MAX);
+
+	safestrcpy(tmp_path, clsdev->path);
+	c = strstr(tmp_path, clsdev->classname);
+	c = strchr(c, '/');
+	*c = '\0';
+
+	safestrcpy(abs_path, clsdev->path);
+	c = strrchr(abs_path, '/');
+	*c = '\0';
+
+	if ((strncmp(tmp_path, abs_path, strlen(abs_path))) == 0) {
+		dprintf("Class device %s doesn't have a parent\n",
+				clsdev->name);
+		return NULL;
 	}
-	return NULL;
+
+	clsdev->parent = sysfs_open_class_device_path(abs_path);
+
+	return clsdev->parent;
 }
 
 /**
@@ -278,16 +242,19 @@ static int get_classdev_path(const char *classname, const char *clsdev,
 		dprintf("Error getting sysfs mount path\n");
 		return -1;
 	}
+	safestrcatmax(path, "/", len);
 	if (strncmp(classname, SYSFS_BLOCK_NAME,
 				sizeof(SYSFS_BLOCK_NAME)) == 0) {
-		safestrcatmax(path, "/", len);
 		safestrcatmax(path, SYSFS_BLOCK_NAME, len);
-	} else {
-		safestrcatmax(path, "/", len);
-		safestrcatmax(path, SYSFS_CLASS_NAME, len);
-		safestrcatmax(path, "/", len);
-		safestrcatmax(path, classname, len);
+		if (!sysfs_path_is_dir(path))
+			goto done;
+		char *c = strrchr(path, '/');
+		*(c+1) = '\0';
 	}
+	safestrcatmax(path, SYSFS_CLASS_NAME, len);
+	safestrcatmax(path, "/", len);
+	safestrcatmax(path, classname, len);
+done:
 	safestrcatmax(path, "/", len);
 	safestrcatmax(path, clsdev, len);
 	return 0;
@@ -410,19 +377,18 @@ struct sysfs_class *sysfs_open_class(const char *name)
                 return NULL;
         }
 
-	/* 
-	 * We shall now treat "block" also as a class. Hence, check here
-	 * if "name" is "block" and proceed accordingly
-	 */
+	safestrcat(classpath, "/");
 	if (strcmp(name, SYSFS_BLOCK_NAME) == 0) {
-		safestrcat(classpath, "/");
 		safestrcat(classpath, SYSFS_BLOCK_NAME);
-	} else {
-		safestrcat(classpath, "/");
-		safestrcat(classpath, SYSFS_CLASS_NAME);
-		safestrcat(classpath, "/");
-		safestrcat(classpath, name);
+		if (!sysfs_path_is_dir(classpath))
+			goto done;
+		char *c = strrchr(classpath, '/');
+		*(c+1) = '\0';
 	}
+	safestrcat(classpath, SYSFS_CLASS_NAME);
+	safestrcat(classpath, "/");
+	safestrcat(classpath, name);
+done:
 	if (sysfs_path_is_dir(classpath)) {
 		dprintf("Class %s not found on the system\n", name);
 		return NULL;
