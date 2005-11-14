@@ -1,3 +1,6 @@
+11/14/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Handle nested classes transparently
+
 10/31/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Check-in Mohan's dlist custom sorter + dlist memory leak fix
 
