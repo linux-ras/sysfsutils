@@ -25,7 +25,7 @@
 
 static int sort_char(void *new, void *old)
 {
-	return ((strncmp((char *)new, (char *)old, 
+	return ((strncmp((char *)new, (char *)old,
 			strlen((char *)new))) < 0 ? 1 : 0);
 }
 
@@ -105,7 +105,7 @@ struct sysfs_attribute *sysfs_open_attribute(const char *path)
 		dprintf("Error allocating attribute at %s\n", path);
 		return NULL;
 	}
-	if (sysfs_get_name_from_path(path, sysattr->name, 
+	if (sysfs_get_name_from_path(path, sysattr->name,
 				SYSFS_NAME_LEN) != 0) {
 		dprintf("Error retrieving attrib name from path: %s\n", path);
 		sysfs_close_attribute(sysattr);
@@ -169,7 +169,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 		return -1;
 	}
 	if (sysattr->len > 0) {
-		if ((sysattr->len == length) && 
+		if ((sysattr->len == length) &&
 				(!(strncmp(sysattr->value, fbuf, length)))) {
 			close(fd);
 			free(fbuf);
@@ -216,7 +216,7 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 	}
 	if (sysattr->method & SYSFS_METHOD_SHOW) {
 		/*
-		 * read attribute again to see if we can get an updated value 
+		 * read attribute again to see if we can get an updated value
 		 */
 		if ((sysfs_read_attribute(sysattr))) {
 			dprintf("Error reading attribute\n");
@@ -226,12 +226,12 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 				(len == sysattr->len)) {
 			dprintf("Attr %s already has the requested value %s\n",
 					sysattr->name, new_value);
-			return 0;	
+			return 0;
 		}
 	}
 	/*
 	 * open O_WRONLY since some attributes have no "read" but only
-	 * "write" permission 
+	 * "write" permission
 	 */
 	if ((fd = open(sysattr->path, O_WRONLY)) < 0) {
 		dprintf("Error reading attribute %s\n", sysattr->path);
@@ -245,9 +245,9 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 		close(fd);
 		return -1;
 	} else if ((unsigned int)length != len) {
-		dprintf("Could not write %zd bytes to attribute %s\n", 
+		dprintf("Could not write %zd bytes to attribute %s\n",
 					len, sysattr->name);
-		/* 
+		/*
 		 * since we could not write user supplied number of bytes,
 		 * restore the old value if one available
 		 */
@@ -262,7 +262,7 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 	 * Validate length that has been copied. Alloc appropriate area
 	 * in sysfs_attribute. Verify first if the attribute supports reading
 	 * (show method). If it does not, do not bother
-	 */ 
+	 */
 	if (sysattr->method & SYSFS_METHOD_SHOW) {
 		if (length != sysattr->len) {
 			sysattr->value = (char *)realloc
@@ -270,12 +270,12 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 			sysattr->len = length;
 			safestrcpymax(sysattr->value, new_value, length);
 		} else {
-			/*"length" of the new value is same as old one */ 
+			/*"length" of the new value is same as old one */
 			safestrcpymax(sysattr->value, new_value, length);
 		}
 	}
-			
-	close(fd);	
+
+	close(fd);
 	return 0;
 }
 
@@ -285,7 +285,7 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
  * @path: path to attribute
  * returns pointer to attr added with success and NULL with error.
  */
-static struct sysfs_attribute *add_attribute_to_list(struct dlist *alist, 
+static struct sysfs_attribute *add_attribute_to_list(struct dlist *alist,
 							const char *path)
 {
 	struct sysfs_attribute *attr;
@@ -338,14 +338,14 @@ static struct sysfs_attribute *add_attribute(void *dev, const char *path)
 		((struct sysfs_device *)dev)->attrlist = dlist_new_with_delete
 			(sizeof(struct sysfs_attribute), sysfs_del_attribute);
 	}
-	dlist_unshift_sorted(((struct sysfs_device *)dev)->attrlist, 
+	dlist_unshift_sorted(((struct sysfs_device *)dev)->attrlist,
 			attr, sort_list);
 
 	return attr;
 }
 
 /*
- * get_attribute - given a sysfs_* struct and a name, return the 
+ * get_attribute - given a sysfs_* struct and a name, return the
  * sysfs_attribute corresponding to "name"
  * returns sysfs_attribute on success and NULL on error
  */
@@ -362,12 +362,12 @@ struct sysfs_attribute *get_attribute(void *dev, const char *name)
 	if (((struct sysfs_device *)dev)->attrlist) {
 		/* check if attr is already in the list */
 		cur = (struct sysfs_attribute *)dlist_find_custom
-			((((struct sysfs_device *)dev)->attrlist), 
+			((((struct sysfs_device *)dev)->attrlist),
 			 	(void *)name, attr_name_equal);
 		if (cur)
 			return cur;
 	}
-	safestrcpymax(path, ((struct sysfs_device *)dev)->path, 
+	safestrcpymax(path, ((struct sysfs_device *)dev)->path,
 			SYSFS_PATH_MAX);
 	safestrcatmax(path, "/", SYSFS_PATH_MAX);
 	safestrcatmax(path, name, SYSFS_PATH_MAX);
@@ -556,13 +556,13 @@ struct dlist *get_dev_attributes_list(void *dev)
 				/* check if attr is already in the list */
 				attr = (struct sysfs_attribute *)
 				dlist_find_custom
-				((((struct sysfs_device *)dev)->attrlist), 
+				((((struct sysfs_device *)dev)->attrlist),
 			 	(void *)dirent->d_name, attr_name_equal);
-				if (attr) 
+				if (attr)
 					continue;
-				else 
+				else
 					add_attribute(dev, file_path);
-			} else 
+			} else
 				attr = add_attribute(dev, file_path);
 		}
 	}

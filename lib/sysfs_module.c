@@ -177,7 +177,7 @@ struct dlist *sysfs_get_module_attributes(struct sysfs_module *module)
  * returns sysfs_attribute reference with success or NULL with error
  */
 struct sysfs_attribute *sysfs_get_module_attr
-               (struct sysfs_module *module, const char *name)
+		(struct sysfs_module *module, const char *name)
 {
 	if (module == NULL || name == NULL) {
 		errno = EINVAL;
@@ -237,7 +237,7 @@ struct dlist *sysfs_get_module_sections(struct sysfs_module *module)
  * Returns sysfs_attribute * on SUCCESS and NULL on error
  */
 struct sysfs_attribute *sysfs_get_module_parm
-       (struct sysfs_module *module, const char *parm)
+		(struct sysfs_module *module, const char *parm)
 {
 	struct dlist *parm_list = NULL;
 
@@ -261,7 +261,7 @@ struct sysfs_attribute *sysfs_get_module_parm
  * Returns sysfs_attribute * on SUCCESS and NULL on error
  */
 struct sysfs_attribute *sysfs_get_module_section
-       (struct sysfs_module *module, const char *section)
+		(struct sysfs_module *module, const char *section)
 {
 	struct dlist *sect_list = NULL;
 
@@ -289,7 +289,7 @@ struct sysfs_attribute *sysfs_get_module_section
  *     attribute returned and to free memory
  */
 struct sysfs_attribute *sysfs_open_module_attr(const char *module,
-               const char *attrib)
+		const char *attrib)
 {
 	struct sysfs_attribute *attribute = NULL;
 	char path[SYSFS_PATH_MAX];

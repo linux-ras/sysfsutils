@@ -54,8 +54,8 @@ enum sysfs_attribute_method {
 };
 
 /*
- * NOTE: 
- * 1. We have the statically allocated "name" as the first element of all 
+ * NOTE:
+ * 1. We have the statically allocated "name" as the first element of all
  * the structures. This feature is used in the "sorter" function for dlists
  * 2. As is the case with attrlist
  * 3. As is the case with path
@@ -87,9 +87,9 @@ struct sysfs_device {
 	char driver_name[SYSFS_NAME_LEN];
 
 	/* Private: for internal use only */
-	struct sysfs_device *parent;		
+	struct sysfs_device *parent;
 	/* NOTE - we still don't populate this */
-	struct dlist *children;	
+	struct dlist *children;
 };
 
 struct sysfs_bus {
@@ -109,7 +109,7 @@ struct sysfs_class_device {
 	char classname[SYSFS_NAME_LEN];
 
 	/* Private: for internal use only */
-	struct sysfs_class_device *parent;	
+	struct sysfs_class_device *parent;
 	struct sysfs_device *sysdevice;		/* NULL if virtual */
 };
 
@@ -223,18 +223,18 @@ extern struct sysfs_attribute *sysfs_get_module_section
 	(struct sysfs_module *module, const char *section);
 
 /**
- * sort_list: sorter function to keep list elements sorted in alphabetical 
+ * sort_list: sorter function to keep list elements sorted in alphabetical
  * 	order. Just does a strncmp as you can see :)
- * 	
+ *
  * Returns 1 if less than 0 otherwise
  *
- * NOTE: We take care to have a statically allocated "name" as the first 
- * 	lement of all libsysfs structures. Hence, this function will work 
+ * NOTE: We take care to have a statically allocated "name" as the first
+ * 	lement of all libsysfs structures. Hence, this function will work
  * 	AS IS for _ALL_ the lists that have to be sorted.
  */
 static inline int sort_list(void *new_elem, void *old_elem)
 {
-        return ((strncmp(((struct sysfs_attribute *)new_elem)->name,
+	return ((strncmp(((struct sysfs_attribute *)new_elem)->name,
 		((struct sysfs_attribute *)old_elem)->name,
 		strlen(((struct sysfs_attribute *)new_elem)->name))) < 0 ? 1 : 0);
 }

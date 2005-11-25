@@ -23,16 +23,16 @@
 /**
  ***************************************************************************
  * this will test the directory related functions provided by libsysfs.
- * 
+ *
  * extern void sysfs_close_attribute(struct sysfs_attribute *sysattr);
  * extern struct sysfs_attribute *sysfs_open_attribute
  * 					(const char *path);
  * extern int sysfs_read_attribute(struct sysfs_attribute *sysattr);
- * extern int sysfs_read_attribute_value(const char *attrpath, 
+ * extern int sysfs_read_attribute_value(const char *attrpath,
  * 				char *value, size_t vsize);
  * extern int sysfs_write_attribute(struct sysfs_attribute *sysattr,
  * 		const char *new_value, size_t len);
- * extern char *sysfs_get_value_from_attributes(struct dlist *attr, 
+ * extern char *sysfs_get_value_from_attributes(struct dlist *attr,
  * 					const char * name);
  * extern int sysfs_refresh_dir_attributes(struct sysfs_directory *sysdir);
  * extern int sysfs_refresh_dir_links(struct sysfs_directory *sysdir);
@@ -81,7 +81,7 @@ int test_sysfs_close_attribute(int flag)
 		path = val_file_path;
 		sysattr = sysfs_open_attribute(path);
 		if (sysattr == NULL) {
-			dbg_print("%s: Error opening attribute at %s\n", 
+			dbg_print("%s: Error opening attribute at %s\n",
 					__FUNCTION__, val_file_path);
 			return 0;
 		}
@@ -134,9 +134,9 @@ int test_sysfs_open_attribute(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
-			dbg_print("Attrib name = %s, at %s\n\n", 
+			dbg_print("Attrib name = %s, at %s\n\n",
 					sysattr->name, sysattr->path);
 		}
 		break;
@@ -146,12 +146,12 @@ int test_sysfs_open_attribute(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
 		break;
-				
+
 	}
 	if (sysattr != NULL) {
 		sysfs_close_attribute(sysattr);
@@ -196,7 +196,7 @@ int test_sysfs_read_attribute(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute(sysattr);
 			dbg_print("\n");
@@ -207,7 +207,7 @@ int test_sysfs_read_attribute(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -217,18 +217,18 @@ int test_sysfs_read_attribute(int flag)
 	if (sysattr != NULL)
 		sysfs_close_attribute(sysattr);
 
-	return 0;		
+	return 0;
 }
 
 /**
- * extern int sysfs_read_attribute_value(const char *attrpath, 
+ * extern int sysfs_read_attribute_value(const char *attrpath,
  *					char *value, size_t vsize);
- * 
+ *
  * flag:
- * 	0:	attrpath -> valid, value -> valid 
- * 	1:	attrpath -> valid, value -> NULL 
- * 	2:	attrpath -> NULL, value -> valid 
- * 	3:	attrpath -> NULL, value -> NULL 
+ * 	0:	attrpath -> valid, value -> valid
+ * 	1:	attrpath -> valid, value -> NULL
+ * 	2:	attrpath -> NULL, value -> valid
+ * 	3:	attrpath -> NULL, value -> NULL
  */
 int test_sysfs_read_attribute_value(int flag)
 {
@@ -258,14 +258,14 @@ int test_sysfs_read_attribute_value(int flag)
 		return -1;
 	}
 	ret = sysfs_read_attribute_value(attrpath, value, vsize);
-	
+
 	switch (flag) {
 	case 0:
 		if (ret != 0)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+		     	dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			dbg_print("Attribute at %s has value %s\n\n",
 					attrpath, value);
@@ -278,7 +278,7 @@ int test_sysfs_read_attribute_value(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+		   	dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -286,7 +286,7 @@ int test_sysfs_read_attribute_value(int flag)
 		break;
 	}
 
-	if (value != NULL) 
+	if (value != NULL)
 		free(value);
 
 	return 0;
@@ -361,10 +361,10 @@ int test_sysfs_write_attribute(int flag)
 		strncpy(new_value, sysattr->value, sysattr->len);
 		len = sysattr->len;
 		sysfs_close_attribute(sysattr);
-		sysattr = NULL; 
+		sysattr = NULL;
 		break;
 	case 4:
-		sysattr = NULL; 
+		sysattr = NULL;
 		new_value = calloc(1, SYSFS_PATH_MAX);
 		strncpy(new_value, "this should not get copied in the attrib",
 				SYSFS_PATH_MAX);
@@ -386,7 +386,7 @@ int test_sysfs_write_attribute(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+		     	dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			dbg_print("Attribute at %s now has value %s\n\n",
 					sysattr->path, sysattr->value);
@@ -401,7 +401,7 @@ int test_sysfs_write_attribute(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+		   	dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -418,7 +418,7 @@ int test_sysfs_write_attribute(int flag)
 }
 
 /**
- * extern char *sysfs_get_value_from_attributes(struct dlist *attr, 
+ * extern char *sysfs_get_value_from_attributes(struct dlist *attr,
  * 					const char * name);
  *
  * flag:
@@ -490,15 +490,15 @@ int test_sysfs_get_value_from_attributes(int flag)
 		name = NULL;
 		break;
 	case 3:
-		attrlist = NULL; 
+		attrlist = NULL;
 		name = val_dev_attr;
 		break;
 	case 4:
-		attrlist = NULL; 
+		attrlist = NULL;
 		name = inval_name;
 		break;
 	case 5:
-		attrlist = NULL; 
+		attrlist = NULL;
 		name = NULL;
 		break;
 	default:
@@ -512,7 +512,7 @@ int test_sysfs_get_value_from_attributes(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+		     	dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			dbg_print("Attribute %s has value %s\n\n",
 					name, val);
@@ -526,12 +526,12 @@ int test_sysfs_get_value_from_attributes(int flag)
 		if (val != NULL)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else 
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+		else
+		   	dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
-		break;	
+		break;
 	}
 
 	if (device != NULL) {
@@ -582,7 +582,7 @@ int test_sysfs_refresh_dir_attributes(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+		     	dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute_list(sysdir->attributes);
 			dbg_print("\n");
@@ -593,7 +593,7 @@ int test_sysfs_refresh_dir_attributes(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+		   	dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -647,7 +647,7 @@ int test_sysfs_refresh_dir_links(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+		     	dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_links_list(sysdir->links);
 			dbg_print("\n");
@@ -658,7 +658,7 @@ int test_sysfs_refresh_dir_links(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+		  	dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -673,7 +673,7 @@ int test_sysfs_refresh_dir_links(int flag)
 
 /**
  * extern int sysfs_refresh_dir_subdirs(struct sysfs_directory *sysdir);
- * 
+ *
  * flag:
  * 	0:	sysdir -> valid
  * 	1:	sysdir -> NULL
@@ -712,7 +712,7 @@ int test_sysfs_refresh_dir_subdirs(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+		     	dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_dir_list(sysdir->subdirs);
 			dbg_print("\n");
@@ -723,7 +723,7 @@ int test_sysfs_refresh_dir_subdirs(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+		  	dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -766,7 +766,7 @@ int test_sysfs_close_directory(int flag)
 	default:
 		return -1;
 	}
-	
+
 	sysfs_close_directory(sysdir);
 	dbg_print("%s: returns void\n", __FUNCTION__);
 
@@ -808,7 +808,7 @@ int test_sysfs_open_directory(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+		     	dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			dbg_print("Directory is %s at %s\n\n",
 						dir->name, dir->path);
@@ -820,11 +820,11 @@ int test_sysfs_open_directory(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+		   	dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
-		break;		
+		break;
 	}
 
 	if (dir != NULL)
@@ -867,7 +867,7 @@ int test_sysfs_read_dir_attributes(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+		     	dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute_list(sysdir->attributes);
 			dbg_print("\n");
@@ -878,7 +878,7 @@ int test_sysfs_read_dir_attributes(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+		   	dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -925,7 +925,7 @@ int test_sysfs_read_dir_links(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+		     	dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_links_list(sysdir->links);
 			dbg_print("\n");
@@ -936,7 +936,7 @@ int test_sysfs_read_dir_links(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+		   	dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -984,7 +984,7 @@ int test_sysfs_read_dir_subdirs(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+		     	dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_dir_list(sysdir->subdirs);
 			dbg_print("\n");
@@ -995,7 +995,7 @@ int test_sysfs_read_dir_subdirs(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+		   	dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -1042,7 +1042,7 @@ int test_sysfs_read_directory(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+		     	dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_directory(sysdir);
 			dbg_print("\n");
@@ -1053,7 +1053,7 @@ int test_sysfs_read_directory(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+		   	dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -1064,7 +1064,7 @@ int test_sysfs_read_directory(int flag)
 		free(sysdir);
 		sysdir = NULL;
 	}
-		
+
 	if (sysdir != NULL)
 		sysfs_close_directory(sysdir);
 	return 0;
@@ -1105,7 +1105,7 @@ int test_sysfs_read_all_subdirs(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_dir_tree(sysdir);
 			dbg_print("\n");
@@ -1116,7 +1116,7 @@ int test_sysfs_read_all_subdirs(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -1197,7 +1197,7 @@ int test_sysfs_get_subdirectory(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_dir(subdir);
 			dbg_print("\n");
@@ -1208,7 +1208,7 @@ int test_sysfs_get_subdirectory(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	}
@@ -1234,7 +1234,7 @@ int test_sysfs_close_link(int flag)
 	switch (flag) {
 	case 0:
 		ln = sysfs_open_link(val_link_path);
-		if (ln == NULL) 
+		if (ln == NULL)
 			return 0;
 		break;
 	case 1:
@@ -1284,7 +1284,7 @@ int test_sysfs_open_link(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_link(ln);
 			dbg_print("\n");
@@ -1295,7 +1295,7 @@ int test_sysfs_open_link(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	}
@@ -1375,7 +1375,7 @@ int test_sysfs_get_directory_link(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_link(ln);
 			dbg_print("\n");
@@ -1390,7 +1390,7 @@ int test_sysfs_get_directory_link(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -1472,7 +1472,7 @@ int test_sysfs_get_subdirectory_link(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_link(ln);
 			dbg_print("\n");
@@ -1483,7 +1483,7 @@ int test_sysfs_get_subdirectory_link(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	}
@@ -1497,7 +1497,7 @@ int test_sysfs_get_subdirectory_link(int flag)
 /**
  * extern struct sysfs_attribute *sysfs_get_directory_attribute
  * 			(struct sysfs_directory *dir, char *attrname);
- * 
+ *
  * flag:
  * 	0:	dir -> valid, attrname -> valid
  * 	1:	dir -> valid, attrname -> invalid
@@ -1563,7 +1563,7 @@ int test_sysfs_get_directory_attribute(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute(attr);
 			dbg_print("\n");
@@ -1574,7 +1574,7 @@ int test_sysfs_get_directory_attribute(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	}
@@ -1619,7 +1619,7 @@ int test_sysfs_get_dir_attributes(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_attribute_list(list);
 			dbg_print("\n");
@@ -1630,7 +1630,7 @@ int test_sysfs_get_dir_attributes(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -1679,7 +1679,7 @@ int test_sysfs_get_dir_links(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_links_list(list);
 			dbg_print("\n");
@@ -1690,7 +1690,7 @@ int test_sysfs_get_dir_links(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:
@@ -1738,7 +1738,7 @@ int test_sysfs_get_dir_subdirs(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
-                        dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_dir_list(list);
 			dbg_print("\n");
@@ -1749,7 +1749,7 @@ int test_sysfs_get_dir_subdirs(int flag)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
-                        dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
 	default:

@@ -24,7 +24,7 @@
 #include "sysfs.h"
 
 /**
- * get_dev_driver: fills in the dev->driver_name field 
+ * get_dev_driver: fills in the dev->driver_name field
  * Returns 0 on SUCCESS and -1 on error
  */
 static int get_dev_driver(struct sysfs_device *dev)
@@ -44,7 +44,7 @@ static int get_dev_driver(struct sysfs_device *dev)
 	safestrcatmax(path, "/driver", SYSFS_PATH_MAX);
 	if (!sysfs_path_is_link(path)) {
 		if (!sysfs_get_link(path, devpath, SYSFS_PATH_MAX)) {
-			if (sysfs_get_name_from_path(devpath, 
+			if (sysfs_get_name_from_path(devpath,
 					dev->driver_name, SYSFS_NAME_LEN))
 				return -1;
 		}
@@ -54,7 +54,7 @@ static int get_dev_driver(struct sysfs_device *dev)
 	/*
 	 * Devices on earlier kernels do not have the "driver" link.
 	 * Look it up in the bus directory.
-	 */ 
+	 */
 	if (dev->bus[0] == '\0')
 		return -1;
 	memset(path, 0, SYSFS_PATH_MAX);
@@ -92,7 +92,7 @@ static int get_dev_driver(struct sysfs_device *dev)
 }
 
 /**
- * sysfs_get_device_bus: retrieves the bus name the device is on, checks path 
+ * sysfs_get_device_bus: retrieves the bus name the device is on, checks path
  * 	to bus' link to make sure it has correct device.
  * @dev: device to get busname.
  * returns 0 with success and -1 with error.
@@ -117,7 +117,7 @@ int sysfs_get_device_bus(struct sysfs_device *dev)
 	safestrcatmax(path, "/bus", SYSFS_PATH_MAX);
 	if (!sysfs_path_is_link(path)) {
 		if (!sysfs_get_link(path, devpath, SYSFS_PATH_MAX)) {
-			if (sysfs_get_name_from_path(devpath, 
+			if (sysfs_get_name_from_path(devpath,
 					dev->bus, SYSFS_NAME_LEN))
 				return -1;
 		}
@@ -134,7 +134,7 @@ int sysfs_get_device_bus(struct sysfs_device *dev)
 	if (c == NULL) {
 		dprintf("Invalid path to device - %s\n", dev->path);
 		return -1;
-	} else 
+	} else
 		*c = '\0';
 	safestrcat(subsys, SYSFS_BUS_NAME);
 	buslist = sysfs_open_directory_list(subsys);
@@ -150,13 +150,13 @@ int sysfs_get_device_bus(struct sysfs_device *dev)
 			safestrcat(path, dev->bus_id);
 			if (!sysfs_path_is_link(path)) {
 				memset(target, 0, SYSFS_PATH_MAX);
-				if (sysfs_get_link(path, target, 
+				if (sysfs_get_link(path, target,
 						SYSFS_PATH_MAX)) {
 					dprintf("Error getting link target\n");
 					sysfs_close_list(buslist);
 					return -1;
 				}
-				if (!(strncmp(target, dev->path, 
+				if (!(strncmp(target, dev->path,
 							SYSFS_PATH_MAX))) {
 					safestrcpy(dev->bus, bus);
 					sysfs_close_list(buslist);
@@ -170,7 +170,7 @@ int sysfs_get_device_bus(struct sysfs_device *dev)
 }
 
 /**
- * sysfs_close_device_tree: closes every device in the supplied tree, 
+ * sysfs_close_device_tree: closes every device in the supplied tree,
  * 	closing children only.
  * @devroot: device root of tree.
  */
@@ -298,14 +298,14 @@ struct dlist *sysfs_get_device_attributes(struct sysfs_device *dev)
 }
 
 /**
- * get_device_absolute_path: looks up the bus the device is on, gets 
+ * get_device_absolute_path: looks up the bus the device is on, gets
  * 		absolute path to the device
  * @device: device for which path is needed
  * @path: buffer to store absolute path
  * @psize: size of "path"
  * Returns 0 on success -1 on failure
  */
-static int get_device_absolute_path(const char *device,	const char *bus, 
+static int get_device_absolute_path(const char *device,	const char *bus,
 				char *path, size_t psize)
 {
 	char bus_path[SYSFS_PATH_MAX];
@@ -331,7 +331,7 @@ static int get_device_absolute_path(const char *device,	const char *bus,
 	/*
 	 * We now are at /sys/bus/"bus_name"/devices/"device" which is a link.
 	 * Now read this link to reach to the device.
-	 */ 
+	 */
 	if (sysfs_get_link(bus_path, path, psize)) {
 		dprintf("Error getting to device %s\n", device);
 		return -1;
@@ -342,10 +342,10 @@ static int get_device_absolute_path(const char *device,	const char *bus,
 /**
  * sysfs_open_device: open a device by id (use the "bus" subsystem)
  * @bus: bus the device belongs to
- * @bus_id: bus_id of the device to open - has to be the "bus_id" in 
+ * @bus_id: bus_id of the device to open - has to be the "bus_id" in
  * 		/sys/bus/xxx/devices
  * returns struct sysfs_device if found, NULL otherwise
- * NOTE: 
+ * NOTE:
  * 1. Use sysfs_close_device to close the device
  * 2. Bus the device is on must be supplied
  * 	Use sysfs_find_device_bus to get the bus name
@@ -360,12 +360,12 @@ struct sysfs_device *sysfs_open_device(const char *bus,	const char *bus_id)
 		return NULL;
 	}
 	memset(sysfs_path, 0, SYSFS_PATH_MAX);
-	if (get_device_absolute_path(bus_id, bus, sysfs_path, 
+	if (get_device_absolute_path(bus_id, bus, sysfs_path,
 				SYSFS_PATH_MAX)) {
 		dprintf("Error getting to device %s\n", bus_id);
 		return NULL;
 	}
-	
+
 	device = sysfs_open_device_path(sysfs_path);
 	if (!device) {
 		dprintf("Error opening device %s\n", bus_id);
@@ -376,7 +376,7 @@ struct sysfs_device *sysfs_open_device(const char *bus,	const char *bus_id)
 }
 
 /**
- * sysfs_get_device_parent: opens up given device's parent and returns a 
+ * sysfs_get_device_parent: opens up given device's parent and returns a
  * 	reference to its sysfs_device
  * @dev: sysfs_device whose parent is requested
  * Returns sysfs_device of the parent on success and NULL on failure
@@ -426,7 +426,7 @@ struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev)
 
 	dev->parent = sysfs_open_device_path(ppath);
 	if (!dev->parent) {
-		dprintf("Error opening device %s's parent at %s\n", 
+		dprintf("Error opening device %s's parent at %s\n",
 					dev->bus_id, ppath);
 		return NULL;
 	}

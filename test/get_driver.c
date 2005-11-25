@@ -66,12 +66,12 @@ int main(int argc, char *argv[])
 	devlist = sysfs_get_driver_devices(driver);
 	if (devlist != NULL) {
 		fprintf(stdout, "%s is used by:\n", argv[2]);
-		dlist_for_each_data(devlist, device, struct sysfs_device) 
+		dlist_for_each_data(devlist, device, struct sysfs_device)
 			fprintf(stdout, "\t\t%s\n", device->bus_id);
-	} else 
-		fprintf(stdout, "%s is presently not used by any device\n", 
+	} else
+		fprintf(stdout, "%s is presently not used by any device\n",
 				argv[2]);
-	
+
 	fprintf(stdout, "driver %s is on bus %s\n", driver->name, driver->bus);
 	sysfs_close_driver(driver);
 	free(bus);

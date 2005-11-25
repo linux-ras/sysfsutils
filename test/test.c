@@ -223,7 +223,7 @@ static int path_is_dir(const char *path)
 
 	if ((lstat(path, &astats)) != 0)
 		goto direrr;
-	
+
 	if (S_ISDIR(astats.st_mode))
 		return 0;
 
@@ -238,7 +238,7 @@ static int path_is_file(const char *path)
 
 	if ((lstat(path, &astats)) != 0)
 		goto fileerr;
-	
+
 	if (S_ISREG(astats.st_mode))
 		return 0;
 
@@ -276,33 +276,33 @@ static int check_header(void)
 		if (path_is_dir(var_path) != 0)
 			return 1;
 	}
-	
+
 	for (i = 0; file_paths[i] != NULL; i++) {
 		var_path = file_paths[i];
 		if (path_is_file(var_path) != 0)
 			return 1;
 	}
-	
+
 	for (i = 0; link_paths[i] != NULL; i++) {
 		var_path = link_paths[i];
 		if (path_is_link(var_path) != 0)
 			return 1;
 	}
-	
+
 	memset(path1, 0, SYSFS_PATH_MAX);
 	strcpy(path1, val_root_dev_path);
 	strcat(path1, "/");
 	strcat(path1, val_subdir_name);
 	if (path_is_dir(path1) != 0)
 		return 1;
-	
+
 	memset(path1, 0, SYSFS_PATH_MAX);
 	strcpy(path1, val_drv_path);
 	strcat(path1, "/");
 	strcat(path1, val_drv_dev_name);
 	if (path_is_link(path1) != 0)
 		return 1;
-	
+
 	memset(path1, 0, SYSFS_PATH_MAX);
 	strcpy(path1, val_dir_path);
 	strcat(path1, "/devices");
@@ -310,21 +310,21 @@ static int check_header(void)
 	strcat(path1, val_subdir_link_name);
 	if (path_is_link(path1) != 0)
 		return 1;
-	
+
 	memset(path1, 0, SYSFS_PATH_MAX);
 	strcpy(path1, val_class_dev_path);
 	strcat(path1, "/");
 	strcat(path1, val_class_dev_attr);
 	if (path_is_file(path1) != 0)
 		return 1;
-	
+
 	memset(path1, 0, SYSFS_PATH_MAX);
 	strcpy(path1, val_dev_path);
 	strcat(path1, "/");
 	strcat(path1, val_dev_attr);
 	if (path_is_file(path1) != 0)
 		return 1;
-	
+
 	memset(path1, 0, SYSFS_PATH_MAX);
 	strcpy(path1, val_drv_path);
 	strcat(path1, "/");
@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
 	if (argc < 2) {
 		usage();
 		return 0;
-	} else 
+	} else
 		num = strtol(argv[1], NULL, 0);
 
 	if (check_header() != 0)
@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
 
 	for (k = 0; k < num ; k++) {
 		dbg_print("\nThis is the %d test run\n", k+1);
-		
+
 		for (i = 0; i < FUNC_TABLE_SIZE; i++) {
 dbg_print("\n**************************************************************\n");
 			dbg_print("TESTING: %s, function no: %d\n\n",

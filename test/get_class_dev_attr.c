@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	struct sysfs_device *dev = NULL;
 	struct sysfs_attribute *attr;
 	struct dlist *list;
-	
+
 	if (argc != 4) {
 		print_usage();
 		return 1;
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 		fprintf(stdout, "Error opening class\n");
 		return 1;
 	}
-	
+
 	list = sysfs_get_class_devices(cls);
 	if (!list)
 		return 1;
@@ -57,12 +57,12 @@ int main(int argc, char *argv[])
 		fprintf(stdout, "Device \"%s\" not found\n", argv[2]);
 		return 1;
 	}
-	
+
 	fprintf(stdout, "Class device \"%s\"\n", cdev->name);
 	fprintf(stdout, "Class \"%s\"\n", cdev->classname);
-	
+
 	attr = sysfs_get_classdev_attr(cdev, argv[3]);
-	if (attr) 
+	if (attr)
 		fprintf(stdout, "\t%-20s : %s", attr->name, attr->value);
 	fprintf(stdout, "\n");
 

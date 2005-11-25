@@ -47,18 +47,18 @@
  * extern struct sysfs_attribute *sysfs_get_classdev_attr
  * 	(struct sysfs_class_device *clsdev, const char *name);
  * extern struct sysfs_attribute *sysfs_open_classdev_attr
- * 			(const char *classname, 
- * 			const char *dev, const char *attrib); 
+ * 			(const char *classname,
+ * 			const char *dev, const char *attrib);
  *****************************************************************************
  */
 
 #include "test-defs.h"
 #include <errno.h>
 
-/** 
+/**
  * this test the function:
  *   extern void sysfs_close_class_device(struct sysfs_class_device *dev);
- *   this has no return, 
+ *   this has no return,
  *
  *   flag:
  *   	0:	dev -> valid
@@ -118,7 +118,7 @@ int test_sysfs_open_class_device_path(int flag)
 		return -1;
 	}
 	dev = sysfs_open_class_device_path(path);
-	
+
 	switch (flag) {
 	case 0:
 		if (dev == NULL)
@@ -145,7 +145,7 @@ int test_sysfs_open_class_device_path(int flag)
 	}
 	if (dev != NULL)
 		sysfs_close_class_device(dev);
-	
+
 	return 0;
 }
 
@@ -181,7 +181,7 @@ int test_sysfs_open_class_device(int flag)
 		break;
 	case 2:
 		class = val_class;
-		name = NULL; 
+		name = NULL;
 		break;
 	case 3:
 		class = inval_name;
@@ -193,7 +193,7 @@ int test_sysfs_open_class_device(int flag)
 		break;
 	case 5:
 		class = inval_name;
-		name = NULL; 
+		name = NULL;
 		break;
 	case 6:
 		class = NULL;
@@ -205,13 +205,13 @@ int test_sysfs_open_class_device(int flag)
 		break;
 	case 8:
 		class = NULL;
-		name = NULL; 
+		name = NULL;
 		break;
 	default:
 		return -1;
 	}
 	clsdev = sysfs_open_class_device(class, name);
-	
+
 	switch(flag) {
 	case 0:
 		if (clsdev == NULL)
@@ -244,7 +244,7 @@ int test_sysfs_open_class_device(int flag)
 	}
 	if (clsdev != NULL)
 		sysfs_close_class_device(clsdev);
-	
+
 	return 0;
 }
 
@@ -342,7 +342,6 @@ int test_sysfs_get_classdev_driver(int flag)
 		break;
 	default:
 		return -1;
-			
 	}
 	drv = sysfs_get_classdev_driver(clsdev);
 
@@ -476,8 +475,8 @@ int test_sysfs_close_class(int flag)
 
 	return 0;
 }
- 
-/** 
+
+/**
  * extern struct sysfs_class *sysfs_open_class(const char *name);
  *
  * flag:
@@ -563,10 +562,9 @@ int test_sysfs_get_class_devices(int flag)
 		break;
 	default:
 		return -1;
-			
 	}
 	list = sysfs_get_class_devices(cls);
-	
+
 	switch(flag) {
 	case 0:
 		if (list == NULL) {
@@ -600,7 +598,7 @@ int test_sysfs_get_class_devices(int flag)
 	return 0;
 }
 
-/** 
+/**
  * extern struct sysfs_class_device *sysfs_get_class_device
  * 	(struct sysfs_class *class, char *name);
  *
@@ -662,7 +660,7 @@ int test_sysfs_get_class_device(int flag)
 		return -1;
 	}
 	clsdev = sysfs_get_class_device(class, name);
-	
+
 	switch(flag) {
 	case 0:
 		if (clsdev == NULL) {
@@ -699,12 +697,12 @@ int test_sysfs_get_class_device(int flag)
 	return 0;
 }
 
-/** 	
+/**
  * extern struct dlist *sysfs_get_classdev_attributes
  * 			(struct sysfs_class_device *cdev);
  * flag:
- * 	0:	cdev -> valid 
- * 	1:	cdev -> NULL 
+ * 	0:	cdev -> valid
+ * 	1:	cdev -> NULL
  */
 int test_sysfs_get_classdev_attributes(int flag)
 {
@@ -727,7 +725,7 @@ int test_sysfs_get_classdev_attributes(int flag)
 		break;
 	default:
 		return -1;
-	}	
+	}
 	list = sysfs_get_classdev_attributes(cdev);
 
 	switch (flag) {
@@ -767,8 +765,8 @@ int test_sysfs_get_classdev_attributes(int flag)
  * 				(struct sysfs_class_device *cdev);
  *
  * flag:
- * 	0:	cdev -> valid 
- * 	1:	cdev -> NULL 
+ * 	0:	cdev -> valid
+ * 	1:	cdev -> NULL
  */
 int test_sysfs_refresh_classdev_attributes(int flag)
 {
@@ -791,9 +789,9 @@ int test_sysfs_refresh_classdev_attributes(int flag)
 		break;
 	default:
 		return -1;
-	}	
+	}
 	list = sysfs_refresh_classdev_attributes(cdev);
-	
+
 	switch (flag) {
 	case 0:
 		if (list == NULL) {
@@ -939,9 +937,9 @@ int test_sysfs_get_classdev_attr(int flag)
 
 /**
  * extern struct sysfs_attribute *sysfs_open_classdev_attr
- * 			(const char *classname, 
- * 			const char *dev, 
- * 			const char *attrib); 
+ * 			(const char *classname,
+ * 			const char *dev,
+ * 			const char *attrib);
  * flag:
  * 	0:	classname -> valid, dev -> valid, attrib -> valid
  * 	1:	classname -> valid, dev -> valid, attrib -> invalid

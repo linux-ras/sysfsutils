@@ -27,7 +27,7 @@
  * sysfs_remove_trailing_slash: Removes any trailing '/' in the given path
  * @path: Path to look for the trailing '/'
  * Returns 0 on success 1 on error
- */ 
+ */
 int sysfs_remove_trailing_slash(char *path)
 {
 	size_t len;
@@ -139,7 +139,7 @@ int sysfs_get_link(const char *path, char *target, size_t len)
 	 * 3. relative path _from_ this dir => format abcd/efgh
 	 */
 	switch (*d) {
-		case '.': 
+		case '.':
 			/*
 			 * handle the case where link is of type ./abcd/xxx
 			 */

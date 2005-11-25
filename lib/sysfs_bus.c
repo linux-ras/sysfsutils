@@ -25,12 +25,12 @@
 
 static void sysfs_close_dev(void *dev)
 {
-        sysfs_close_device((struct sysfs_device *)dev);
+	sysfs_close_device((struct sysfs_device *)dev);
 }
 
 static void sysfs_close_drv(void *drv)
 {
-        sysfs_close_driver((struct sysfs_driver *)drv);
+	sysfs_close_driver((struct sysfs_driver *)drv);
 }
 
 /*
@@ -117,13 +117,13 @@ struct dlist *sysfs_get_bus_devices(struct sysfs_bus *bus)
 			}
 			dev = sysfs_open_device_path(target);
 			if (!dev) {
-				dprintf("Error opening device at %s\n",	
+				dprintf("Error opening device at %s\n",
 								target);
 				continue;
 			}
 			if (!bus->devices)
 				bus->devices = dlist_new_with_delete
-					(sizeof(struct sysfs_device), 
+					(sizeof(struct sysfs_device),
 					 		sysfs_close_dev);
 			dlist_unshift_sorted(bus->devices, dev, sort_list);
 		}
@@ -168,13 +168,13 @@ struct dlist *sysfs_get_bus_drivers(struct sysfs_bus *bus)
 			safestrcat(drvpath, curdir);
 			drv = sysfs_open_driver_path(drvpath);
 			if (!drv) {
-				dprintf("Error opening driver at %s\n",	
+				dprintf("Error opening driver at %s\n",
 								drvpath);
 				continue;
 			}
 			if (!bus->drivers)
 				bus->drivers = dlist_new_with_delete
-					(sizeof(struct sysfs_driver), 
+					(sizeof(struct sysfs_driver),
 					 		sysfs_close_drv);
 			dlist_unshift_sorted(bus->drivers, drv, sort_list);
 		}
@@ -216,7 +216,7 @@ struct sysfs_bus *sysfs_open_bus(const char *name)
 		dprintf("calloc failed\n");
 		return NULL;
 	}
-	safestrcpy(bus->name, name);	
+	safestrcpy(bus->name, name);
 	safestrcpy(bus->path, buspath);
 	if (sysfs_remove_trailing_slash(bus->path)) {
 		dprintf("Incorrect path to bus %s\n", bus->path);
@@ -233,12 +233,12 @@ struct sysfs_bus *sysfs_open_bus(const char *name)
  * @id: bus_id for device
  * returns struct sysfs_device reference or NULL if not found.
  */
-struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus, 
+struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus,
 		const char *id)
 {
 	struct sysfs_device *dev = NULL;
 	char devpath[SYSFS_PATH_MAX], target[SYSFS_PATH_MAX];
-	
+
 	if (!bus || !id) {
 		errno = EINVAL;
 		return NULL;
@@ -267,7 +267,7 @@ struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus,
 		}
 		if (!bus->devices)
 			bus->devices = dlist_new_with_delete
-					(sizeof(struct sysfs_device), 
+					(sizeof(struct sysfs_device),
 					 		sysfs_close_dev);
 		dlist_unshift_sorted(bus->devices, dev, sort_list);
 	}
@@ -285,7 +285,7 @@ struct sysfs_driver *sysfs_get_bus_driver(struct sysfs_bus *bus,
 {
 	struct sysfs_driver *drv;
 	char drvpath[SYSFS_PATH_MAX];
-	
+
 	if (!bus || !drvname) {
 		errno = EINVAL;
 		return NULL;
@@ -309,7 +309,7 @@ struct sysfs_driver *sysfs_get_bus_driver(struct sysfs_bus *bus,
 	}
 	if (!bus->drivers)
 		bus->drivers = dlist_new_with_delete
-				(sizeof(struct sysfs_driver), 
+				(sizeof(struct sysfs_driver),
 				 		sysfs_close_drv);
 	dlist_unshift_sorted(bus->drivers, drv, sort_list);
 	return drv;

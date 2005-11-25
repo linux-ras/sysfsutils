@@ -35,7 +35,7 @@ static void sysfs_close_driver_device(void *device)
 void sysfs_close_driver(struct sysfs_driver *driver)
 {
 	if (driver) {
-		if (driver->devices) 
+		if (driver->devices)
 			dlist_destroy(driver->devices);
 		if (driver->attrlist)
 			dlist_destroy(driver->attrlist);
@@ -59,7 +59,7 @@ static struct sysfs_driver *alloc_driver(void)
 static int get_driver_bus(struct sysfs_driver *drv)
 {
 	char drvpath[SYSFS_PATH_MAX], *c = NULL;
-	
+
 	if (!drv) {
 		errno = EINVAL;
 		return 1;
@@ -162,7 +162,7 @@ struct sysfs_driver *sysfs_open_driver_path(const char *path)
  * @psize: size of "path"
  * Returns 0 on success and -1 on error
  */
-static int get_driver_path(const char *bus, const char *drv, 
+static int get_driver_path(const char *bus, const char *drv,
 			char *path, size_t psize)
 {
 	if (!bus || !drv || !path || psize == 0) {
@@ -190,7 +190,7 @@ static int get_driver_path(const char *bus, const char *drv,
  * @drv_name: Name of the driver
  * Returns the sysfs_driver reference on success and NULL on failure
  */
-struct sysfs_driver *sysfs_open_driver(const char *bus_name, 
+struct sysfs_driver *sysfs_open_driver(const char *bus_name,
 			const char *drv_name)
 {
 	char path[SYSFS_PATH_MAX];
@@ -233,7 +233,7 @@ struct dlist *sysfs_get_driver_devices(struct sysfs_driver *drv)
 	linklist = read_dir_links(drv->path);
 	if (linklist) {
 		dlist_for_each_data(linklist, ln, char) {
-			
+
 			if (!strncmp(ln, SYSFS_MODULE_NAME, strlen(ln)))
 				continue;
 

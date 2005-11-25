@@ -364,35 +364,35 @@
 		* Updated NEWS, TODO and docs/libsysfs.txt files
 
 08/28/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
-                * Added more utility functions to sysfsutils
-                * Modified commands to make use of the new functions
-                * Updated libsysfs.txt to reflect new structure modifications
-                * Added sysfs_open_subsystem_list() to get subsystem specific
-                        lists from the library
-                * Added sysfs_close_list() - a generic list deletion routine
+		* Added more utility functions to sysfsutils
+		* Modified commands to make use of the new functions
+		* Updated libsysfs.txt to reflect new structure modifications
+		* Added sysfs_open_subsystem_list() to get subsystem specific
+			lists from the library
+		* Added sysfs_close_list() - a generic list deletion routine
 
 08/28/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
-                * Added sysfs_root_device struct for modelling /sys/devices
-                        path.
+		* Added sysfs_root_device struct for modelling /sys/devices
+			path.
 
 08/28/2003 - Guo Min <min.guo@intel.com>
-                * Added "write" attribute support to sysfsutils
+		* Added "write" attribute support to sysfsutils
 
 08/28/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
-                * Changed sysfs_driver to contain a dlist of devices
+		* Changed sysfs_driver to contain a dlist of devices
 
 08/28/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
-                * Removed sysfs_driver reference from sysfs_device struct
-                * Fixed a few bugs in the commands.
+		* Removed sysfs_driver reference from sysfs_device struct
+		* Fixed a few bugs in the commands.
 
 08/19/2003 - Daniel Stekloff <dsteklof@us.ibm.com>
-               * Integrated Eric Bohm's dlist patch
-               * Integrated Eric Bohm's follow on patch adding dlist_for_each
-               * Changed chars to unsigned chars
-               * Reworked structures to be neater and to contain
-                       sysfs_directories as private structures
-               * Added more functions for retrieving data like attributes
-               * Added some find functions
+		* Integrated Eric Bohm's dlist patch
+		* Integrated Eric Bohm's follow on patch adding dlist_for_each
+		* Changed chars to unsigned chars
+		* Reworked structures to be neater and to contain
+			sysfs_directories as private structures
+		* Added more functions for retrieving data like attributes
+		* Added some find functions
 
 08/06/2003 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Patch to correct dprintf usage

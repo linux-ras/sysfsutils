@@ -28,8 +28,8 @@ This package currently includes:
 	and topology.
 - A number of example usage routines in the "test" directory.
 - A comprehensive testsuite, also shipped as part of the "test" directory. This
-	testsuite can be used to test _all_ the APIs exported by Libsysfs. 
-	Please refer the libsysfs.txt file in the "docs" directory for 
+	testsuite can be used to test _all_ the APIs exported by Libsysfs.
+	Please refer the libsysfs.txt file in the "docs" directory for
 	details as to how to use the testsuite.
 
 
@@ -37,7 +37,7 @@ This package currently includes:
 -----------------
 
 Run the "configure" script to generate Makefiles. Use "make" to build the
-library and utilities. 
+library and utilities.
 
 For a successful install, run "make install" as super-user. "make uninstall"
 will clean up all installed files.
@@ -47,29 +47,29 @@ will clean up all installed files.
 ------------------------
 
 The header files (libsysfs.h and dlist.h) are installed in /usr/include/sysfs
-by default. This _cannot_ be changed by using the --prefix or --includedir 
-parameters while running the "configure" script. 
+by default. This _cannot_ be changed by using the --prefix or --includedir
+parameters while running the "configure" script.
 
 As a consequence, when a non-root user runs the "configure" script with these
 options and builds the package, and tries to install it, "make install" will
-return an error since the non-root user will not have "write" permission to 
-/usr/include/sysfs to install the headers. 
+return an error since the non-root user will not have "write" permission to
+/usr/include/sysfs to install the headers.
 
 However, the library and binaries will be installed at the requested location.
-The header files will have to be manually copied over by the user to the 
+The header files will have to be manually copied over by the user to the
 desired directory.
 
 
 3. Licenses
 -----------
 
-The commands and tests are licensed under the GNU Public License (GPL) 
-Version2, June 1991. The full text of the GPL is located in this package's 
+The commands and tests are licensed under the GNU Public License (GPL)
+Version2, June 1991. The full text of the GPL is located in this package's
 "cmd" directory:
 
 sysfsutils/cmd/GPL
 
-The library is licensed under the GNU Lesser Public License (LGPL) 
+The library is licensed under the GNU Lesser Public License (LGPL)
 Version 2.1, February 1999. The full text of the LGPL is located in
 this package's "lib" directory:
 
@@ -79,7 +79,7 @@ sysfsutils/lib/LGPL
 4. Reporting Bugs
 -----------------
 
-Please direct all bugs to either the linux-diag mailing list - 
+Please direct all bugs to either the linux-diag mailing list -
 linux-diag-devel@lists.sourceforge.net - or to the authors:
 
 Ananth Mavinakayanahalli <ananth@in.ibm.com>

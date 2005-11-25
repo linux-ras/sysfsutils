@@ -42,9 +42,9 @@
  * extern struct dlist *sysfs_refresh_driver_attributes
  * 					(struct sysfs_driver *driver);
  * extern struct sysfs_attribute *sysfs_open_driver_attr
- * 		(const char *bus, const char *drv, 
+ * 		(const char *bus, const char *drv,
  * 					const char *attrib);
- * 
+ *
  ******************************************************************************
  */
 
@@ -80,10 +80,10 @@ int test_sysfs_close_driver(int flag)
 	return 0;
 }
 
-/** 
+/**
  * extern struct sysfs_driver *sysfs_open_driver_path
  * 					(const char *path);
- * 
+ *
  * flag:
  * 	0:	path -> valid
  * 	1:	path -> invalid
@@ -106,7 +106,6 @@ int test_sysfs_open_driver_path(int flag)
 		break;
 	default:
 		return -1;
-		
 	}
 	driver = sysfs_open_driver_path(path);
 
@@ -135,14 +134,14 @@ int test_sysfs_open_driver_path(int flag)
 	}
 	if (driver != NULL)
 		sysfs_close_driver(driver);
-	
+
 	return 0;
 }
 
-/** 
+/**
  * extern struct sysfs_driver *sysfs_open_driver
  * 	(const char *bus_name, const char *drv_name);
- * 
+ *
  * flag:
  * 	0:	path -> valid, name -> valid
  * 	1:	path -> valid, name -> invalid
@@ -201,7 +200,6 @@ int test_sysfs_open_driver(int flag)
 
 	default:
 		return -1;
-		
 	}
 	driver = sysfs_open_driver(bus_name, drv_name);
 	switch (flag) {
@@ -229,7 +227,7 @@ int test_sysfs_open_driver(int flag)
 	}
 	if (driver != NULL)
 		sysfs_close_driver(driver);
-	
+
 	return 0;
 }
 
@@ -293,9 +291,9 @@ int test_sysfs_get_driver_attr(int flag)
 		break;
 	case 5:
 		drv = NULL;
-		attrname = NULL; 
+		attrname = NULL;
 		break;
-	default: 
+	default:
 		return -1;
 	}
 
@@ -303,7 +301,7 @@ int test_sysfs_get_driver_attr(int flag)
 	switch (flag) {
 	case 0:
 		if (attr == NULL) {
-			if (errno == EACCES) 
+			if (errno == EACCES)
 				dbg_print("%s: attribute %s does not support READ\n",
 						__FUNCTION__, attrname);
 			else if (errno == ENOENT)
@@ -340,7 +338,7 @@ int test_sysfs_get_driver_attr(int flag)
 		sysfs_close_driver(drv);
 
 	return 0;
-} 
+}
 
 /**
  * extern struct dlist *sysfs_get_driver_attributes
@@ -412,7 +410,7 @@ int test_sysfs_get_driver_attributes(int flag)
 	}
 	if (driver != NULL)
 		sysfs_close_driver(driver);
-	
+
 	return 0;
 }
 
@@ -455,7 +453,7 @@ int test_sysfs_get_driver_devices(int flag)
 		return -1;
 	}
 	list = sysfs_get_driver_devices(driver);
-	
+
 	switch (flag) {
 	case 0:
 	case 2:
@@ -482,11 +480,10 @@ int test_sysfs_get_driver_devices(int flag)
 						__FUNCTION__, flag);
 	default:
 		break;
-			
 	}
 	if (driver != NULL)
 		sysfs_close_driver(driver);
-	
+
 	return 0;
 }
 
@@ -526,7 +523,7 @@ int test_sysfs_refresh_driver_devices(int flag)
 		return -1;
 	}
 	list = sysfs_refresh_driver_devices(driver);
-	
+
 	switch (flag) {
 	case 0:
 		if (list == NULL) {
@@ -552,7 +549,6 @@ int test_sysfs_refresh_driver_devices(int flag)
 						__FUNCTION__, flag);
 	default:
 		break;
-			
 	}
 	if (driver != NULL)
 		sysfs_close_driver(driver);
@@ -614,7 +610,6 @@ int test_sysfs_get_driver_links(int flag)
 						__FUNCTION__, flag);
 	default:
 		break;
-			
 	}
 	if (driver != NULL)
 		sysfs_close_driver(driver);
@@ -714,7 +709,6 @@ int test_sysfs_get_driver_device(int flag)
 						__FUNCTION__, flag);
 	default:
 		break;
-			
 	}
 	if (driver != NULL)
 		sysfs_close_driver(driver);
@@ -776,7 +770,6 @@ int test_sysfs_refresh_driver_attributes(int flag)
 						__FUNCTION__, flag);
 	default:
 		break;
-			
 	}
 	if (driver != NULL)
 		sysfs_close_driver(driver);
@@ -786,7 +779,7 @@ int test_sysfs_refresh_driver_attributes(int flag)
 
 /**
  * extern struct sysfs_attribute *sysfs_open_driver_attr
- * 			(const char *bus, const char *drv, 
+ * 			(const char *bus, const char *drv,
  * 			const char *attrib);
  *
  * flag:
@@ -976,7 +969,7 @@ int  test_sysfs_open_driver_attr(int flag)
 	case 0:
 	case 27:
 		if (attr == NULL) {
-			if (errno == EACCES) 
+			if (errno == EACCES)
 				dbg_print("%s: attribute %s does not support READ\n",
 						__FUNCTION__, attrib);
 			else if (errno == ENOENT)
@@ -1000,7 +993,6 @@ int  test_sysfs_open_driver_attr(int flag)
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
 		break;
-			
 	}
 	if (attr != NULL)
 		sysfs_close_attribute(attr);
