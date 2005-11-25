@@ -1,6 +1,12 @@
+11/25/2005 - Mohan Kumar <mohan@in.ibm.com>
+		* Documentation update
+		* Add missing function prototype in libsysfs.h
+
 11/25/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
-		* Added Martin Schlemmer's KLIBC support patch
 		* Other autotool updates
+
+11/25/2005 - Martin Schlemmer <azarah@nosferatu.za.org>
+		* KLIBC support for sysfsutils
 
 11/14/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* More class_devices now have a "parent"

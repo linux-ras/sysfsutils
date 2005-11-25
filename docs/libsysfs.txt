@@ -2,8 +2,8 @@
 	System Utilities sysfs Library - libsysfs
 	=========================================
 
-Version: 1.2.0 
-September 13, 2004
+Version: 2.0.0
+November 25, 2005
 
 Contents
 --------
@@ -12,29 +12,25 @@ Contents
 3. Definitions
 4. Overview
 5. Data Structures
-   5.1 Directory and Attribute Data Structures
-       5.1.1 Attribute Structure
-       5.1.2 Link Structure
-       5.1.3 Directory Structure
+   5.1 Attribute Data Structure
    5.2 Bus Data Structure
    5.3 Class Data Structures
-   5.4 Root Device Data Structure
-   5.5 Device Data Structure
-   5.6 Driver Data Structure
+   5.4 Device Data Structure
+   5.5 Driver Data Structure
+   5.6 Module Data Structure
 6. Functions
    6.1 Calling Conventions in Libsysfs
    6.2 Utility Functions
-   6.3 Filesystem Functions
-       6.3.1 Attribute Functions
-       6.3.2 Directory Link Functions
-       6.3.3 Directory Functions
+   6.3 Attribute Functions
    6.4 Bus Functions
    6.5 Class Functions
    6.6 Device Functions
    6.7 Driver Functions
+   6.8 Module functions
 7. Dlists
    7.1 Navigating a dlist
    7.2 Custom sorting using dlist_sort_custom()
+   7.3 Custom filtering and sorting using dlist_filter_sort()
 8. Usage
 9. Testsuite
 10. Conclusion
@@ -45,9 +41,9 @@ Contents
 
 Libsysfs' purpose is to provide a consistent and stable interface for
 querying system device information exposed through the sysfs filesystem.
-The library implements functions for querying filesystem information, 
+The library implements functions for querying filesystem information,
 such as reading directories and files. It also contains routines for
-working with buses, classes, and the device tree. 
+working with buses, classes, and the device tree.
 
 
 2. Requirements
@@ -56,7 +52,7 @@ working with buses, classes, and the device tree.
 The library must satisfy the following requirements:
 
 - It must provide a stable programming interfaces that applications can
-  be built upon. 
+  be built upon.
 
 - It must provide functions to retrieve device Vital Product Data (VPD)
   information for Error Log Analysis (ELA) support. ELA will provide
@@ -74,7 +70,7 @@ The library must satisfy the following requirements:
 3. Definitions
 --------------
 
-- sysfs: Sysfs is a virtual filesystem in 2.5+ Linux kernels that 
+- sysfs: Sysfs is a virtual filesystem in 2.5+ Linux kernels that
   presents a hierarchical representation of all system physical and
   virtual devices. It presents system devices by bus, by class, and
   by topology. Callbacks to device drivers are exposed as files in
@@ -93,7 +89,7 @@ The library must satisfy the following requirements:
 
   Udev provides persistent device naming based on a set of user specified
   rules. The rules a device name is based on could one or a combination of a
-  number of parameters such as the bus the device is on, the serial number 
+  number of parameters such as the bus the device is on, the serial number
   of the device (in case of USB), the vendor name (in case of SCSI) and so
   on. Udev uses Libsysfs to retrieve relevent information to appropriately
   name devices.
@@ -106,9 +102,9 @@ Libsysfs grew from a common need. There are several applications under
 development that need access to sysfs and system devices. Udev, on a
 hotplug event, must take a sysfs device path and create a /dev node. Our
 diagnostic client needs to list all system devices. Finally, our Error
-Log Analysis piece is required to retrieve VPD information for a 
-failing device. We divided to create a single library interface rather 
-than having these separate applications create their own accesses to 
+Log Analysis piece is required to retrieve VPD information for a
+failing device. We divided to create a single library interface rather
+than having these separate applications create their own accesses to
 sysfs involving reading directories and files.
 
 Libsysfs will also provide stability for applications to be built upon. Sysfs
@@ -120,7 +116,7 @@ applications while allowing sysfs to change underneath it.
 Like sysfs, the library will provide devices to applications by bus, by
 class, and by topology. The library will function similar to directories
 and files that lie underneath it. To query a device on a PCI bus, one would
-"open" the bus to scan or read devices and "close" the bus when 
+"open" the bus to scan or read devices and "close" the bus when
 completed. Besides supplying functions to retrieve devices, the library
 will also provide some utility functions like getting sysfs mount point.
 
@@ -133,9 +129,9 @@ http://oss.software.ibm.com/linux/papers/libsysfs/libsysfs-linuxconfau2004.pdf
 5. Data Structures
 ------------------
 
-Libsysfs will classify system devices following sysfs' example, dividing 
+Libsysfs will classify system devices following sysfs' example, dividing
 them by bus, class, and devices. The library presents this information
-generically. It doesn't, for example, differentiate between PCI and USB 
+generically. It doesn't, for example, differentiate between PCI and USB
 buses. Device attributes are presented with values as they are exposed
 by sysfs, the values are not formatted.
 
@@ -150,6 +146,10 @@ and devices, here's some examples:
 #define SYSFS_DEVICES_NAME      "devices"
 #define SYSFS_DRIVERS_NAME      "drivers"
 #define SYSFS_NAME_ATTRIBUTE    "name"
+#define SYSFS_MOD_PARM_NAME     "parameters"
+#define SYSFS_MOD_SECT_NAME     "sections"
+#define SYSFS_UNKNOWN           "unknown"
+#define SYSFS_PATH_ENV          "SYSFS_PATH"
 
 The library uses some definitions to mark maximum size of a sysfs name or
 path length:
@@ -160,29 +160,24 @@ path length:
 
 
 NOTE:
-     a. As of release 0.4.0 of sysfsutils, a number of changes have been 
-	made so that the dlists and "directory" references in all libsysfs's 
+     a. As of release 0.4.0 of sysfsutils, a number of changes have been
+	made so that the dlists and "directory" references in all libsysfs's
 	structures are not populated until such time that it is absolutely
 	necessary. Hence, these elements may not contain valid data at all
 	times (as was the case before).
      b. As of release 1.0.0 of sysfsutils, all dlists in the library are
-	sorted in alphabetical order. It is now a requirement that the 
+	sorted in alphabetical order. It is now a requirement that the
 	"name" and "path" be the first two elements of all libsysfs
 	structures.
 
 
-5.1 Directory and Attribute Data Structures
+5.1 Attribute Data Structure
 -------------------------------------------
 
-The library implements structures to represent sysfs directories, links, 
-and files. 
-
-
-5.1.1 Attribute Structure
--------------------------
+The library implements structure to represent sysfs files.
 
 A file in sysfs represents a device or driver attribute. Attributes can be
-read only, write only, or read and write. File data can be ASCII and 
+read only, write only, or read and write. File data can be ASCII and
 binary. The library has the following structure to represent files:
 
 struct sysfs_attribute {
@@ -194,47 +189,9 @@ struct sysfs_attribute {
 };
 
 Path represents the file/attribute's full path. Value is used when reading
-from or writing to an attribute. "len" is the length of data in "value". 
-Method is a bitmask for defining if the attribute supports show(read) 
-and/or store(write). 
-
-
-5.1.2 Link Structure
---------------------
-
-Symbolic links are used in sysfs to link bus or class views with 
-particular devices. 
-
-struct sysfs_link {
-        char name[SYSFS_NAME_LEN];
-        char path[SYSFS_PATH_MAX];
-        char target[SYSFS_PATH_MAX];
-};
-
-Link's name is stored in "name' and it's target stored in "target". Absolute 
-path to the link is stored in "path".
-
-
-5.1.3 Directory Structure
--------------------------
-
-The directory structure represents a sysfs directory:
-
-struct sysfs_directory {
-        char name[SYSFS_NAME_LEN];
-        char path[SYSFS_PATH_MAX];
-
-	/* Private: for internal use only */
-        struct dlist *subdirs;
-        struct dlist *links;
-        struct dlist *attributes;
-};
-
-The sysfs_directory structure includes the list of subdirectories, links and
-attributes. The "name" and absolute "path" are also stored in the structure.
-The sysfs_directory structure is intended for use internal to the library.
-Applications needing access to attributes and links from the directory
-will need to make appropriate calls (described below) to get the same.
+from or writing to an attribute. "len" is the length of data in "value".
+Method is a bitmask for defining if the attribute supports show(read)
+and/or store(write).
 
 
 5.2 Bus Data Structure
@@ -253,12 +210,12 @@ struct sysfs_bus {
         struct sysfs_directory *directory;
 };
 
-The sysfs_bus structure contains the bus "name", while the "path" to bus 
-directory is also stored. It also contains lists of devices on the bus 
-and drivers that are registered on it. The bus' directory is represented 
-by the sysfs_directory structure and it contains references to all the 
-subdirectories, links, and attributes. The sysfs_directory structure 
-is for internal use only. The following functions may be used by 
+The sysfs_bus structure contains the bus "name", while the "path" to bus
+directory is also stored. It also contains lists of devices on the bus
+and drivers that are registered on it. The bus' directory is represented
+by the sysfs_directory structure and it contains references to all the
+subdirectories, links, and attributes. The sysfs_directory structure
+is for internal use only. The following functions may be used by
 applications to retrieve data from the sysfs_directory structure:
 
 struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus)
@@ -282,9 +239,9 @@ struct sysfs_class {
         struct sysfs_directory *directory;
 };
 
-The sysfs_class represents device classes in sysfs like "net". It contains  
-the class "name", "path" to the class, a list of class devices and the 
-directory representation (for internal use only). 
+The sysfs_class represents device classes in sysfs like "net". It contains
+the class "name", "path" to the class, a list of class devices and the
+directory representation (for internal use only).
 
 struct sysfs_class_device {
         char name[SYSFS_NAME_LEN];
@@ -292,47 +249,24 @@ struct sysfs_class_device {
         char classname[SYSFS_NAME_LEN];
 
         /* Private: for internal use only */
-	struct sysfs_class_device *parent;
+        struct sysfs_class_device *parent;
         struct sysfs_device *sysdevice;         /* NULL if virtual */
         struct sysfs_driver *driver;            /* NULL if not implemented */
         struct sysfs_directory *directory;
 };
 
-A class device isn't the same as a sysfs_device, it's specific to the class in 
+A class device isn't the same as a sysfs_device, it's specific to the class in
 which it belongs. The class device structure contains the name of the class
-the class device belongs to, its sysfs_device reference and that device's 
-driver reference (if any). It also contains the name of the class device 
-- like "eth0", its parent point (if present) and its sysfs directory 
-information including links and attributes (for internal use only). 
+the class device belongs to, its sysfs_device reference and that device's
+driver reference (if any). It also contains the name of the class device
+- like "eth0", its parent point (if present) and its sysfs directory
+information including links and attributes (for internal use only).
 The following function may be used by applications to retrieve data
 from the sysfs_directory structure:
 
 struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev);
 
-
-5.4 Root Device Data Structure
-------------------------------
-
-Device hierarchies in sysfs are represented under the /sys/devices directory 
-structure. Sysfs devices typically spawn off from base devices which are 
-represented by a sysfs_root_device. 
-
-struct sysfs_root_device {
-        char name[SYSFS_NAME_LEN];
-        char path[SYSFS_PATH_MAX];
-
-        /* Private: for internal use only */
-        struct dlist *devices;
-        struct sysfs_directory *directory;
-};
-
-The sysfs_root_device structure contains a list of "devices" that spawn off it.
-The name of the root device as represented under /sys/devices is read into 
-"name" and the absolute path into "path" and its sysfs_directory information 
-intended to be used internal to the library. 
-
-
-5.5 Device Data Structure
+5.4 Device Data Structure
 -------------------------
 
 The sysfs_device structure represents a system device that's exposed
@@ -352,11 +286,11 @@ struct sysfs_device {
 };
 
 The sysfs_device structure contains a "parent" pointer, a list of child
-devices, if any, device's directory, its bus id - which is the name of 
-device's directory, the bus name on which this device is registered and 
+devices, if any, device's directory, its bus id - which is the name of
+device's directory, the bus name on which this device is registered and
 its driver name. The device structure also contains the absolute path
-to the device and a directory structure, which contains a list of the 
-device's attributes (for internal use only). The following functions 
+to the device and a directory structure, which contains a list of the
+device's attributes (for internal use only). The following functions
 may be used to obtain information from sysfs_directory structure:
 
 struct sysfs_attribute *sysfs_get_device_attribute(struct sysfs_device *dev,
@@ -364,7 +298,7 @@ struct sysfs_attribute *sysfs_get_device_attribute(struct sysfs_device *dev,
 struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
 
 
-5.6 Driver Data Structure
+5.5 Driver Data Structure
 -------------------------
 
 The sysfs_driver structure represents a device driver.
@@ -379,7 +313,7 @@ struct sysfs_driver {
 };
 
 The sysfs_driver structure contains a list of devices that use this driver,
-the name of the driver, its path, and its directory information, which 
+the name of the driver, its path, and its directory information, which
 includes the driver's attributes (for internal use only). The following
 function may be used to retrieve driver attribute information from the
 sysfs_directory structure:
@@ -387,11 +321,32 @@ sysfs_directory structure:
 struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver)
 
 
+5.6 Module Data Structure
+-------------------------
+The sysfs_module structure represents the module loaded in the system.
+
+struct sysfs_module {
+        char name[SYSFS_NAME_LEN];
+        char path[SYSFS_PATH_MAX];
+        struct dlist *attrlist;
+        struct dlist *parmlist;
+        struct dlist *sections;
+};
+
+The sysfs_module structure contains a list of attributes, parameters and
+sections used by the corresponding module. It also contains name of the
+module, its path. The following functions can be used to retrive the
+information related to the module.
+
+struct dlist *sysfs_get_module_parms(struct sysfs_module *module)
+struct dlist *sysfs_get_module_sections(struct sysfs_module *module)
+struct dlist *sysfs_get_module_attributes(struct sysfs_module *module)
+
 6. Functions
 ------------
 
 Libsysfs will provide functions to access system devices by bus, by class,
-and by device. Functions will act like accessing directories and files, 
+and by device. Functions will act like accessing directories and files,
 using "open" and "close". Open returns a structure and close is used
 to clean that structure up.
 
@@ -399,7 +354,7 @@ to clean that structure up.
 6.1 Calling Conventions in Libsysfs
 -----------------------------------
 
-Libsysfs uses a simple API calling convention. APIs are classified to be 
+Libsysfs uses a simple API calling convention. APIs are classified to be
 one of "open", "get", "close" types. The convention is as follows:
 
 	a. All "open" APIs have a corresponding "close" API.
@@ -445,7 +400,7 @@ Returns:	0 with success.
 		-1 on Error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
-Prototype:	int sysfs_get_name_from_path(const char *path, 
+Prototype:	int sysfs_get_name_from_path(const char *path,
 					char *name, size_t *len)
 -------------------------------------------------------------------------------
 
@@ -456,48 +411,14 @@ Description:	Sysfs readlink function, reads the link at supplied path
 		and returns its target path.
 
 Arguments:	const char *path	Link's path
-		char *target		Buffer to place link's target 
+		char *target		Buffer to place link's target
 		size_t len		Size of target buffer
 
-Returns:	0 with success 
+Returns:	0 with success
 		-1 with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
 Prototype:	int sysfs_get_link(const char *path, char *target, size_t len)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_open_subsystem_list
-
-Description:	Function returns the list of entries for the given subsystem. If
-		the argument is "bus", this function will return a list of buses
-		("pci", "scsi", etc) supported on the system.
-
-		sysfs_close_list() has to be called to free the list obtained
-		from this call.
-
-Arguments:	char *name		Subsystem to open, like "bus"..
-
-Returns:	dlist of entries for the subsystem on success
-		NULL with error indicating the "name" subsystem is invalid.
-
-Prototype:	struct dlist *sysfs_open_subsystem_list(char *name)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_open_bus_devices_list
-
-Description:	Function returns the list of devices on the given bus. 
-
-		sysfs_close_list() has to be called to free the list obtained
-		from this call.
-
-Arguments:	char *name		Bus name to open "pci"/"scsi"/"usb"..
-
-Returns:	dlist of device names for the given bus on success
-		NULL with error indicating the bus is not supported.
-
-Prototype:	struct dlist *sysfs_open_bus_devices_list(char *name)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -550,20 +471,26 @@ Returns:	0 on success, 1 on error
 Prototype:	int sysfs_path_is_link(const char *path)
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+Name:		sysfs_open_directory_list
 
-6.3 Filesystem Functions
+Description:	Utility function to get list of all directories under path.
+
+Arguments:	const char *path	Path to read
+
+Returns:	Directory list on success, NULL on error
+
+Prototype:	struct dlist *sysfs_open_directory_list(const char *path)
+-------------------------------------------------------------------------------
+
+
+6.3 Attribute Functions
 ------------------------
 
-Libsysfs provides a set of functions to open, read, and close directories
-and attributes/files in sysfs. These functions mirror their filesystem
-function counterparts. 
-
-
-6.3.1 Attribute Functions
--------------------------
+Libsysfs provides a set of functions to open, read, and close attributes in sysfs. These functions mirror their filesystem function counterparts.
 
 Along with the usual open, read, and close functions, libsysfs provides
-a couple other functions for accessing attribute values. 
+a couple other functions for accessing attribute values.
 
 -------------------------------------------------------------------------------
 Name:		sysfs_open_attribute
@@ -591,54 +518,6 @@ Prototype:	void sysfs_close_attribute(struct sysfs_attribute *sysattr)
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Name:		sysfs_read_dir_attributes
-
-Description:	Reads the given sysfs_directory to create a list of attributes.
-
-Arguments:	struct sysfs_directory *sysdir	sysfs_directory whose 
-						attributes to read
-
-Returns:	struct dlist * of attributes on success
-		NULL with error. Errno will be set on error, returning EINVAL
-				for invalid arguments
-		
-Prototype:	struct dlist *sysfs_read_dir_attributes
-					(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_refresh_dir_attributes
-
-Description:	Given a list sysfs_directory, this function refreshes the list
-		of attributes for the given directory.
-
-Arguments:	struct sysfs_directory *sysdir	sysfs_ directory whose 
-						attributes list	to refresh
-
-Returns:	0 with success.
-		1 with error. Errno will be set on error, returning EINVAL
-				for invalid arguments
-
-Prototype:	int sysfs_refresh_dir_attributes(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_dir_attributes
-
-Description:	Returns a list of attributes for the given sysfs_directory.
-
-Arguments:	struct sysfs_directory *sysdir	sysfs_directory whose 
-						attributes list to return
-
-Returns:	struct dlist * of attributes with success
-		NULL with error. Errno will be set on error, returning EINVAL
-				for invalid arguments
-		
-Prototype:	struct dlist *sysfs_read_dir_attributes
-					(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
 Name:		sysfs_read_attribute
 
 Description:	Reads the supplied attribute. Since the maximum transfer
@@ -659,10 +538,10 @@ Prototype:	int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 Name:		sysfs_write_attribute
 
 Description:	Writes to the supplied attribute. Function validates if the
-		given attribute is writable, and writes the new value to the 
-		attribute. Value to write as well as its length is user 
-		supplied. In case the length written is not equal to the 
-		length requested to be written, the original value is 
+		given attribute is writable, and writes the new value to the
+		attribute. Value to write as well as its length is user
+		supplied. In case the length written is not equal to the
+		length requested to be written, the original value is
 		restored and an error is returned.
 
 Arguments:	struct sysfs_attribute *sysattr		Attribute to write to
@@ -670,326 +549,21 @@ Arguments:	struct sysfs_attribute *sysattr		Attribute to write to
 		size_t len				Length of "new_value"
 
 Returns:	0 with success.
-		-1 with error. Errno will be set with error, returning 
+		-1 with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
 Prototype:	int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 				const char *new_value, size_t len)
 -------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
-Name:		sysfs_read_attribute_value
-
-Description:	Given a path to a specific attribute, function reads and
-		returns its value to the supplied value buffer.
-
-Arguments:	const char *attrpath	Attribute path to read
-		char *value		Buffer to read in attribute's value
-		size_t vsize		Size of buffer
-
-Returns:	0 with success.
-		-1 with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	int sysfs_read_attribute_value(const char *attrpath, 
-					char *value, size_t vsize)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_value_from_attributes
-
-Description:	Function takes a single or linked list of sysfs attribute
-		structures and returns the value of the specified attribute
-		name.
-
-Arguments:	struct dlist *attr	Attribute list to search through
-		const char *name 	Name of attribute whose value
-					to retrieve
-
-Returns:	char * attribute value with success.
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	char *sysfs_get_value_from_attributes
-			(struct sysfs_attribute *attr, const char *name)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_directory_attribute
-
-Description:	Function walks the list of attributes for the given sysfs 
-		directory and returns the sysfs_attribute structure for
-		the specified attribute name.
-
-Arguments:	struct sysfs_directory *dir	Directory in which to search
-		char *attrname			Attribute name to look for
-
-Returns:	struct sysfs_attribute on success.
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_attribute *sysfs_get_directory_attribute
-			(struct sysfs_directory *dir, char *attrname)
--------------------------------------------------------------------------------
-		
-
-6.3.2 Link Functions
---------------------
-
-Sysfs contains many symbolic links, like bus links to bus devices. Libsysfs
-treats links differently than directories due to processing differences. A
-link in the /sys/bus/"busname"/devices/ directory indicates a device in the
-/sys/devices directory. Through links we give the functionality to know
-what is and what isn't a link and the ability to query the links target.
-
--------------------------------------------------------------------------------
-Name:		sysfs_open_link
-
-Description:	Opens a directory link. 
-
-Arguments:	const char *linkpath		Path to link
-
-Returns:	struct sysfs_link * with success.
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_link *sysfs_open_link(const char *linkpath)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_close_link
-
-Description:	Closes a directory link structure.
-
-Arguments:	struct sysfs_link *ln		Link to close
-
-Prototype:	void sysfs_close_link(struct sysfs_link *ln)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_read_dir_links
-
-Description:	Reads the given sysfs_directory to create a list of links.
-
-Arguments:	struct sysfs_directory *sysdir	sysfs_directory whose 
-						links to read
-
-Returns:	struct dlist * of links with success
-		NULL with error. Errno will be set on error, returning EINVAL
-				for invalid arguments
-		
-Prototype:	struct dlist *sysfs_read_dir_links
-					(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_dir_links
-
-Description:	Returns a list of links for the given sysfs_directory.
-
-Arguments:	struct sysfs_directory *sysdir	sysfs_directory whose 
-						list of links to return
-
-Returns:	struct dlist * of links with success
-		NULL with error. Errno will be set on error, returning EINVAL
-				for invalid arguments
-		
-Prototype:	struct dlist *sysfs_read_dir_links
-					(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_directory_link
-
-Description:	Function walks the list of links for the given sysfs directory 
-		and returns the sysfs_link structure for the specified link 
-		name.
-
-Arguments:	struct sysfs_directory *dir	Directory in which to search
-		char *linkname			Link name to look for
-
-Returns:	struct sysfs_link * with success.
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_link *sysfs_get_directory_link
-			(struct sysfs_directory *dir, char *linkname)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_subdirectory_link
-
-Description:	Function walks the list of links for the given sysfs directory 
-		and its subdirectories returns the sysfs_link structure for 
-		the specified link name.
-
-Arguments:	struct sysfs_directory *dir	Directory in which to search
-		char *linkname			Link name to look for
-
-Returns:	struct sysfs_link * with success.
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_link *sysfs_get_subdirectory_link
-			(struct sysfs_directory *dir, char *linkname)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_refresh_dir_links
-
-Description:	Given a list sysfs_directory, this function refreshes the list
-		of links under the given directory.
-
-Arguments:	struct sysfs_directory *sysdir	sysfs_ directory whose 
-						links list to refresh
-
-Returns:	0 with success.
-		1 with error. Errno will be set on error, returning EINVAL
-				for invalid arguments
-
-Prototype:	int sysfs_refresh_dir_links(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
-
-6.3.3 Directory Functions
--------------------------
-
-Sysfs directories can represent every directory under sysfs. The structures
-keep track of subdirectories, links, and files. Like opendir, readdir, and
-closedir, libsysfs provides open, read, and close functions for working with
-sysfs directories. Open creates the sysfs_directory structure. Read reads in
-its contents - like subdirectories, links, and files. Close cleans it all
-up.
-
--------------------------------------------------------------------------------
-Name:		sysfs_open_directory
-
-Description:	Opens a sysfs directory at a specific path
-
-Arguments:	const char *path	Directory path to open
-
-Returns:	struct sysfs_directory * with success.
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_directory *sysfs_open_directory(const char *path)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_close_directory
-
-Description:	Closes specific directory, its subdirectories, links, and
-		files.
-
-Arguments:	struct sysfs_directory *sysdir	Directory to close
-
-Prototype:	void sysfs_close_directory(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_read_dir_subdirs
-
-Description:	Reads the given sysfs_directory to create a list of subdirs.
-
-Arguments:	struct sysfs_directory *sysdir	sysfs_directory whose 
-						subdirs have to be read
-
-Returns:	struct dlist * of links with success
-		NULL with error. Errno will be set on error, returning EINVAL
-				for invalid arguments
-		
-Prototype:	struct dlist *sysfs_read_dir_subdirs
-					(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_read_directory
-
-Description:	Read the supplied directory. Reading fills in the directory's
-		contents like subdirectories, links, and attributes.
-
-Arguments:	struct sysfs_directory *sysdir	Directory to read
-
-Returns:	0 with success.
-		-1 with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	int sysfs_read_directory(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_read_all_subdirs
-
-Description:	Reads all subdirs under a given supplied directory. 
-
-Arguments:	struct sysfs_directory *sysdir	Directory to read
-
-Returns:	0 with success.
-		-1 with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	int sysfs_read_all_subdirs(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_subdirectory
-
-Description:	Function walks the directory tree for the given directory and
-		returns a sysfs_directory structure for the specified directory
-		name.
-
-Arguments:	struct sysfs_directory *dir	Directory in which to search
-		char *subname			Name of directory to look for
-
-Returns:	struct sysfs_directory with success.
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_directory *sysfs_get_subdirectory
-				(struct sysfs_directory *dir, char *subname)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_dir_subdirs
-
-Description:	Returns a list of subdirs for the given sysfs_directory.
-
-Arguments:	struct sysfs_directory *sysdir	sysfs_directory whose 
-						subdirectories list to return
-
-Returns:	struct dlist * of directories with success
-		NULL with error. Errno will be set on error, returning EINVAL
-				for invalid arguments
-		
-Prototype:	struct dlist *sysfs_read_dir_subdirs
-					(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_refresh_dir_subdirs
-
-Description:	Given a list sysfs_directory, this function refreshes the list
-		of subdirectories under the given directory.
-
-Arguments:	struct sysfs_directory *sysdir	sysfs_ directory whose 
-						subdirs list to refresh
-
-Returns:	0 with success.
-		1 with error. Errno will be set on error, returning EINVAL
-				for invalid arguments
-
-Prototype:	int sysfs_refresh_dir_subdirs(struct sysfs_directory *sysdir)
--------------------------------------------------------------------------------
-
-
 6.4 Bus Functions
 -----------------
 
-The library provides a functions for viewing buses represented in sysfs. 
+The library provides a functions for viewing buses represented in sysfs.
 The sysfs_open_bus opens a bus in the /sys/bus directory, such as "pci",
-"usb", or "scsi". The open command returns a sysfs_bus structure that 
-contains a list of the bus' devices. The sysfs_close_bus function is 
-used to clean up the bus structure. Given a device or a driver, 
+"usb", or "scsi". The open command returns a sysfs_bus structure that
+contains a list of the bus' devices. The sysfs_close_bus function is
+used to clean up the bus structure. Given a device or a driver,
 functions are provided to determine what bus they are on.
 
 -------------------------------------------------------------------------------
@@ -1001,7 +575,7 @@ Description:	Function opens up one of the buses represented in sysfs in
 
 Arguments:	const char *name	Bus name to open, like "pci"...
 
-Returns:	struct sysfs_bus * with success 
+Returns:	struct sysfs_bus * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1052,15 +626,15 @@ Prototype:	struct dlist *sysfs_get_bus_drivers(struct sysfs_bus *bus)
 -------------------------------------------------------------------------------
 Name:		sysfs_get_bus_device
 
-Description:	Function takes a sysfs_bus structure(obtained on a successful 
-		return from a sysfs_open_bus() call) and looks for the given 
-		device on this bus. On success, it returns a sysfs_device 
+Description:	Function takes a sysfs_bus structure(obtained on a successful
+		return from a sysfs_open_bus() call) and looks for the given
+		device on this bus. On success, it returns a sysfs_device
 		structure corresponding to the device.
 
 Arguments:	struct sysfs_bus *bus	Bus structure on which to search
 		char *id		Device to look for
 
-Returns:	struct sysfs_device * with success 
+Returns:	struct sysfs_device * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1071,87 +645,21 @@ Prototype:	struct sysfs_device *sysfs_get_bus_device
 -------------------------------------------------------------------------------
 Name:		sysfs_get_bus_driver
 
-Description:	Function takes a sysfs_bus structure (obtained on a successful 
-		return from a sysfs_open_bus() call) and looks for the given 
-		driver on this bus. On success, it returns a sysfs_driver 
+Description:	Function takes a sysfs_bus structure (obtained on a successful
+		return from a sysfs_open_bus() call) and looks for the given
+		driver on this bus. On success, it returns a sysfs_driver
 		structure corresponding to the driver.
 
 Arguments:	struct sysfs_bus *bus	Bus structure on which to search
 		char *drvname		Driver to look for
 
-Returns:	struct sysfs_driver * with success 
+Returns:	struct sysfs_driver * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
 Prototype:	struct sysfs_device *sysfs_get_bus_driver
 				(struct sysfs_bus *bus, char *drvname)
 -------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_bus_attributes
-
-Description:	Function takes a sysfs_bus structure and returns a list of
-		attributes for the bus.
-
-Arguments:	struct sysfs_bus *bus	Bus for which attributes are required
-
-Returns:	struct dlist * of attributes with success 
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_bus_attribute
-
-Description:	Function takes a sysfs_bus structure and looks for the required
-		attribute on the bus. On success, it returns a sysfs_attribute
-		structure corresponding to the given attribute.
-
-Arguments:	struct sysfs_bus *bus		Bus structure on which to search
-		char *attrname			Attribute to look for
-
-Returns:	struct sysfs_attribute * with success
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_attribute *sysfs_get_bus_attribute
-				(struct sysfs_bus *bus, char *attrname)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_refresh_bus_attributes
-
-Description:	Function refreshes the list of attributes for a given sysfs_bus
-
-Arguments:	struct sysfs_bus *bus	Bus whose attributes list to refresh
-
-Returns:	struct dlist * of attributes with success 
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_find_driver_bus
-
-Description:	Given the name of a driver, this function finds the name of the
-		bus the driver is on
-
-Arguments:	const char *driver	Name of the driver to look for
-		char *busname		Buffer to return the bus name
-		size_t bsize		Size of the "busname" buffer
-
-Returns:	0 with success.
-		-1 with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	int sysfs_find_driver_bus(const char *driver,
-					char *busname, size_t bsize)
--------------------------------------------------------------------------------
-
 
 6.5 Class Functions
 -------------------
@@ -1173,7 +681,7 @@ Description:	Function opens up one of the classes represented in sysfs in
 
 Arguments:	const char *name	Class name to open, like "net"..
 
-Returns:	struct sysfs_class * with success 
+Returns:	struct sysfs_class * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1194,13 +702,13 @@ Prototype:	void sysfs_close_class(struct sysfs_class *cls);
 -------------------------------------------------------------------------------
 Name:		sysfs_open_class_device_path
 
-Description:	Function opens up one of the class devices represented in 
+Description:	Function opens up one of the class devices represented in
 		sysfs in sysfs/class/"class"/ directory. It returns a
 		sysfs_class_device structure.
 
 Arguments:	const char *path	Path to class device
 
-Returns:	struct sysfs_class_device * with success 
+Returns:	struct sysfs_class_device * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1221,15 +729,15 @@ Prototype:	void sysfs_close_class_device(struct sysfs_class_device *dev)
 -------------------------------------------------------------------------------
 Name:		sysfs_get_class_device
 
-Description:	Function takes a sysfs_class structure(obtained on a successful 
-		return from a sysfs_open_class() call) and looks for the given 
-		device in this class. On success, it returns a sysfs_class_device 
+Description:	Function takes a sysfs_class structure(obtained on a successful
+		return from a sysfs_open_class() call) and looks for the given
+		device in this class. On success, it returns a sysfs_class_device
 		structure corresponding to the class device.
 
 Arguments:	struct sysfs_class *cls		Class on which to search
 		char *name			Class device "name" to look for
 
-Returns:	struct sysfs_class_device * with success 
+Returns:	struct sysfs_class_device * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1255,21 +763,21 @@ Prototype:	struct dlist *sysfs_get_class_devices(struct sysfs_class *cls)
 -------------------------------------------------------------------------------
 Name:		sysfs_open_class_device
 
-Description:	Given the name of the class on which to look for, this function 
-		locates a given class device and returns a sysfs_class_device 
+Description:	Given the name of the class on which to look for, this function
+		locates a given class device and returns a sysfs_class_device
 		structure corresponding to the requested class device.
 
 	NOTE: 	
-		1. The sysfs_class_device structure obtained upon successful 
-		   return from this function has to be closed by calling 
+		1. The sysfs_class_device structure obtained upon successful
+		   return from this function has to be closed by calling
 		   sysfs_close_class_device().
 		2. Class this device belongs to must be known prior to calling
-		   this function. 
+		   this function.
 
 Arguments:	const char *classname	Class on which to search
 		char *name		Class device "name" to open
 
-Returns:	struct sysfs_class_device * with success 
+Returns:	struct sysfs_class_device * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1280,7 +788,7 @@ Prototype:	struct sysfs_class_device *sysfs_open_class_device
 -------------------------------------------------------------------------------
 Name:		sysfs_get_classdev_device
 
-Description:	Function returns the sysfs_device reference (if present) for the 
+Description:	Function returns the sysfs_device reference (if present) for the
 		given class device.
 
 Arguments:	struct sysfs_class_device *clsdev	Class device whose
@@ -1292,24 +800,6 @@ Returns:	struct sysfs_device * on success
 			- EINVAL for invalid arguments
 		
 Prototype:	struct sysfs_device *sysfs_get_classdev_device
-					(struct sysfs_class_device *clsdev)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_classdev_driver
-
-Description:	Function returns the sysfs_driver reference (if present) for 
-		the given class device.
-
-Arguments:	struct sysfs_class_device *clsdev	Class device whose
-							sysfs_driver reference
-							is required
-
-Returns:	struct sysfs_driver * on success
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-		
-Prototype:	struct sysfs_driver *sysfs_get_classdev_driver
 					(struct sysfs_class_device *clsdev)
 -------------------------------------------------------------------------------
 
@@ -1334,13 +824,13 @@ Prototype:	struct sysfs_class_device *sysfs_get_classdev_parent
 -------------------------------------------------------------------------------
 Name:		sysfs_get_classdev_attributes
 
-Description:	Function takes a sysfs_class_device structure and returns a 
+Description:	Function takes a sysfs_class_device structure and returns a
 		list of attributes for the class device.
 
-Arguments:	struct sysfs_class_device *cdev		Class device for which 
+Arguments:	struct sysfs_class_device *cdev		Class device for which
 							attributes are required
 
-Returns:	struct dlist * of attributes with success 
+Returns:	struct dlist * of attributes with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1357,7 +847,7 @@ Description:	Searches supplied class device's attributes by name and returns
 Arguments:	struct sysfs_class_device *clsdev	Device to search
 		const char *name			Attribute name to find
 
-Returns:	struct sysfs_attribute * with success 
+Returns:	struct sysfs_attribute * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1365,56 +855,14 @@ Prototype:	struct sysfs_attribute *sysfs_get_classdev_attr
 		(struct sysfs_class_device *clsdev, const char *name)
 -------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
-Name:		sysfs_refresh_classdev_attributes
-
-Description:	Function refreshes the list of attributes for a given
-		sysfs_class_device.
-
-Arguments:	struct sysfs_class_device *cdev	Class device whose attributes 
-						list to refresh
-
-Returns:	struct dlist * of attributes with success 
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_get_classdev_attributes
-					(struct sysfs_class_device *cdev)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_open_classdev_attr
-
-Description:	Function takes as arguments, a the name of the class, the class
-		device name and the name of the required attribute.
-
-	NOTE:
-		1. The struct sysfs_attribute * obtained upon successful
-			return from this function has to be closed by making
-			a call to sysfs_close_attribute()
-
-Arguments:	char *classname		Class name on which to search
-		char *dev		Name of the class device
-		char *attrib		Attribute to open
-
-Returns:	struct sysfs_attribute * with success.
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_attribute *sysfs_write_classdev_attr
-			(const char *classname, const char *dev, 
-							const char *attrib)
--------------------------------------------------------------------------------
-
-
 6.6 Device Functions
 --------------------
 
 Devices represent everything in sysfs under /sys/devices, which is a
-hierarchical view of system devices. Besides the expected open and 
+hierarchical view of system devices. Besides the expected open and
 close functions, libsysfs provides open and close functions for
-root devices. These functions recursively open or close a device 
-and all of its children. 
+root devices. These functions recursively open or close a device
+and all of its children.
 
 -------------------------------------------------------------------------------
 Name:		sysfs_open_device_path
@@ -1425,7 +873,7 @@ Description:	Opens up a device at a specific path. It opens the device's
 
 Arguments:	const char *path	Path to device
 
-Returns:	struct sysfs_device * with success 
+Returns:	struct sysfs_device * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1442,66 +890,14 @@ Arguments:	sysfs_device *dev		Device structure to close
 Prototype:	void sysfs_close_device(struct sysfs_device *dev)
 -------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
-Name:		sysfs_open_root_device
-
-Description:	Function opens up one of the root devices represented in sysfs 
-		in the /sys/devices directory. It returns a sysfs_root_device
-		structure that includes a list of devices in the tree.
-
-Arguments:	const char *name	Name of the root device to open
-
-Returns:	struct sysfs_root_device * with success 
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_device *sysfs_open_root_device(const char *name)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_close_root_device
-
-Description:	Function closes up the sysfs_root_device structure including the
-		devices in the root device tree.
-
-Arguments:	sysfs_device *root	Root device structure to close
-
-Prototype:	void sysfs_close_root_device(struct sysfs_root_device *root)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_open_device_tree
-
-Description:	Function opens up the device tree at the specified path.
-
-Arguments:	const char *path	Path at which to open the device tree
-
-Returns:	struct sysfs_device * with success
-		NULL with error, Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_device *sysfs_open_device_tree(const char *path)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_close_device_tree
-
-Description:	Function closes the device tree originating at the given 
-		sysfs_device.
-
-Arguments:	struct sysfs_device *devroot	Device from which the device
-						tree has to be closed
-
-Prototype:	void sysfs_close_device_tree(struct sysfs_device *devroot)
--------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
 Name:		sysfs_get_device_parent
 
-Description:	Function returns the sysfs_device reference for the parent 
+Description:	Function returns the sysfs_device reference for the parent
 		(if present) of the given sysfs_device.
 
-Arguments:	struct sysfs_device *dev	sysfs_device whose parent 
+Arguments:	struct sysfs_device *dev	sysfs_device whose parent
 						reference is required
 
 Returns:	struct sysfs_device * on success
@@ -1512,21 +908,6 @@ Prototype:	struct sysfs_device *sysfs_get_device_parent
 						(struct sysfs_device *dev)
 -------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
-Name:		sysfs_get_root_devices
-
-Description:	Function returns a list of devices under the given root device.
-
-Arguments:	struct sysfs_root_device *root	sysfs_root_device whose devices
-						list is required
-
-Returns:	struct dlist * of sysfs_devices on success
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_get_root_devices
-					(struct sysfs_root_device *root)
--------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
 Name:		sysfs_get_device_attr
@@ -1537,7 +918,7 @@ Description:	Searches supplied device's attributes by name and returns
 Arguments:	struct sysfs_device *dev	Device to search
 		const char *name		Attribute name to find
 
-Returns:	struct sysfs_attribute * with success 
+Returns:	struct sysfs_attribute * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1548,13 +929,13 @@ Prototype:	struct sysfs_attribute *sysfs_get_device_attr
 -------------------------------------------------------------------------------
 Name:		sysfs_get_device_attributes
 
-Description:	Function takes a sysfs_device structure and returns a list 
+Description:	Function takes a sysfs_device structure and returns a list
 		of attributes for the device.
 
-Arguments:	struct sysfs_device *device	Device for which 
+Arguments:	struct sysfs_device *device	Device for which
 						attributes are required
 
-Returns:	struct dlist * of attributes with success 
+Returns:	struct dlist * of attributes with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1563,33 +944,16 @@ Prototype:	struct dlist *sysfs_get_device_attributes
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Name:		sysfs_refresh_device_attributes
-
-Description:	Function refreshes the list of attributes for a given
-		sysfs_device.
-
-Arguments:	struct sysfs_device *device	Device whose attributes list 
-						to refresh
-
-Returns:	struct dlist * of attributes with success 
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_refresh_device_attributes
-					(struct sysfs_device *device)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
 Name:		sysfs_open_device
 
-Description:	Given the name of the bus on which to look for, this function 
-		locates a given device and returns a sysfs_device structure 
+Description:	Given the name of the bus on which to look for, this function
+		locates a given device and returns a sysfs_device structure
 		corresponding to the requested device.
 
 Arguments:	const char *bus		Bus on which to search
 		const char *bus_id	Device to look for
 
-Returns:	struct sysfs_device * with success 
+Returns:	struct sysfs_device * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1600,7 +964,7 @@ Prototype:	struct sysfs_device *sysfs_open_device
 -------------------------------------------------------------------------------
 Name:		sysfs_get_device_bus
 
-Description:	Given a sysfs_device, this function fills in the bus this 
+Description:	Given a sysfs_device, this function fills in the bus this
 		device is on in the sysfs_device->bus field.
 
 Arguments:	struct sysfs_device *dev	Device whose bus name to find
@@ -1611,30 +975,6 @@ Returns:	0 with success.
 
 Prototype:	int sysfs_get_device_bus(struct sysfs_device *dev)
 -------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_open_device_attr
-
-Description:	Function takes as arguments, the bus on which to search for a 
-		device, and an attribute of the device to open. 
-
-	NOTE:
-		1. The struct sysfs_attribute * obtained upon successful
-			return from this function has to be closed by making
-			a call to sysfs_close_attribute()
-
-Arguments:	char *bus		Bus on which to search
-		char *bus_id		Device to look for
-		char *attrib		Name of the attribute to open
-
-Returns:	struct sysfs_attribute * with success.
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct sysfs_attribute *sysfs_open_device_attr
-		(const char *bus, const char *bus_id, const char *attrib)
--------------------------------------------------------------------------------
-
 
 6.7 Driver Functions
 --------------------
@@ -1650,7 +990,7 @@ Description:	Opens driver at specific path.
 
 Arguments:	const char *path	Path to driver
 
-Returns:	struct sysfs_driver * with success 
+Returns:	struct sysfs_driver * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1684,39 +1024,6 @@ Prototype:	struct dlist *sysfs_get_driver_devices
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Name:		sysfs_refresh_driver_devices
-
-Description:	Function refreshes the list of devices that use this driver.
-
-Arguments:	struct sysfs_driver *driver	Driver whose devices list is
-						required to be refreshed
-
-Returns:	struct dlist * of sysfs_devices on success
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_refresh_driver_devices
-					(struct sysfs_driver *driver)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-Name:		sysfs_get_driver_device
-
-Description:	Function returns a sysfs_device reference for the device with 
-		"name" that uses this driver
-
-Arguments:	struct sysfs_driver *driver	Driver on which to search
-		const char *name		Name of the device to look for
-
-Returns:	struct sysfs_device * corresponding to "name" on success
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_get_driver_device
-			(struct sysfs_driver *driver, const char *name)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
 Name:		sysfs_get_driver_attr
 
 Description:	Searches supplied driver's attributes by name and returns
@@ -1725,7 +1032,7 @@ Description:	Searches supplied driver's attributes by name and returns
 Arguments:	struct sysfs_driver *drv	Driver to search
 		const char *name		Attribute name to find
 
-Returns:	struct sysfs_attribute * with success 
+Returns:	struct sysfs_attribute * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1736,13 +1043,13 @@ Prototype:	struct sysfs_attribute *sysfs_get_driver_attr
 -------------------------------------------------------------------------------
 Name:		sysfs_get_driver_attributes
 
-Description:	Function takes a sysfs_driver structure and returns a list 
+Description:	Function takes a sysfs_driver structure and returns a list
 		of attributes for the driver.
 
-Arguments:	struct sysfs_driver *driver	Driver for which attributes 
+Arguments:	struct sysfs_driver *driver	Driver for which attributes
 						are required
 
-Returns:	struct dlist * of attributes with success 
+Returns:	struct dlist * of attributes with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1751,41 +1058,24 @@ Prototype:	struct dlist *sysfs_get_driver_attributes
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Name:		sysfs_refresh_driver_attributes
-
-Description:	Function refreshes the list of attributes for a given
-		sysfs_driver.
-
-Arguments:	struct sysfs_driver *driver	Driver whose attributes list 
-						to refresh
-
-Returns:	struct dlist * of attributes with success 
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
-
-Prototype:	struct dlist *sysfs_refresh_driver_attributes
-					(struct sysfs_driver *driver)
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
 Name:		sysfs_open_driver
 
-Description:	Given the name of the bus on which to look for, this function 
-		locates a given driver and returns a sysfs_driver structure 
+Description:	Given the name of the bus on which to look for, this function
+		locates a given driver and returns a sysfs_driver structure
 		corresponding to the requested device.
 
 	NOTE: 	
-		1. The sysfs_driver structure obtained upon successful return 
-		   from this function has to be closed by calling 
+		1. The sysfs_driver structure obtained upon successful return
+		   from this function has to be closed by calling
 		   sysfs_close_driver_by_name().
-		2. Bus on which to look for this driver should be known prior 
-		   to calling this function. Use sysfs_find_driver_bus() 
+		2. Bus on which to look for this driver should be known prior
+		   to calling this function. Use sysfs_find_driver_bus()
 		   to determine this.
 
 Arguments:	const char *bus_name	Bus on which to search
 		const char *drv_name	Driver name to look for
 
-Returns:	struct sysfs_driver * with success 
+Returns:	struct sysfs_driver * with success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
 
@@ -1793,41 +1083,138 @@ Prototype:	struct sysfs_driver *sysfs_open_driver(const char *bus_name,
 							const char *drv_name)
 -------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
-Name:		sysfs_get_driver_links
 
-Description:	Function returns a list of links for a given driver 
+6.8 Module Functions
+--------------------
 
-Arguments:	struct sysfs_driver *driver	Driver to get links from
-
-Returns:	struct dlist * of links on success
-		NULL with error
-
-Prototype:	struct dlist *sysfs_get_driver_links
-						(struct sysfs_driver *driver)
--------------------------------------------------------------------------------
+Modules are represented in sysfs under the /sys/module. Functions are provided
+to open and close modules.
 
 -------------------------------------------------------------------------------
-Name:		sysfs_open_driver_attr
+Name:		sysfs_close_module
 
-Description:	Function takes as arguments, the bus the driver is registered 
-		on, the driver name and the name of the attribute to open.
-	
-	NOTE:
-		1. The struct sysfs_attribute * obtained upon successful
-			return from this function has to be closed by making
-			a call to sysfs_close_attribute()
+Description:	Closes a module
 
-Arguments:	char *bus		Bus on which driver is present
-		char *drv		Driver to look for
-		char *attrib		Name of the attribute to open
+Arguments:	module: sysfs_module device to close
 
-Returns:	struct sysfs_attribute * with success.
-		NULL with error. Errno will be set with error, returning
-			- EINVAL for invalid arguments
+Returns:	None
 
-Prototype:	struct sysfs_attribute *sysfs_open_driver_attr
-			(const char *bus, const char *drv, const char *attrib)
+Prototype:	void sysfs_close_module(struct sysfs_module *module);
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_module_path
+
+Description:	Opens and populates the module struct
+
+Arguments:	path: path to module
+
+Returns:	struct sysfs_module if success and NULL if error occured
+
+Prototype:	struct sysfs_module *sysfs_open_module_path(const char *path);
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_module
+
+Description:	Opens specific module on a system
+
+Arguments:	name: Name of the module
+
+Returns:	sysfs_module structure on success or NULL if error
+
+Prototype:	struct sysfs_module *sysfs_open_module(const char *name);
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_get_module_parms
+
+Description:	Get modules list of parameters
+
+Arguments:	sysfs_module whose parmameter list is required
+
+Returns:	dlist of parameters on SUCCESS and NULL on error
+
+Prototype:	struct dlist *sysfs_get_module_parms(struct sysfs_module *module);
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Name:		sysfs_get_module_sections
+
+Description:	Get the set of sections for this module
+
+Arguments:	sysfs_module whose list of sections is required
+
+Returns:	dlist of sections on SUCCESS and NULL on error
+
+Prototype:	struct dlist *sysfs_get_module_sections(struct sysfs_module *module);
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_get_module_attributes
+
+Description:	Get dlist of attributes for the requested sysfs_module
+
+Arguments:	sysfs_module for which attributes are needed
+
+Returns:	a dlist of attributes if exists, NULL otherwise
+
+Prototype:	struct dlist *sysfs_get_module_attributes(struct sysfs_module *module);
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_get_module_attr
+
+Description:	searches module's attributes by name
+
+Arguments:	module: to look through
+		name: name of the attribute
+
+Returns:	sysfs_attribute reference with success or NULL with error
+
+Prototype:	struct sysfs_attribute *sysfs_get_module_attr
+		(struct sysfs_module *module, const char *name);
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_get_module_parm
+
+Description:	searches module's parameters by name
+
+Arguments:	sysfs_module: to look through
+		parm: parameter name
+
+Returns:	sysfs_attribute on SUCCESS and NULL on error
+
+Prototype:	struct sysfs_attribute *sysfs_get_module_parm
+			(struct sysfs_module *module, const char *parm);
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_get_module_section
+
+Description:	searches module's sections by name
+
+Arguments:	sysfs_module: to look through
+		section: section name
+
+Returns:	sysfs_attribute * on SUCCESS and NULL on error
+
+Prototype:	struct sysfs_attribute *sysfs_get_module_section
+			(struct sysfs_module *module, const char *section);
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_open_module_attr
+
+Description:	read an attribute for a given module
+
+Arguments:	module: name of the module on which to look
+		attrib: attribute to read
+
+Returns:	sysfs_attribute * on SUCCESS and NULL on error
+
+Prototype:	struct sysfs_attribute *sysfs_open_module_attr(const char
+			*module, const char *attrib);
 -------------------------------------------------------------------------------
 
 
@@ -1896,6 +1283,22 @@ dlist_sort_custom() expects that the compare function will:
 	return <0 for b before a
 	return  0 for a == b
 
+7.3 Custom filtering and sorting using dlist_filter_sort()
+----------------------------------------------------------
+
+As of release 2.0.0, libsysfs provides a new interface for custom filtering
+and sorting of dlists. This API is similar to scandir() system call.
+Applications can call this API with the following arguments: the list, pointer
+to the filter function, pointer to the sorter function as in
+dlist_sort_custom.
+
+The filter function must conform to the following prototype:
+
+	int filter(void *a)
+
+dlist_filter_sort expects that the filter function will:
+	return 0 for unwanted nodes
+	return 1 for required nodes
 
 8. Usage
 --------
@@ -1912,7 +1315,7 @@ in the filesystem it represents. Here's a typical order of operation:
 9. Testsuite
 ------------
 
-Version 1.0.0 of sysfsutils ships with a comprehensive testsuite. The testsuite
+Version 2.0.0 of sysfsutils ships with a comprehensive testsuite. The testsuite
 shipped as part of the "test" directory of the sysfsutils source package,
 results in an executable "testlibsysfs" which will be installed in the
 /usr/local/bin directory. Some of the salient features of the testsuite are:
@@ -1925,14 +1328,15 @@ e. Number of iterations of tests can be specified.
 
 The testsuite comes with its own configuration file "libsysfs.conf" in the
 "test" directory. This file is used to generate a header file at the time
-the tests are built. 
+the tests are built.
 
 To use the testsuite:
 
 a. Modify the variables libsysfs.conf file to appropriate values for your
    system. (The libsysfs.conf file contains comments describing what each
-   variable stands for and, in some cases, how to determine an appropriate 
+   variable stands for and, in some cases, how to determine an appropriate
    value for the system under test).
+
 
 b. Build and install the testsuite.
 
@@ -1942,7 +1346,7 @@ c. Run the testsuite:
 
 The default logfile is stdout.
 
-NOTE: If the libsysfs.conf file is changed, make sure to run "make clean" in 
+NOTE: If the libsysfs.conf file is changed, make sure to run "make clean" in
 the test directory and then a "make" for the changes to take effect.
 
 
