@@ -54,6 +54,9 @@ int sysfs_get_mnt_path(char *mnt_path, size_t len)
 	static char sysfs_path[SYSFS_PATH_MAX] = "";
 	const char *sysfs_path_env;
 
+	if (len == 0 || mnt_path == NULL)
+		return -1;
+
 	/* evaluate only at the first call */
 	if (sysfs_path[0] == '\0') {
 		/* possible overrride of real mount path */
