@@ -31,7 +31,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
-#include <mntent.h>
 
 #include "libsysfs.h"
 #include "dlist.h"

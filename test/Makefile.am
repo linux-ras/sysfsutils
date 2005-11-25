@@ -5,5 +5,6 @@ get_driver_SOURCES = get_driver.c
 get_module_SOURCES = get_module.c
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
-AM_CFLAGS = -Wall -g -Wshadow -W -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
+EXTRA_CFLAGS = @EXTRA_CLFAGS@
+AM_CFLAGS = -Wall -W -Wstrict-prototypes $(EXTRA_CLFAGS)
 

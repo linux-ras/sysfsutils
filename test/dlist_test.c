@@ -24,6 +24,7 @@
  */
 #include "dlist.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 // create some dlists put nodes in and out
 // use dump
