@@ -29,10 +29,7 @@
  */
 static int get_dev_driver(struct sysfs_device *dev)
 {
-	struct dlist *drvlist;
-	char path[SYSFS_PATH_MAX];
-	char devpath[SYSFS_PATH_MAX];
-	char *drv = NULL, *c;
+	char path[SYSFS_PATH_MAX], devpath[SYSFS_PATH_MAX];
 
 	if (!dev) {
 		errno = EINVAL;
@@ -44,49 +41,10 @@ static int get_dev_driver(struct sysfs_device *dev)
 	safestrcatmax(path, "/driver", SYSFS_PATH_MAX);
 	if (!sysfs_path_is_link(path)) {
 		if (!sysfs_get_link(path, devpath, SYSFS_PATH_MAX)) {
-			if (sysfs_get_name_from_path(devpath,
+			if (!sysfs_get_name_from_path(devpath,
 					dev->driver_name, SYSFS_NAME_LEN))
-				return -1;
-		}
-		return 0;
-	}
-
-	/*
-	 * Devices on earlier kernels do not have the "driver" link.
-	 * Look it up in the bus directory.
-	 */
-	if (dev->bus[0] == '\0')
-		return -1;
-	memset(path, 0, SYSFS_PATH_MAX);
-	memset(devpath, 0, SYSFS_PATH_MAX);
-	safestrcpy(path, dev->path);
-	c = strstr(path, SYSFS_DEVICES_NAME);
-	if (c == NULL) {
-		dprintf("Invalid path to device - %s\n", dev->path);
-		return -1;
-	} else
-		*c = '\0';
-	safestrcat(path, SYSFS_BUS_NAME);
-	safestrcat(path, "/");
-	safestrcat(path, dev->bus);
-	safestrcat(path, "/");
-	safestrcat(path, SYSFS_DRIVERS_NAME);
-
-	drvlist = sysfs_open_directory_list(path);
-	if (drvlist) {
-		dlist_for_each_data(drvlist, drv, char) {
-			safestrcpy(devpath, path);
-			safestrcat(devpath, "/");
-			safestrcat(devpath, drv);
-			safestrcat(devpath, "/");
-			safestrcat(devpath, dev->bus_id);
-			if (!sysfs_path_is_link(devpath)) {
-				safestrcpy(dev->driver_name, drv);
-				sysfs_close_list(drvlist);
 				return 0;
-			}
 		}
-		sysfs_close_list(drvlist);
 	}
 	return -1;
 }
@@ -99,12 +57,7 @@ static int get_dev_driver(struct sysfs_device *dev)
  */
 int sysfs_get_device_bus(struct sysfs_device *dev)
 {
-	char devpath[SYSFS_PATH_MAX];
-	char subsys[SYSFS_NAME_LEN];
-	char path[SYSFS_PATH_MAX];
-	char target[SYSFS_PATH_MAX];
-	char *bus = NULL, *c;
-	struct dlist *buslist;
+	char devpath[SYSFS_PATH_MAX], path[SYSFS_PATH_MAX];
 
 	if (!dev) {
 		errno = EINVAL;
@@ -117,54 +70,10 @@ int sysfs_get_device_bus(struct sysfs_device *dev)
 	safestrcatmax(path, "/bus", SYSFS_PATH_MAX);
 	if (!sysfs_path_is_link(path)) {
 		if (!sysfs_get_link(path, devpath, SYSFS_PATH_MAX)) {
-			if (sysfs_get_name_from_path(devpath,
+			if (!sysfs_get_name_from_path(devpath,
 					dev->bus, SYSFS_NAME_LEN))
-				return -1;
+				return 0;
 		}
-		return 0;
-	}
-
-	/*
-	 * Devices on on earlier kernels do not have the "bus" link.
-	 * Look it up in the bus directory.
-	 */
-	memset(subsys, 0, SYSFS_NAME_LEN);
-	safestrcpy(subsys, dev->path);
-	c = strstr(subsys, SYSFS_DEVICES_NAME);
-	if (c == NULL) {
-		dprintf("Invalid path to device - %s\n", dev->path);
-		return -1;
-	} else
-		*c = '\0';
-	safestrcat(subsys, SYSFS_BUS_NAME);
-	buslist = sysfs_open_directory_list(subsys);
-	if (buslist) {
-		dlist_for_each_data(buslist, bus, char) {
-			memset(path, 0, SYSFS_PATH_MAX);
-			safestrcpy(path, subsys);
-			safestrcat(path, "/");
-			safestrcat(path, bus);
-			safestrcat(path, "/");
-			safestrcat(path, SYSFS_DEVICES_NAME);
-			safestrcat(path, "/");
-			safestrcat(path, dev->bus_id);
-			if (!sysfs_path_is_link(path)) {
-				memset(target, 0, SYSFS_PATH_MAX);
-				if (sysfs_get_link(path, target,
-						SYSFS_PATH_MAX)) {
-					dprintf("Error getting link target\n");
-					sysfs_close_list(buslist);
-					return -1;
-				}
-				if (!(strncmp(target, dev->path,
-							SYSFS_PATH_MAX))) {
-					safestrcpy(dev->bus, bus);
-					sysfs_close_list(buslist);
-					return 0;
-				}
-			}
-		}
-		sysfs_close_list(buslist);
 	}
 	return -1;
 }
@@ -181,9 +90,8 @@ void sysfs_close_device_tree(struct sysfs_device *devroot)
 			struct sysfs_device *child = NULL;
 
 			dlist_for_each_data(devroot->children, child,
-					struct sysfs_device) {
+					struct sysfs_device)
 				sysfs_close_device_tree(child);
-			}
 		}
 		sysfs_close_device(devroot);
 	}
@@ -263,7 +171,6 @@ struct sysfs_device *sysfs_open_device_path(const char *path)
 		dprintf("Could not get device %s's driver\n", dev->bus_id);
 		safestrcpy(dev->driver_name, SYSFS_UNKNOWN);
 	}
-
 	return dev;
 }
 
@@ -371,7 +278,6 @@ struct sysfs_device *sysfs_open_device(const char *bus,	const char *bus_id)
 		dprintf("Error opening device %s\n", bus_id);
 		return NULL;
 	}
-
 	return device;
 }
 

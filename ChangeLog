@@ -1,4 +1,8 @@
 11/28/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Remove stale brute force code to determine device's
+			bus and device's driver
+
+11/28/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Add sysfs_get_driver_module()
 
 11/25/2005 - Mohan Kumar <mohan@in.ibm.com>
