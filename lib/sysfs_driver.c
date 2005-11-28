@@ -39,6 +39,8 @@ void sysfs_close_driver(struct sysfs_driver *driver)
 			dlist_destroy(driver->devices);
 		if (driver->attrlist)
 			dlist_destroy(driver->attrlist);
+		if (driver->module)
+			sysfs_close_module(driver->module);
 		free(driver);
 	}
 }
@@ -258,4 +260,30 @@ struct dlist *sysfs_get_driver_devices(struct sysfs_driver *drv)
 		sysfs_close_list(linklist);
 	}
 	return drv->devices;
+}
+
+/**
+ * sysfs_get_driver_module: gets the module being used by this driver
+ * @drv: sysfs_driver whose "module" is needed
+ * Returns sysfs_module on success and NULL on failure
+ */
+struct sysfs_module *sysfs_get_driver_module(struct sysfs_driver *drv)
+{
+	char path[SYSFS_PATH_MAX], mod_path[SYSFS_PATH_MAX];
+
+	if (!drv) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	memset(path, 0, SYSFS_PATH_MAX);
+	safestrcpy(path, drv->path);
+	safestrcat(path, "/");
+	safestrcat(path, SYSFS_MODULE_NAME);
+	if (!sysfs_path_is_link(path)) {
+		memset(mod_path, 0, SYSFS_PATH_MAX);
+		if (!sysfs_get_link(path, mod_path, SYSFS_PATH_MAX))
+			drv->module = sysfs_open_module_path(mod_path);
+	}
+	return drv->module;
 }

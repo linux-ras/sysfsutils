@@ -75,6 +75,7 @@ struct sysfs_driver {
 	char bus[SYSFS_NAME_LEN];
 
 	/* Private: for internal use only */
+	struct sysfs_module *module;
 	struct dlist *devices;
 };
 
@@ -161,8 +162,9 @@ extern struct sysfs_driver *sysfs_open_driver
 extern struct sysfs_driver *sysfs_open_driver_path(const char *path);
 extern struct sysfs_attribute *sysfs_get_driver_attr
 	(struct sysfs_driver *drv, const char *name);
-extern struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver);
-extern struct dlist *sysfs_get_driver_devices(struct sysfs_driver *driver);
+extern struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *drv);
+extern struct dlist *sysfs_get_driver_devices(struct sysfs_driver *drv);
+extern struct sysfs_module *sysfs_get_driver_module(struct sysfs_driver *drv);
 
 /* generic sysfs device access */
 extern void sysfs_close_device_tree(struct sysfs_device *device);

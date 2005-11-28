@@ -1,3 +1,6 @@
+11/28/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Add sysfs_get_driver_module()
+
 11/25/2005 - Mohan Kumar <mohan@in.ibm.com>
 		* Documentation update
 		* Add missing function prototype in libsysfs.h
