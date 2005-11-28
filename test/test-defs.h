@@ -40,7 +40,7 @@
 #define val_drv1_attr_name	"dummy2"
 #define inval_name 		"invalid_name"
 #define inval_path 		"/sys/invalid/path"
-#define FUNC_TABLE_SIZE  	81
+#define FUNC_TABLE_SIZE  	(sizeof(func_table)/sizeof(int))
 
 FILE *my_stdout;
 
@@ -53,18 +53,16 @@ extern void show_device(struct sysfs_device *device);
 extern void show_driver(struct sysfs_driver *driver);
 extern void show_device_list(struct dlist *devlist);
 extern void show_driver_list(struct dlist *drvlist);
-extern void show_root_device(struct sysfs_root_device *root);
 extern void show_attribute(struct sysfs_attribute *attr);
 extern void show_attribute_list(struct dlist *list);
-extern void show_link(struct sysfs_link *ln);
 extern void show_links_list(struct dlist *linklist);
-extern void show_dir(struct sysfs_directory *dir);
 extern void show_dir_list(struct dlist *dirlist);
-extern void show_directory(struct sysfs_directory *dir);
-extern void show_dir_tree(struct sysfs_directory *dir);
 extern void show_class_device(struct sysfs_class_device *dev);
 extern void show_class_device_list(struct dlist *devlist);
 extern void show_list(struct dlist *list);
+extern void show_parm_list(struct dlist *list);
+extern void show_section_list(struct dlist *list);
+extern void show_module(struct sysfs_module *module);
 
 /**
  * list of test functions.....
@@ -76,79 +74,51 @@ extern int test_sysfs_path_is_dir(int flag);
 extern int test_sysfs_path_is_link(int flag);
 extern int test_sysfs_path_is_file(int flag);
 extern int test_sysfs_get_link(int flag);
-extern int test_sysfs_open_subsystem_list(int flag);
-extern int test_sysfs_open_bus_devices_list(int flag);
+extern int test_sysfs_open_directory_list(int flag);
 extern int test_sysfs_close_list(int flag);
 extern int test_sysfs_close_attribute(int flag);
 extern int test_sysfs_open_attribute(int flag);
 extern int test_sysfs_read_attribute(int flag);
-extern int test_sysfs_read_attribute_value(int flag);
 extern int test_sysfs_write_attribute(int flag);
-extern int test_sysfs_get_value_from_attributes(int flag);
-extern int test_sysfs_refresh_dir_attributes(int flag);
-extern int test_sysfs_refresh_dir_links(int flag);
-extern int test_sysfs_refresh_dir_subdirs(int flag);
-extern int test_sysfs_close_directory(int flag);
-extern int test_sysfs_open_directory(int flag);
-extern int test_sysfs_read_dir_attributes(int flag);
-extern int test_sysfs_read_dir_links(int flag);
-extern int test_sysfs_read_dir_subdirs(int flag);
-extern int test_sysfs_read_directory(int flag);
-extern int test_sysfs_read_all_subdirs(int flag);
-extern int test_sysfs_get_subdirectory(int flag);
-extern int test_sysfs_close_link(int flag);
-extern int test_sysfs_open_link(int flag);
-extern int test_sysfs_get_directory_link(int flag);
-extern int test_sysfs_get_subdirectory_link(int flag);
-extern int test_sysfs_get_directory_attribute(int flag);
-extern int test_sysfs_get_dir_attributes(int flag);
-extern int test_sysfs_get_dir_links(int flag);
-extern int test_sysfs_get_dir_subdirs(int flag);
 extern int test_sysfs_close_driver(int flag);
 extern int test_sysfs_open_driver(int flag);
 extern int test_sysfs_open_driver_path(int flag);
 extern int test_sysfs_get_driver_attr(int flag);
 extern int test_sysfs_get_driver_attributes(int flag);
 extern int test_sysfs_get_driver_devices(int flag);
-extern int test_sysfs_refresh_driver_devices(int flag);
-extern int test_sysfs_get_driver_links(int flag);
-extern int test_sysfs_get_driver_device(int flag);
-extern int test_sysfs_refresh_driver_attributes(int flag);
-extern int test_sysfs_open_driver_attr(int flag);
-extern int test_sysfs_close_root_device(int flag);
-extern int test_sysfs_open_root_device(int flag);
-extern int test_sysfs_get_root_devices(int flag);
+extern int test_sysfs_get_driver_module(int flag);
 extern int test_sysfs_close_device(int flag);
 extern int test_sysfs_open_device(int flag);
 extern int test_sysfs_get_device_parent(int flag);
 extern int test_sysfs_open_device_path(int flag);
 extern int test_sysfs_get_device_attr(int flag);
 extern int test_sysfs_get_device_attributes(int flag);
-extern int test_sysfs_refresh_device_attributes(int flag);
-extern int test_sysfs_open_device_attr(int flag);
 extern int test_sysfs_close_bus(int flag);
 extern int test_sysfs_open_bus(int flag);
 extern int test_sysfs_get_bus_device(int flag);
 extern int test_sysfs_get_bus_driver(int flag);
 extern int test_sysfs_get_bus_drivers(int flag);
 extern int test_sysfs_get_bus_devices(int flag);
-extern int test_sysfs_get_bus_attributes(int flag);
-extern int test_sysfs_refresh_bus_attributes(int flag);
-extern int test_sysfs_get_bus_attribute(int flag);
-extern int test_sysfs_find_driver_bus(int flag);
 extern int test_sysfs_close_class_device(int flag);
 extern int test_sysfs_open_class_device_path(int flag);
 extern int test_sysfs_open_class_device(int flag);
 extern int test_sysfs_get_classdev_device(int flag);
-extern int test_sysfs_get_classdev_driver(int flag);
 extern int test_sysfs_get_classdev_parent(int flag);
 extern int test_sysfs_close_class(int flag);
 extern int test_sysfs_open_class(int flag);
 extern int test_sysfs_get_class_devices(int flag);
 extern int test_sysfs_get_class_device(int flag);
 extern int test_sysfs_get_classdev_attributes(int flag);
-extern int test_sysfs_refresh_classdev_attributes(int flag);
 extern int test_sysfs_get_classdev_attr(int flag);
 extern int test_sysfs_open_classdev_attr(int flag);
+extern int test_sysfs_close_module(int flag);
+extern int test_sysfs_open_module_path(int flag);
+extern int test_sysfs_open_module(int flag);
+extern int test_sysfs_get_module_attr(int flag);
+extern int test_sysfs_get_module_attributes(int flag);
+extern int test_sysfs_get_module_parms(int flag);
+extern int test_sysfs_get_module_sections(int flag);
+extern int test_sysfs_get_module_parm(int flag);
+extern int test_sysfs_get_module_section(int flag);
 
 #endif /* _TESTER_H_ */

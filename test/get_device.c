@@ -45,12 +45,13 @@ int main(int argc, char *argv[])
 					argv[2], argv[1]);
 		return 1;
 	}
+	fprintf(stdout, "device is on bus %s, using driver %s\n",
+				device->bus, device->driver_name);
+
 	struct sysfs_device *parent = sysfs_get_device_parent(device);
-	if (parent) {
+	if (parent)
 		fprintf(stdout, "parent is %s\n", parent->name);
-		fprintf(stdout, "parent is on bus %s, using driver %s\n",
-				parent->bus, parent->driver_name);
-	} else
+	else
 		fprintf(stdout, "no parent\n");
 	return 0;
 }

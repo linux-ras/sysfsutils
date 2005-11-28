@@ -68,13 +68,6 @@ void show_driver_list(struct dlist *drvlist)
 	}
 }
 
-void show_root_device(struct sysfs_root_device *root)
-{
-	if (root != NULL)
-		dbg_print("Device is \"%s\" at \"%s\"\n",
-				root->name, root->path);
-}
-
 void show_attribute(struct sysfs_attribute *attr)
 {
 	if (attr != NULL) {
@@ -92,69 +85,6 @@ void show_attribute_list(struct dlist *attrlist)
 
 		dlist_for_each_data(attrlist, attr, struct sysfs_attribute)
 			show_attribute(attr);
-	}
-}
-
-void show_link(struct sysfs_link *ln)
-{
-	if (ln != NULL)
-		dbg_print("Link at \"%s\" points to \"%s\"\n",
-				ln->path, ln->target);
-}
-
-void show_links_list(struct dlist *linklist)
-{
-	if (linklist != NULL) {
-		struct sysfs_link *ln = NULL;
-
-		dlist_for_each_data(linklist, ln, struct sysfs_link)
-			show_link(ln);
-	}
-}
-
-void show_dir(struct sysfs_directory *dir)
-{
-	if (dir != NULL)
-		dbg_print("Directory \"%s\" is at \"%s\"\n",
-				dir->name, dir->path);
-}
-
-void show_dir_list(struct dlist *dirlist)
-{
-	if (dirlist != NULL) {
-		struct sysfs_directory *dir = NULL;
-
-		dlist_for_each_data(dirlist, dir, struct sysfs_directory)
-			show_dir(dir);
-	}
-}
-
-void show_directory(struct sysfs_directory *dir)
-{
-	if (dir != NULL) {
-		show_dir(dir);
-
-		if (dir->attributes)
-			show_attribute_list(dir->attributes);
-		if (dir->links)
-			show_links_list(dir->links);
-		if (dir->subdirs)
-			show_dir_list(dir->subdirs);
-	}
-}
-
-void show_dir_tree(struct sysfs_directory *dir)
-{
-	if (dir != NULL) {
-		struct sysfs_directory *subdir = NULL;
-
-		if (dir->subdirs) {
-			dlist_for_each_data(dir->subdirs, subdir,
-						struct sysfs_directory) {
-				show_dir(subdir);
-				show_dir_tree(subdir);
-			}
-		}
 	}
 }
 
@@ -185,3 +115,33 @@ void show_list(struct dlist *list)
 	}
 }
 
+void show_parm_list(struct dlist *list)
+{
+ 	if (list != NULL) {
+  		char *name = NULL;
+
+		dlist_for_each_data(list, name, char)
+ 			dbg_print("%s\n", name);
+  	}
+}
+
+void show_section_list(struct dlist *list)
+{
+   	if (list != NULL) {
+    		char *name = NULL;
+
+     		dlist_for_each_data(list, name, char)
+      			dbg_print("%s\n", name);
+       	}
+}
+
+void show_module(struct sysfs_module *module)
+{
+	if (module) {
+		dbg_print("Module name is %s, path is %s\n",
+				module->name, module->path);
+ 		show_attribute_list(module->attrlist);
+  		show_parm_list(module->parmlist);
+   		show_section_list(module->sections);
+    	}
+}

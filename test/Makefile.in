@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-SOURCES = dlist_test.c $(get_class_dev_attr_SOURCES) $(get_device_SOURCES) $(get_driver_SOURCES) $(get_module_SOURCES)
+SOURCES = dlist_test.c $(get_device_SOURCES) $(get_driver_SOURCES) $(get_module_SOURCES) $(testlibsysfs_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -38,8 +38,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = dlist_test$(EXEEXT) get_class_dev_attr$(EXEEXT) \
-	get_device$(EXEEXT) get_driver$(EXEEXT) get_module$(EXEEXT)
+bin_PROGRAMS = dlist_test$(EXEEXT) get_device$(EXEEXT) \
+	get_driver$(EXEEXT) get_module$(EXEEXT) testlibsysfs$(EXEEXT)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -57,10 +57,6 @@ dlist_test_SOURCES = dlist_test.c
 dlist_test_OBJECTS = dlist_test.$(OBJEXT)
 dlist_test_LDADD = $(LDADD)
 dlist_test_DEPENDENCIES = ../lib/libsysfs.la
-am_get_class_dev_attr_OBJECTS = get_class_dev_attr.$(OBJEXT)
-get_class_dev_attr_OBJECTS = $(am_get_class_dev_attr_OBJECTS)
-get_class_dev_attr_LDADD = $(LDADD)
-get_class_dev_attr_DEPENDENCIES = ../lib/libsysfs.la
 am_get_device_OBJECTS = get_device.$(OBJEXT)
 get_device_OBJECTS = $(am_get_device_OBJECTS)
 get_device_LDADD = $(LDADD)
@@ -73,6 +69,13 @@ am_get_module_OBJECTS = get_module.$(OBJEXT)
 get_module_OBJECTS = $(am_get_module_OBJECTS)
 get_module_LDADD = $(LDADD)
 get_module_DEPENDENCIES = ../lib/libsysfs.la
+am_testlibsysfs_OBJECTS = test.$(OBJEXT) test_attr.$(OBJEXT) \
+	test_bus.$(OBJEXT) test_class.$(OBJEXT) test_device.$(OBJEXT) \
+	test_driver.$(OBJEXT) test_module.$(OBJEXT) \
+	test_utils.$(OBJEXT) testout.$(OBJEXT)
+testlibsysfs_OBJECTS = $(am_testlibsysfs_OBJECTS)
+testlibsysfs_LDADD = $(LDADD)
+testlibsysfs_DEPENDENCIES = ../lib/libsysfs.la
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -84,12 +87,11 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = dlist_test.c $(get_class_dev_attr_SOURCES) \
-	$(get_device_SOURCES) $(get_driver_SOURCES) \
-	$(get_module_SOURCES)
-DIST_SOURCES = dlist_test.c $(get_class_dev_attr_SOURCES) \
-	$(get_device_SOURCES) $(get_driver_SOURCES) \
-	$(get_module_SOURCES)
+SOURCES = dlist_test.c $(get_device_SOURCES) $(get_driver_SOURCES) \
+	$(get_module_SOURCES) $(testlibsysfs_SOURCES)
+DIST_SOURCES = dlist_test.c $(get_device_SOURCES) \
+	$(get_driver_SOURCES) $(get_module_SOURCES) \
+	$(testlibsysfs_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -194,14 +196,20 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-get_class_dev_attr_SOURCES = get_class_dev_attr.c
+BUILT_SOURCES = test.h
+CLEANFILES = test.h
 get_device_SOURCES = get_device.c
 get_driver_SOURCES = get_driver.c
 get_module_SOURCES = get_module.c
+testlibsysfs_SOURCES = test.c test_attr.c test_bus.c test_class.c \
+		       test_device.c test_driver.c test_module.c test_utils.c \
+		       testout.c test-defs.h libsysfs.conf create-test
+
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
 AM_CFLAGS = -Wall -W -Wstrict-prototypes $(EXTRA_CLFAGS)
-all: all-am
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -265,9 +273,6 @@ clean-binPROGRAMS:
 dlist_test$(EXEEXT): $(dlist_test_OBJECTS) $(dlist_test_DEPENDENCIES) 
 	@rm -f dlist_test$(EXEEXT)
 	$(LINK) $(dlist_test_LDFLAGS) $(dlist_test_OBJECTS) $(dlist_test_LDADD) $(LIBS)
-get_class_dev_attr$(EXEEXT): $(get_class_dev_attr_OBJECTS) $(get_class_dev_attr_DEPENDENCIES) 
-	@rm -f get_class_dev_attr$(EXEEXT)
-	$(LINK) $(get_class_dev_attr_LDFLAGS) $(get_class_dev_attr_OBJECTS) $(get_class_dev_attr_LDADD) $(LIBS)
 get_device$(EXEEXT): $(get_device_OBJECTS) $(get_device_DEPENDENCIES) 
 	@rm -f get_device$(EXEEXT)
 	$(LINK) $(get_device_LDFLAGS) $(get_device_OBJECTS) $(get_device_LDADD) $(LIBS)
@@ -277,6 +282,9 @@ get_driver$(EXEEXT): $(get_driver_OBJECTS) $(get_driver_DEPENDENCIES)
 get_module$(EXEEXT): $(get_module_OBJECTS) $(get_module_DEPENDENCIES) 
 	@rm -f get_module$(EXEEXT)
 	$(LINK) $(get_module_LDFLAGS) $(get_module_OBJECTS) $(get_module_LDADD) $(LIBS)
+testlibsysfs$(EXEEXT): $(testlibsysfs_OBJECTS) $(testlibsysfs_DEPENDENCIES) 
+	@rm -f testlibsysfs$(EXEEXT)
+	$(LINK) $(testlibsysfs_LDFLAGS) $(testlibsysfs_OBJECTS) $(testlibsysfs_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -285,10 +293,18 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlist_test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_class_dev_attr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_device.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_module.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_attr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_bus.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_class.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_device.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_driver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_module.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_utils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testout.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -397,13 +413,15 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS)
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -420,6 +438,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -427,6 +446,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
@@ -489,6 +509,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-info-am
 
+test.h:
+	./create-test
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

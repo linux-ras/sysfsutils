@@ -31,13 +31,9 @@
  * extern int sysfs_path_is_dir(const char *path);
  * extern int sysfs_path_is_link(const char *path);
  * extern int sysfs_path_is_file(const char *path);
- * extern int sysfs_get_link(const char *path, char *target,
- * 								size_t len);
- * extern struct dlist *sysfs_open_subsystem_list(char *name);
- * extern struct dlist *sysfs_open_bus_devices_list(char *name);
+ * extern int sysfs_get_link(const char *path, char *target, size_t len);
+ * extern struct dlist *sysfs_open_directory_list(char *name);
  * extern void sysfs_close_list(struct dlist *list);
- *
- *
  *****************************************************************************
  */
 
@@ -49,11 +45,9 @@
  *
  * flag:
  * 	0:	mnt_path -> valid, len -> valid
- * 	1:	mnt_path -> valid, len -> invalid
- * 	2:	mnt_path -> valid, len -> 0
- * 	3:	mnt_path -> NULL, len -> valid
- * 	4:	mnt_path -> NULL, len -> invalid
- * 	5:	mnt_path -> NULL, len -> NULL
+ * 	1:	mnt_path -> valid, len -> 0
+ * 	2:	mnt_path -> NULL, len -> valid
+ * 	3:	mnt_path -> NULL, len -> NULL
  */
 int test_sysfs_get_mnt_path(int flag)
 {
@@ -68,21 +62,13 @@ int test_sysfs_get_mnt_path(int flag)
 		break;
 	case 1:
 		mnt_path = calloc(1, SYSFS_PATH_MAX);
-		len = 1;
+		len = 0;
 		break;
 	case 2:
-		mnt_path = calloc(1, SYSFS_PATH_MAX);
-		len = 0;
+		mnt_path = NULL;
+		len = SYSFS_PATH_MAX;
 		break;
 	case 3:
-		mnt_path = NULL;
-		len = 0;
-		break;
-	case 4:
-		mnt_path = NULL;
-		len = 12;
-		break;
-	case 5:
 		mnt_path = NULL;
 		len = 0;
 		break;
@@ -93,7 +79,7 @@ int test_sysfs_get_mnt_path(int flag)
 
 	switch (flag) {
 	case 0:
-		if (ret < 0)
+		if (ret)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else {
@@ -105,9 +91,7 @@ int test_sysfs_get_mnt_path(int flag)
 	case 1:
 	case 2:
 	case 3:
-	case 4:
-	case 5:
-		if (ret != -1)
+		if (!ret)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
 		else
@@ -497,7 +481,7 @@ int test_sysfs_get_link(int flag)
 }
 
 /**
- * extern struct dlist *sysfs_open_subsystem_list(char *name);
+ * extern struct dlist *sysfs_open_directory_list(char *name);
  *
  * flag:
  * 	0:	name -> valid
@@ -505,87 +489,25 @@ int test_sysfs_get_link(int flag)
  * 	2:	name -> NULL
  *
  */
-int  test_sysfs_open_subsystem_list(int flag)
+int  test_sysfs_open_directory_list(int flag)
 {
-	char *name = NULL;
+	char *path = NULL;
 	struct dlist *list = NULL;
 
 	switch (flag) {
 	case 0:
-		name = val_subsys;
+		path = val_dir_path;
 		break;
 	case 1:
-		name = inval_name;
+		path = inval_path;
 		break;
 	case 2:
-		name = NULL;
+		path = NULL;
 		break;
 	default:
 		return -1;
 	}
-	list = sysfs_open_subsystem_list(name);
-
-	switch (flag) {
-	case 0:
-		if (list == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
-						__FUNCTION__, flag, errno);
-		else {
-			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
-						__FUNCTION__, flag);
-			show_list(list);
-			dbg_print("\n");
-		}
-		break;
-	case 1:
-	case 2:
-		if (list != NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
-						__FUNCTION__, flag, errno);
-		else
-			dbg_print("%s: SUCCEEDED with flag = %d\n",
-						__FUNCTION__, flag);
-		break;
-	default:
-		break;
-	}
-
-	if (list != NULL) {
-		sysfs_close_list(list);
-		list = NULL;
-	}
-
-	return 0;
-}
-
-/**
- * extern struct dlist *sysfs_open_bus_devices_list(char *name);
- *
- * flag:
- * 	0:	name -> valid
- * 	1:	name -> invalid
- * 	2:	name -> NULL
- *
- */
-int test_sysfs_open_bus_devices_list(int flag)
-{
-	char *name = NULL;
-	struct dlist *list = NULL;
-
-	switch (flag) {
-	case 0:
-		name = val_bus_name;
-		break;
-	case 1:
-		name = inval_name;
-		break;
-	case 2:
-		name = NULL;
-		break;
-	default:
-		return -1;
-	}
-	list = sysfs_open_bus_devices_list(name);
+	list = sysfs_open_directory_list(path);
 
 	switch (flag) {
 	case 0:
@@ -632,14 +554,6 @@ int test_sysfs_close_list(int flag)
 
 	switch (flag) {
 	case 0:
-		list = sysfs_open_subsystem_list("bus");
-		if (list == NULL) {
-			dbg_print("%s: failed to open the bus list\n",
-							__FUNCTION__);
-			return 0;
-		}
-		break;
-	case 1:
 		list = NULL;
 		break;
 	default:

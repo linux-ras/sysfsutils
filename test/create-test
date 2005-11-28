@@ -33,4 +33,10 @@ echo "#define val_drv1_name		\"$VALID_DRIVER1\"" >> test.h
 echo "#define val_drv1_path		\"$VALID_DRIVER1_PATH\"" >> test.h
 echo "#define val_drv1_bus_name		\"$VALID_DRIVER1_BUS\"" >> test.h
 echo "#define val_write_attr_path	\"$VALID_WRITE_ATTR_PATH\"" >> test.h
+echo "#define val_mod_path		\"$VALID_MODULE_PATH\"" >> test.h
+echo "#define val_mod_name		\"$VALID_MODULE\"" >> test.h
+echo "#define val_mod_attr_name 	\"$VALID_MODULE_ATTRIBUTE\"" >> test.h
+echo "#define val_mod_param		\"$VALID_MODULE_PARAM\"" >> test.h
+echo "#define val_mod_section		\"$VALID_MODULE_SECTION\"" >> test.h
+
 

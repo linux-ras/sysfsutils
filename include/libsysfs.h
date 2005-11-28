@@ -168,7 +168,6 @@ extern struct sysfs_module *sysfs_get_driver_module(struct sysfs_driver *drv);
 
 /* generic sysfs device access */
 extern void sysfs_close_device_tree(struct sysfs_device *device);
-extern struct sysfs_device *sysfs_open_device_tree(const char *path);
 extern void sysfs_close_device(struct sysfs_device *dev);
 extern struct sysfs_device *sysfs_open_device
 	(const char *bus, const char *bus_id);

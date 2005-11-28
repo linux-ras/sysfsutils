@@ -73,6 +73,12 @@ int main(int argc, char *argv[])
 				argv[2]);
 
 	fprintf(stdout, "driver %s is on bus %s\n", driver->name, driver->bus);
+
+	struct sysfs_module *module = sysfs_get_driver_module(driver);
+	if (module)
+		fprintf(stdout, "%s is using the module %s\n",
+				driver->name, module->name);
+
 	sysfs_close_driver(driver);
 	free(bus);
 	return 0;
