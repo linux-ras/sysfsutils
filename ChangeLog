@@ -1,6 +1,7 @@
 11/28/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Remove stale brute force code to determine device's
-			bus and device's driver
+			bus and device's driver - Thanks Kay for the patch
+		* Remove sysfs_open_module_attr()
 
 11/28/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Add sysfs_get_driver_module()

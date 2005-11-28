@@ -223,8 +223,6 @@ extern struct sysfs_attribute *sysfs_get_module_parm
 	(struct sysfs_module *module, const char *parm);
 extern struct sysfs_attribute *sysfs_get_module_section
 	(struct sysfs_module *module, const char *section);
-extern struct sysfs_attribute *sysfs_open_module_attr(const char *module,
-	const char *attrib);
 
 /**
  * sort_list: sorter function to keep list elements sorted in alphabetical
