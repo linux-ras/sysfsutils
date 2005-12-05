@@ -441,6 +441,7 @@ int test_sysfs_get_driver_devices(int flag)
 	default:
 		return -1;
 	}
+	errno = 0;
 	list = sysfs_get_driver_devices(driver);
 
 	switch (flag) {

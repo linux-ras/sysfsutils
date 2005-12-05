@@ -547,7 +547,7 @@ int test_sysfs_get_module_parm(int flag)
 						__FUNCTION__, name);
 			return 0;
 		}
-		paramname = val_mod_attr_name;
+		paramname = val_mod_param;
 		break;
 	case 1:
 		name = val_mod_path;
