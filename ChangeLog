@@ -1,3 +1,6 @@
+12/05/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Add support for class:class_device representation
+
 11/28/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Remove stale brute force code to determine device's
 			bus and device's driver - Thanks Kay for the patch

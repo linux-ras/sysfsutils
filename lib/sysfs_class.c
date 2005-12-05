@@ -96,15 +96,29 @@ static struct sysfs_class_device *alloc_class_device(void)
  */
 static void set_classdev_classname(struct sysfs_class_device *cdev)
 {
-	char *c, *e;
+	char *c, *e, name[SYSFS_NAME_LEN];
 	int count = 0;
 
-	c = strstr(cdev->path, SYSFS_CLASS_NAME);
-	if (c == NULL) {
-		c = strstr(cdev->path, SYSFS_BLOCK_NAME);
-	} else {
-		c = strstr(c, "/");
+	/*
+	 * Newer driver core changes have a class:class_device representation.
+	 * Check if this cdev belongs to the newer style subsystem and
+	 * set the classname appropriately.
+	 */
+	memset(name, 0, SYSFS_NAME_LEN);
+	safestrcpy(name, cdev->name);
+	c = strchr(name, ':');
+	if (c) {
+		safestrcpy(cdev->name, c+1);
+		*c = '\0';
+		safestrcpy(cdev->classname, name);
+		return;
 	}
+
+	c = strstr(cdev->path, SYSFS_CLASS_NAME);
+	if (c == NULL)
+		c = strstr(cdev->path, SYSFS_BLOCK_NAME);
+	else
+		c = strstr(c, "/");
 
 	if (c == NULL)
 		safestrcpy(cdev->classname, SYSFS_UNKNOWN);
