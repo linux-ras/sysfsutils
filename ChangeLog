@@ -1,13 +1,17 @@
+12/06/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+		* Ship systool.1
+		* Update README CREDITS, AUTHORS, libsysfs.txt, systool.1
+
 12/05/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Add support for class:class_device representation
 
-11/28/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
+11/28/2005 - Kay Sievers <Kay.Sievers@vrfy.org>
 		* Remove stale brute force code to determine device's
-			bus and device's driver - Thanks Kay for the patch
-		* Remove sysfs_open_module_attr()
+			bus and device's driver
 
 11/28/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Add sysfs_get_driver_module()
+		* Remove sysfs_open_module_attr()
 
 11/25/2005 - Mohan Kumar <mohan@in.ibm.com>
 		* Documentation update

@@ -154,9 +154,9 @@ and devices, here's some examples:
 The library uses some definitions to mark maximum size of a sysfs name or
 path length:
 
-#define SYSFS_PATH_MAX          255
-#define SYSFS_NAME_LEN          50
-#define SYSFS_BUS_ID_SIZE       20
+#define SYSFS_PATH_MAX          256
+#define SYSFS_NAME_LEN          64
+#define SYSFS_BUS_ID_SIZE       32
 
 
 NOTE:
@@ -169,6 +169,13 @@ NOTE:
 	sorted in alphabetical order. It is now a requirement that the
 	"name" and "path" be the first two elements of all libsysfs
 	structures.
+     c. There has been a major overhaul with 2.0.0 release of sysfsutils.
+	We now have a much leaner and meaner library without the overhead
+	of the sysfs_directory and related structures. The API list has
+	also been pruned to contain the most frequently used calls and
+	the lists are not populated all at once. This has lead to enormous
+	speed improvements as well as reduction in the number of system
+	calls.
 
 
 5.1 Attribute Data Structure
@@ -184,14 +191,14 @@ struct sysfs_attribute {
         char name[SYSFS_NAME_LEN];
         char path[SYSFS_PATH_MAX];
         char *value;
-        unsigned short len;             /* value length */
-        unsigned short method;          /* show and store */
+        unsigned short len;             	/* value length */
+        enum sysfs_attribute_method method;	/* show and store */
 };
 
 Path represents the file/attribute's full path. Value is used when reading
 from or writing to an attribute. "len" is the length of data in "value".
-Method is a bitmask for defining if the attribute supports show(read)
-and/or store(write).
+Method is an enum for defining if the attribute supports show(read) and/or
+store(write).
 
 
 5.2 Bus Data Structure
@@ -203,24 +210,16 @@ therefore we use the following structure to represent all sysfs buses:
 struct sysfs_bus {
         char name[SYSFS_NAME_LEN];
         char path[SYSFS_PATH_MAX];
+	struct dlist *attrlist;
 
         /* Private: for internal use only */
         struct dlist *drivers;
         struct dlist *devices;
-        struct sysfs_directory *directory;
 };
 
 The sysfs_bus structure contains the bus "name", while the "path" to bus
 directory is also stored. It also contains lists of devices on the bus
-and drivers that are registered on it. The bus' directory is represented
-by the sysfs_directory structure and it contains references to all the
-subdirectories, links, and attributes. The sysfs_directory structure
-is for internal use only. The following functions may be used by
-applications to retrieve data from the sysfs_directory structure:
-
-struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus)
-struct sysfs_attribute *sysfs_get_bus_attribute(struct sysfs_bus *bus,
-						char *attrname)
+and drivers that are registered on it.
 
 
 5.3 Class Data Structures
@@ -233,38 +232,30 @@ class devices like "eth0", "lo", or "eth1" for the "net" class.
 struct sysfs_class {
         char name[SYSFS_NAME_LEN];
         char path[SYSFS_PATH_MAX];
+	struct dlist *attrlist;
 
         /* Private: for internal use only */
         struct dlist *devices;
-        struct sysfs_directory *directory;
 };
 
 The sysfs_class represents device classes in sysfs like "net". It contains
-the class "name", "path" to the class, a list of class devices and the
-directory representation (for internal use only).
+the class "name", "path" to the class and a list of class devices
 
 struct sysfs_class_device {
         char name[SYSFS_NAME_LEN];
         char path[SYSFS_PATH_MAX];
+	struct dlist *attrlist;
         char classname[SYSFS_NAME_LEN];
 
         /* Private: for internal use only */
         struct sysfs_class_device *parent;
         struct sysfs_device *sysdevice;         /* NULL if virtual */
-        struct sysfs_driver *driver;            /* NULL if not implemented */
-        struct sysfs_directory *directory;
 };
 
 A class device isn't the same as a sysfs_device, it's specific to the class in
 which it belongs. The class device structure contains the name of the class
-the class device belongs to, its sysfs_device reference and that device's
-driver reference (if any). It also contains the name of the class device
-- like "eth0", its parent point (if present) and its sysfs directory
-information including links and attributes (for internal use only).
-The following function may be used by applications to retrieve data
-from the sysfs_directory structure:
-
-struct dlist *sysfs_get_classdev_attributes(struct sysfs_class_device *cdev);
+the class device belongs to and its sysfs_device reference. It also contains
+the name of the class device - like "eth0", its parent (if present).
 
 5.4 Device Data Structure
 -------------------------
@@ -275,6 +266,7 @@ in sysfs under the /sys/devices directory structure.
 struct sysfs_device {
         char name[SYSFS_NAME_LEN];
         char path[SYSFS_PATH_MAX];
+	struct dlist *attrlist;
         char bus_id[SYSFS_NAME_LEN];
         char bus[SYSFS_NAME_LEN];
         char driver_name[SYSFS_NAME_LEN];
@@ -282,20 +274,13 @@ struct sysfs_device {
         /* Private: for internal use only */
         struct sysfs_device *parent;
         struct dlist *children;
-        struct sysfs_directory *directory;
 };
 
 The sysfs_device structure contains a "parent" pointer, a list of child
 devices, if any, device's directory, its bus id - which is the name of
 device's directory, the bus name on which this device is registered and
 its driver name. The device structure also contains the absolute path
-to the device and a directory structure, which contains a list of the
-device's attributes (for internal use only). The following functions
-may be used to obtain information from sysfs_directory structure:
-
-struct sysfs_attribute *sysfs_get_device_attribute(struct sysfs_device *dev,
-						const char *name)
-struct dlist *sysfs_get_device_attributes(struct sysfs_device *device)
+to the device.
 
 
 5.5 Driver Data Structure
@@ -306,19 +291,17 @@ The sysfs_driver structure represents a device driver.
 struct sysfs_driver {
         char name[SYSFS_NAME_LEN];
         char path[SYSFS_PATH_MAX];
+	struct dlist *attrlist;
+	char bus[SYSFS_NAME_LEN];
 
         /* Private: for internal use only */
+	struct sysfs_module *module;
         struct dlist *devices;
-        struct sysfs_directory *directory;
 };
 
 The sysfs_driver structure contains a list of devices that use this driver,
-the name of the driver, its path, and its directory information, which
-includes the driver's attributes (for internal use only). The following
-function may be used to retrieve driver attribute information from the
-sysfs_directory structure:
-
-struct dlist *sysfs_get_driver_attributes(struct sysfs_driver *driver)
+the name of the driver, the module it is using and a list of attributes
+for the driver.
 
 
 5.6 Module Data Structure
@@ -376,7 +359,7 @@ Name:		sysfs_get_mnt_path
 Description:	Function finds the mount path for filesystem type "sysfs".
 
 Arguments:	char *mnt_path		Mount path buffer
-		size_t len		Size of mount path buffer	
+		size_t len		Size of mount path buffer
 
 Returns:	Zero with success.
 		-1 with error. Errno will be set with error:
@@ -586,7 +569,7 @@ Prototype:	struct sysfs_bus *sysfs_open_bus(const char *name)
 Name:		sysfs_close_bus
 
 Description:	Function closes up the sysfs_bus structure including its
-		devices, drivers, and directory.
+		devices, and drivers and the list of attributes.
 
 Arguments:	sysfs_bus *bus		Bus structure to close
 
@@ -731,8 +714,8 @@ Name:		sysfs_get_class_device
 
 Description:	Function takes a sysfs_class structure(obtained on a successful
 		return from a sysfs_open_class() call) and looks for the given
-		device in this class. On success, it returns a sysfs_class_device
-		structure corresponding to the class device.
+		device in this class. On success, it returns a
+		sysfs_class_device structure corresponding to the class device.
 
 Arguments:	struct sysfs_class *cls		Class on which to search
 		char *name			Class device "name" to look for
@@ -767,7 +750,7 @@ Description:	Given the name of the class on which to look for, this function
 		locates a given class device and returns a sysfs_class_device
 		structure corresponding to the requested class device.
 
-	NOTE: 	
+	NOTE:
 		1. The sysfs_class_device structure obtained upon successful
 		   return from this function has to be closed by calling
 		   sysfs_close_class_device().
@@ -798,7 +781,7 @@ Arguments:	struct sysfs_class_device *clsdev	Class device whose
 Returns:	struct sysfs_device * on success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
-		
+
 Prototype:	struct sysfs_device *sysfs_get_classdev_device
 					(struct sysfs_class_device *clsdev)
 -------------------------------------------------------------------------------
@@ -816,7 +799,7 @@ Arguments:	struct sysfs_class_device *clsdev	Class device whose
 Returns:	struct sysfs_class_device * on success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
-		
+
 Prototype:	struct sysfs_class_device *sysfs_get_classdev_parent
 					(struct sysfs_class_device *clsdev)
 -------------------------------------------------------------------------------
@@ -843,7 +826,7 @@ Name:		sysfs_get_classdev_attr
 
 Description:	Searches supplied class device's attributes by name and returns
 		the attribute.
-	
+
 Arguments:	struct sysfs_class_device *clsdev	Device to search
 		const char *name			Attribute name to find
 
@@ -903,7 +886,7 @@ Arguments:	struct sysfs_device *dev	sysfs_device whose parent
 Returns:	struct sysfs_device * on success
 		NULL with error. Errno will be set with error, returning
 			- EINVAL for invalid arguments
-		
+
 Prototype:	struct sysfs_device *sysfs_get_device_parent
 						(struct sysfs_device *dev)
 -------------------------------------------------------------------------------
@@ -1064,13 +1047,10 @@ Description:	Given the name of the bus on which to look for, this function
 		locates a given driver and returns a sysfs_driver structure
 		corresponding to the requested device.
 
-	NOTE: 	
+	NOTE:
 		1. The sysfs_driver structure obtained upon successful return
 		   from this function has to be closed by calling
 		   sysfs_close_driver_by_name().
-		2. Bus on which to look for this driver should be known prior
-		   to calling this function. Use sysfs_find_driver_bus()
-		   to determine this.
 
 Arguments:	const char *bus_name	Bus on which to search
 		const char *drv_name	Driver name to look for
@@ -1083,6 +1063,23 @@ Prototype:	struct sysfs_driver *sysfs_open_driver(const char *bus_name,
 							const char *drv_name)
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+Name:		sysfs_get_driver_module
+
+Description:	Function takes a sysfs_driver structure and returns the module
+		that the driver is using.
+
+Arguments:	struct sysfs_driver *drv	Driver for which the module
+						details are required
+
+Returns:	struct sysfs_module * with success
+		NULL with error. Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct dlist *sysfs_get_driver_module
+					(struct sysfs_driver *drv)
+-------------------------------------------------------------------------------
+
 
 6.8 Module Functions
 --------------------
@@ -1093,11 +1090,9 @@ to open and close modules.
 -------------------------------------------------------------------------------
 Name:		sysfs_close_module
 
-Description:	Closes a module
+Description:	Closes and cleans up the sysfs_module structure
 
-Arguments:	module: sysfs_module device to close
-
-Returns:	None
+Arguments:	struct sysfs_module *module	sysfs_module device to close
 
 Prototype:	void sysfs_close_module(struct sysfs_module *module);
 -------------------------------------------------------------------------------
@@ -1105,11 +1100,11 @@ Prototype:	void sysfs_close_module(struct sysfs_module *module);
 -------------------------------------------------------------------------------
 Name:		sysfs_open_module_path
 
-Description:	Opens and populates the module struct
+Description:	Opens and populates the sysfs_module struct
 
-Arguments:	path: path to module
+Arguments:	const char *path		path to the module to open
 
-Returns:	struct sysfs_module if success and NULL if error occured
+Returns:	struct sysfs_module * with success and NULL if error
 
 Prototype:	struct sysfs_module *sysfs_open_module_path(const char *path);
 -------------------------------------------------------------------------------
@@ -1119,9 +1114,9 @@ Name:		sysfs_open_module
 
 Description:	Opens specific module on a system
 
-Arguments:	name: Name of the module
+Arguments:	const char *name		Name of the module to open
 
-Returns:	sysfs_module structure on success or NULL if error
+Returns:	struct sysfs_module * with success or NULL if error
 
 Prototype:	struct sysfs_module *sysfs_open_module(const char *name);
 -------------------------------------------------------------------------------
@@ -1203,20 +1198,6 @@ Prototype:	struct sysfs_attribute *sysfs_get_module_section
 			(struct sysfs_module *module, const char *section);
 -------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
-Name:		sysfs_open_module_attr
-
-Description:	read an attribute for a given module
-
-Arguments:	module: name of the module on which to look
-		attrib: attribute to read
-
-Returns:	sysfs_attribute * on SUCCESS and NULL on error
-
-Prototype:	struct sysfs_attribute *sysfs_open_module_attr(const char
-			*module, const char *attrib);
--------------------------------------------------------------------------------
-
 
 7 Dlists
 --------
@@ -1247,7 +1228,7 @@ Returns:                On each iteration, "data_iterator" will contain a list
 
 Usage example:          The function sysfs_get_classdev_attributes() returns a
 			dlist of attributes. To navigate the list:
-				
+
 			struct sysfs_attribute *attr = NULL;
 			struct dlist *attrlist = NULL;
 			.

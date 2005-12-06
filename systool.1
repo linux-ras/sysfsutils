@@ -19,12 +19,12 @@ is supplied, the information reqested by
 is shown only for the specified device, otherwise all present devices
 are displayed.
 .P
-.B systool 
-uses APIs provided by 
-.B libsysfs 
+.B systool
+uses APIs provided by
+.B libsysfs
 to gather information.
-.B systool 
-runs only on Linux systems running kernels 2.5 or later, with the sysfs 
+.B systool
+runs only on Linux systems running kernels 2.5 or later, with the sysfs
 filesystem mounted.
 
 .SH OPTIONS
@@ -44,20 +44,17 @@ Show only devices
 .B \-h
 Show usage
 .TP
+.B \-m \fImodule_name
+Show information for a specific module
+.TP
 .B \-p
 Show absolute sysfs path to the resource
-.TP
-.B \-r \fIroot_device
-Show a specific root device tree
 .TP
 .B \-v
 Show all attributes with values
 .TP
 .B \-A \fIattribute
 Show attribute value for the requested resource
-.TP
-.B \-C
-Show device's children
 .TP
 .B \-D
 Show only drivers
