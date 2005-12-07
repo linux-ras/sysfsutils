@@ -248,6 +248,8 @@ struct sysfs_class_device *sysfs_get_classdev_parent
 static int get_classdev_path(const char *classname, const char *clsdev,
 		char *path, size_t len)
 {
+	char *c;
+
 	if (!classname || !clsdev || !path) {
 		errno = EINVAL;
 		return -1;
@@ -262,7 +264,7 @@ static int get_classdev_path(const char *classname, const char *clsdev,
 		safestrcatmax(path, SYSFS_BLOCK_NAME, len);
 		if (!sysfs_path_is_dir(path))
 			goto done;
-		char *c = strrchr(path, '/');
+		c = strrchr(path, '/');
 		*(c+1) = '\0';
 	}
 	safestrcatmax(path, SYSFS_CLASS_NAME, len);
@@ -378,7 +380,7 @@ struct sysfs_device *sysfs_get_classdev_device
 struct sysfs_class *sysfs_open_class(const char *name)
 {
 	struct sysfs_class *cls = NULL;
-	char classpath[SYSFS_PATH_MAX];
+	char *c, classpath[SYSFS_PATH_MAX];
 
 	if (!name) {
 		errno = EINVAL;
@@ -396,7 +398,7 @@ struct sysfs_class *sysfs_open_class(const char *name)
 		safestrcat(classpath, SYSFS_BLOCK_NAME);
 		if (!sysfs_path_is_dir(classpath))
 			goto done;
-		char *c = strrchr(classpath, '/');
+		c = strrchr(classpath, '/');
 		*(c+1) = '\0';
 	}
 	safestrcat(classpath, SYSFS_CLASS_NAME);

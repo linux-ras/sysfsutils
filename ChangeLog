@@ -1,3 +1,6 @@
+12/07/2005 - Mohan Kumar M <mohan@in.ibm.com>
+		* Minor code cleanup in sysfs_class.c to conform to C99
+
 12/06/2005 - Ananth Mavinakayanahalli <ananth@in.ibm.com>
 		* Ship systool.1
 		* Update README CREDITS, AUTHORS, libsysfs.txt, systool.1
