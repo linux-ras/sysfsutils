@@ -1,3 +1,9 @@
+28/06/2006 - Mohan Kumar M <mohan@in.ibm.com>
+		* Add sysfs_open_device_tree()
+
+17/04/2006 - Mohan Kumar M <mohan@in.ibm.com>
+		* Add sysfs_open_link_list()
+
 12/07/2005 - Mohan Kumar M <mohan@in.ibm.com>
 		* Minor code cleanup in sysfs_class.c to conform to C99
 

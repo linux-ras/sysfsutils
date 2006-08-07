@@ -96,7 +96,8 @@ static struct sysfs_class_device *alloc_class_device(void)
  */
 static void set_classdev_classname(struct sysfs_class_device *cdev)
 {
-	char *c, *e, name[SYSFS_NAME_LEN];
+	char *c, *e, name[SYSFS_PATH_MAX], link[SYSFS_PATH_MAX];
+	struct stat stats;
 	int count = 0;
 
 	/*
@@ -104,7 +105,7 @@ static void set_classdev_classname(struct sysfs_class_device *cdev)
 	 * Check if this cdev belongs to the newer style subsystem and
 	 * set the classname appropriately.
 	 */
-	memset(name, 0, SYSFS_NAME_LEN);
+	memset(name, 0, SYSFS_PATH_MAX);
 	safestrcpy(name, cdev->name);
 	c = strchr(name, ':');
 	if (c) {
@@ -120,9 +121,7 @@ static void set_classdev_classname(struct sysfs_class_device *cdev)
 	else
 		c = strstr(c, "/");
 
-	if (c == NULL)
-		safestrcpy(cdev->classname, SYSFS_UNKNOWN);
-	else {
+	if (c) {
 		if (*c == '/')
 			c++;
 		e = c;
@@ -131,6 +130,19 @@ static void set_classdev_classname(struct sysfs_class_device *cdev)
 			count++;
 		}
 		strncpy(cdev->classname, c, count);
+	} else {
+		strcpy(link, cdev->path);
+		strcat(link, "/subsystem");
+		sysfs_get_link(link, name, SYSFS_PATH_MAX);
+		if (lstat(name, &stats))
+			safestrcpy(cdev->classname, SYSFS_UNKNOWN);
+		else {
+			c = strrchr(name, '/');
+			if (c)
+				safestrcpy(cdev->classname, c+1);
+			else
+				safestrcpy(cdev->classname, SYSFS_UNKNOWN);
+		}
 	}
 }
 

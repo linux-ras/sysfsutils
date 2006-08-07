@@ -224,6 +224,20 @@ struct dlist *sysfs_open_directory_list(const char *path)
 }
 
 /**
+ * sysfs_open_link_list: gets a list of all links under "path"
+ * @path: path to read
+ * Returns a dlist of supported links or NULL no directories (errno is set
+ * 	in case of error
+ */
+struct dlist *sysfs_open_link_list(const char *path)
+{
+	if (!path)
+		return NULL;
+
+	return (read_dir_links(path));
+}
+
+/**
  * sysfs_path_is_dir: Check if the path supplied points to a directory
  * @path: path to validate
  * Returns 0 if path points to dir, 1 otherwise

@@ -466,6 +466,17 @@ Returns:	Directory list on success, NULL on error
 Prototype:	struct dlist *sysfs_open_directory_list(const char *path)
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+Name:		sysfs_open_link_list
+
+Description:	Utility function to get list of all links under path.
+
+Arguments:	const char *path	Path to read
+
+Returns:	Links list on success, NULL on error
+
+Prototype:	struct dlist *sysfs_open_link_list(const char *path)
+-------------------------------------------------------------------------------
 
 6.3 Attribute Functions
 ------------------------
@@ -873,6 +884,31 @@ Arguments:	sysfs_device *dev		Device structure to close
 Prototype:	void sysfs_close_device(struct sysfs_device *dev)
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+Name:		sysfs_open_device_tree
+
+Description:	Function opens up the device tree at the specified path.
+
+Arguments:	const char *path	Path at which to open the device tree
+
+Returns:	struct sysfs_device * with success
+		NULL with error, Errno will be set with error, returning
+			- EINVAL for invalid arguments
+
+Prototype:	struct sysfs_device *sysfs_open_device_tree(const char *path)
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Name:		sysfs_close_device_tree
+
+Description:	Function closes the device tree originating at the given
+		sysfs_device.
+
+Arguments:	struct sysfs_device *devroot	Device from which the device
+						tree has to be closed
+
+Prototype:	void sysfs_close_device_tree(struct sysfs_device *devroot)
+-------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
 Name:		sysfs_get_device_parent

@@ -70,6 +70,10 @@ typedef struct dlist {
   DL_node *head;
 } Dlist;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 Dlist *dlist_new(size_t datasize);
 Dlist *dlist_new_with_delete(size_t datasize,void (*del_func)(void*));
 void *_dlist_mark_move(Dlist *list,int direction);
@@ -205,5 +209,10 @@ void *_dlist_insert_dlnode(struct dlist *list,struct dl_node *new_node,int direc
 #define dlist_for_each_data_nomark_rev(list,iterator, data_iterator,datatype) \
 	for((iterator)=(list)->head->prev, (data_iterator)=(datatype *) (iterator)->data; \
 	(iterator)!=(list)->head;(iterator)=(iterator)->prev,(data_iterator)=(datatype *) (iterator))
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _DLIST_H_ */

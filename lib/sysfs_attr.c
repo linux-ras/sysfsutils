@@ -424,6 +424,67 @@ struct dlist *read_dir_links(const char *path)
 	return linklist;
 }
 
+void sysfs_close_dev_tree(void *dev);
+
+int add_subdirectory(struct sysfs_device *dev, char *path)
+{
+	struct sysfs_device *newdev;
+
+	if (!path)
+		return -1;
+
+	newdev = sysfs_open_device_path(path);
+	if (newdev == NULL)
+		return -1;
+
+	if (dev->children == NULL)
+		dev->children = dlist_new_with_delete(
+			sizeof(struct sysfs_device), sysfs_close_dev_tree);
+
+	dlist_unshift_sorted(dev->children, newdev, sort_list);
+	return 0;
+}
+
+/**
+ * read_dir_subdirs: grabs subdirs in a specific directory
+ * @sysdir: sysfs directory to read
+ * returns list of directory names with success and NULL with error.
+ */
+struct sysfs_device *sysfs_read_dir_subdirs(const char *path)
+{
+	DIR *dir = NULL;
+	struct dirent *dirent = NULL;
+	char file_path[SYSFS_PATH_MAX];
+	struct sysfs_device *dev = NULL;
+
+	if (!path) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	dev = sysfs_open_device_path(path);
+
+	dir = opendir(path);
+	if (!dir) {
+		dprintf("Error opening directory %s\n", path);
+		return NULL;
+	}
+	while ((dirent = readdir(dir)) != NULL) {
+		if (0 == strcmp(dirent->d_name, "."))
+			 continue;
+		if (0 == strcmp(dirent->d_name, ".."))
+			continue;
+		memset(file_path, 0, SYSFS_PATH_MAX);
+		safestrcpy(file_path, path);
+		safestrcat(file_path, "/");
+		safestrcat(file_path, dirent->d_name);
+		if (!sysfs_path_is_dir(file_path))
+			add_subdirectory(dev, file_path);
+	}
+	closedir(dir);
+	return dev;
+}
+
 /**
  * read_dir_subdirs: grabs subdirs in a specific directory
  * @sysdir: sysfs directory to read

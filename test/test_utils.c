@@ -33,6 +33,7 @@
  * extern int sysfs_path_is_file(const char *path);
  * extern int sysfs_get_link(const char *path, char *target, size_t len);
  * extern struct dlist *sysfs_open_directory_list(char *name);
+ * extern struct dlist *sysfs_open_link_list(char *name);
  * extern void sysfs_close_list(struct dlist *list);
  *****************************************************************************
  */
@@ -541,6 +542,66 @@ int  test_sysfs_open_directory_list(int flag)
 	return 0;
 }
 
+/**
+ * extern struct dlist *sysfs_open_link_list(char *name);
+ *
+ * flag:
+ * 	0:	name -> valid
+ * 	1:	name -> invalid
+ * 	2:	name -> NULL
+ *
+ */
+int  test_sysfs_open_link_list(int flag)
+{
+	char *path = NULL;
+	struct dlist *list = NULL;
+
+	switch (flag) {
+	case 0:
+		path = val_link_path;
+		break;
+	case 1:
+		path = inval_path;
+		break;
+	case 2:
+		path = NULL;
+		break;
+	default:
+		return -1;
+	}
+	list = sysfs_open_link_list(path);
+
+	switch (flag) {
+	case 0:
+		if (list == NULL)
+			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+						__FUNCTION__, flag, errno);
+		else {
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+						__FUNCTION__, flag);
+			show_list(list);
+			dbg_print("\n");
+		}
+		break;
+	case 1:
+	case 2:
+		if (list != NULL)
+			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+						__FUNCTION__, flag, errno);
+		else
+			dbg_print("%s: SUCCEEDED with flag = %d\n",
+						__FUNCTION__, flag);
+		break;
+	default:
+		break;
+	}
+	if (list != NULL) {
+		sysfs_close_list(list);
+		list = NULL;
+	}
+
+	return 0;
+}
 /**
  * extern void sysfs_close_list(struct dlist *list);
  *

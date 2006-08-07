@@ -79,6 +79,39 @@ int sysfs_get_device_bus(struct sysfs_device *dev)
 }
 
 /**
+ * get_dev_subsystem: fills in the dev->subsystem field
+ * Returns 0 on SUCCESS and -1 on error
+ */
+static int get_dev_subsystem(struct sysfs_device *dev)
+{
+	char path[SYSFS_PATH_MAX], devpath[SYSFS_PATH_MAX];
+
+	if (!dev) {
+		errno = EINVAL;
+		return -1;
+	}
+	memset(path, 0, SYSFS_PATH_MAX);
+	memset(devpath, 0, SYSFS_PATH_MAX);
+	safestrcpymax(path, dev->path, SYSFS_PATH_MAX);
+	safestrcatmax(path, "/subsystem", SYSFS_PATH_MAX);
+	if (!sysfs_path_is_link(path)) {
+		if (!sysfs_get_link(path, devpath, SYSFS_PATH_MAX)) {
+			if (!sysfs_get_name_from_path(devpath,
+					dev->subsystem, SYSFS_NAME_LEN))
+				return 0;
+		}
+	}
+	return -1;
+}
+/**
+ * sysfs_close_dev_tree: routine for dlist integration
+ */
+void sysfs_close_dev_tree(void *dev)
+{
+	sysfs_close_device_tree((struct sysfs_device *)dev);
+}
+
+/**
  * sysfs_close_device_tree: closes every device in the supplied tree,
  * 	closing children only.
  * @devroot: device root of tree.
@@ -93,6 +126,7 @@ void sysfs_close_device_tree(struct sysfs_device *devroot)
 					struct sysfs_device)
 				sysfs_close_device_tree(child);
 		}
+		devroot->children = NULL;
 		sysfs_close_device(devroot);
 	}
 }
@@ -171,7 +205,57 @@ struct sysfs_device *sysfs_open_device_path(const char *path)
 		dprintf("Could not get device %s's driver\n", dev->bus_id);
 		safestrcpy(dev->driver_name, SYSFS_UNKNOWN);
 	}
+
+	if (get_dev_subsystem(dev)) {
+		dprintf("Could not get device %s's subsystem\n", dev->bus_id);
+		safestrcpy(dev->subsystem, SYSFS_UNKNOWN);
+	}
 	return dev;
+}
+
+/**
+ * sysfs_open_device_tree: opens root device and all of its children,
+ *	creating a tree of devices. Only opens children.
+ * @path: sysfs path to devices
+ * returns struct sysfs_device and its children with success or NULL with
+ *	error.
+ */
+struct sysfs_device *sysfs_open_device_tree(const char *path)
+{
+	struct sysfs_device *rootdev = NULL, *new = NULL;
+	struct sysfs_device *cur = NULL;
+	struct sysfs_device *devlist;
+
+	if (path == NULL) {
+		errno = EINVAL;
+		return NULL;
+	}
+	rootdev = sysfs_open_device_path(path);
+	if (rootdev == NULL) {
+		dprintf("Error opening root device at %s\n", path);
+		return NULL;
+	}
+
+	devlist = sysfs_read_dir_subdirs(path);
+        if (devlist->children) {
+		dlist_for_each_data(devlist->children, cur,
+				struct sysfs_device) {
+			new = sysfs_open_device_tree(cur->path);
+			if (new == NULL) {
+				dprintf("Error opening device tree at %s\n",
+						cur->path);
+				sysfs_close_device_tree(rootdev);
+				return NULL;
+			}
+			if (rootdev->children == NULL)
+				rootdev->children = dlist_new_with_delete
+					(sizeof(struct sysfs_device),
+					sysfs_close_dev_tree);
+			dlist_unshift_sorted(rootdev->children, new, sort_list);
+		}
+	}
+
+	return rootdev;
 }
 
 /**

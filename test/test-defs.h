@@ -75,6 +75,7 @@ extern int test_sysfs_path_is_link(int flag);
 extern int test_sysfs_path_is_file(int flag);
 extern int test_sysfs_get_link(int flag);
 extern int test_sysfs_open_directory_list(int flag);
+extern int test_sysfs_open_link_list(int flag);
 extern int test_sysfs_close_list(int flag);
 extern int test_sysfs_close_attribute(int flag);
 extern int test_sysfs_open_attribute(int flag);
