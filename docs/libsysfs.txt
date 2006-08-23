@@ -2,8 +2,8 @@
 	System Utilities sysfs Library - libsysfs
 	=========================================
 
-Version: 2.0.0
-November 25, 2005
+Version: 2.1.0
+August 22, 2006
 
 Contents
 --------
@@ -264,16 +264,17 @@ The sysfs_device structure represents a system device that's exposed
 in sysfs under the /sys/devices directory structure.
 
 struct sysfs_device {
-        char name[SYSFS_NAME_LEN];
-        char path[SYSFS_PATH_MAX];
+	char name[SYSFS_NAME_LEN];
+	char path[SYSFS_PATH_MAX];
 	struct dlist *attrlist;
-        char bus_id[SYSFS_NAME_LEN];
-        char bus[SYSFS_NAME_LEN];
-        char driver_name[SYSFS_NAME_LEN];
+	char bus_id[SYSFS_NAME_LEN];
+	char bus[SYSFS_NAME_LEN];
+	char driver_name[SYSFS_NAME_LEN];
+	char subsystem[SYSFS_NAME_LEN];
 
-        /* Private: for internal use only */
-        struct sysfs_device *parent;
-        struct dlist *children;
+	/* Private: for internal use only */
+	struct sysfs_device *parent;
+	struct dlist *children;
 };
 
 The sysfs_device structure contains a "parent" pointer, a list of child
@@ -1303,7 +1304,7 @@ dlist_sort_custom() expects that the compare function will:
 7.3 Custom filtering and sorting using dlist_filter_sort()
 ----------------------------------------------------------
 
-As of release 2.0.0, libsysfs provides a new interface for custom filtering
+From release 2.0.0, libsysfs provides a new interface for custom filtering
 and sorting of dlists. This API is similar to scandir() system call.
 Applications can call this API with the following arguments: the list, pointer
 to the filter function, pointer to the sorter function as in
@@ -1332,10 +1333,10 @@ in the filesystem it represents. Here's a typical order of operation:
 9. Testsuite
 ------------
 
-Version 2.0.0 of sysfsutils ships with a comprehensive testsuite. The testsuite
-shipped as part of the "test" directory of the sysfsutils source package,
-results in an executable "testlibsysfs" which will be installed in the
-/usr/local/bin directory. Some of the salient features of the testsuite are:
+From version 2.0.0 sysfsutils ships with a comprehensive testsuite. The
+testsuite shipped as part of the "test" directory of the sysfsutils source
+package, results in an executable "testlibsysfs". Some of the salient
+features of the testsuite are:
 
 a. Tests _every_ API exported by the library.
 b. Tests are performed for all possible combinations of input parameters.
@@ -1355,7 +1356,7 @@ a. Modify the variables libsysfs.conf file to appropriate values for your
    value for the system under test).
 
 
-b. Build and install the testsuite.
+b. Build testsuite.
 
 c. Run the testsuite:
 

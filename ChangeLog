@@ -1,3 +1,9 @@
+18/07/2006 - Mohan Kumar M <mohan@in.ibm.com>
+		* Add subsystem in sysfs_device
+
+07/07/2006 - Mohan Kumar M <mohan@in.ibm.com>
+		* Add C++ compilation suport
+
 28/06/2006 - Mohan Kumar M <mohan@in.ibm.com>
 		* Add sysfs_open_device_tree()
 
