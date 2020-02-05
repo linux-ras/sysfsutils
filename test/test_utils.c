@@ -26,18 +26,18 @@
  *
  * extern int sysfs_get_mnt_path(char *mnt_path, size_t len);
  * extern int sysfs_remove_trailing_slash(char *path);
- * extern int sysfs_get_name_from_path(const char *path,
+ * extern int sysfs_get_name_from_path(const char *path, 
  * 					char *name, size_t len);
  * extern int sysfs_path_is_dir(const char *path);
  * extern int sysfs_path_is_link(const char *path);
  * extern int sysfs_path_is_file(const char *path);
- * extern int sysfs_get_link(const char *path, char *target,
+ * extern int sysfs_get_link(const char *path, char *target, 
  * 								size_t len);
  * extern struct dlist *sysfs_open_subsystem_list(char *name);
  * extern struct dlist *sysfs_open_bus_devices_list(char *name);
  * extern void sysfs_close_list(struct dlist *list);
- *
- *
+ * 
+ * 
  *****************************************************************************
  */
 
@@ -113,7 +113,7 @@ int test_sysfs_get_mnt_path(int flag)
 		else
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
-		break;
+		break;		
 	default:
 		break;
 	}
@@ -168,7 +168,7 @@ int test_sysfs_remove_trailing_slash(int flag)
 		else
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
 						__FUNCTION__, flag);
-		break;
+		break;		
 	default:
 		break;
 	}
@@ -182,7 +182,7 @@ int test_sysfs_remove_trailing_slash(int flag)
 }
 
 /**
- * extern int sysfs_get_name_from_path(const char *path,
+ * extern int sysfs_get_name_from_path(const char *path, 
  * 					char *name, size_t len);
  *
  * flag:
@@ -197,7 +197,7 @@ int test_sysfs_get_name_from_path(int flag)
 	char *name = NULL;
 	size_t len = SYSFS_NAME_LEN;
 	int ret = 0;
-
+	
 	switch (flag) {
 	case 0:
 		path = val_dir_path;
@@ -205,7 +205,7 @@ int test_sysfs_get_name_from_path(int flag)
 		break;
 	case 1:
 		path = val_dir_path;
-		name = NULL;
+		name = NULL; 
 		break;
 	case 2:
 		path = NULL;
@@ -213,7 +213,7 @@ int test_sysfs_get_name_from_path(int flag)
 		break;
 	case 3:
 		path = NULL;
-		name = NULL;
+		name = NULL; 
 		break;
 	default:
 		return -1;
@@ -257,15 +257,15 @@ int test_sysfs_get_name_from_path(int flag)
  * extern int sysfs_path_is_dir(const char *path);
  *
  * flag:
- * 	0:	path -> valid
- * 	1:	path -> invalid
- * 	2:	path -> NULL
+ * 	0:	path -> valid 
+ * 	1:	path -> invalid 
+ * 	2:	path -> NULL 
  */
 int test_sysfs_path_is_dir(int flag)
 {
 	char *path = NULL;
 	int ret = 0;
-
+	
 	switch (flag) {
 	case 0:
 		path = val_dir_path;
@@ -280,7 +280,7 @@ int test_sysfs_path_is_dir(int flag)
 		return -1;
 	}
 	ret = sysfs_path_is_dir(path);
-
+	
 	switch (flag) {
 	case 0:
 		if (ret != 0)
@@ -289,7 +289,7 @@ int test_sysfs_path_is_dir(int flag)
 		else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
-			dbg_print("Path \"%s\" points to a directory\n\n",
+			dbg_print("Path \"%s\" points to a directory\n\n", 
 						path);
 		}
 		break;
@@ -314,15 +314,15 @@ int test_sysfs_path_is_dir(int flag)
  * extern int sysfs_path_is_link(const char *path);
  *
  * flag:
- * 	0:	path -> valid
- * 	1:	path -> invalid
- * 	2:	path -> NULL
+ * 	0:	path -> valid 
+ * 	1:	path -> invalid 
+ * 	2:	path -> NULL 
  */
 int test_sysfs_path_is_link(int flag)
 {
 	char *path = NULL;
 	int ret = 0;
-
+	
 	switch (flag) {
 	case 0:
 		path = val_link_path;
@@ -346,7 +346,7 @@ int test_sysfs_path_is_link(int flag)
 		else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
-			dbg_print("Path \"%s\" points to a link\n\n",
+			dbg_print("Path \"%s\" points to a link\n\n", 
 						path);
 		}
 		break;
@@ -371,15 +371,15 @@ int test_sysfs_path_is_link(int flag)
  * extern int sysfs_path_is_file(const char *path);
  *
  * flag:
- * 	0:	path -> valid
- * 	1:	path -> invalid
- * 	2:	path -> NULL
+ * 	0:	path -> valid 
+ * 	1:	path -> invalid 
+ * 	2:	path -> NULL 
  */
 int test_sysfs_path_is_file(int flag)
 {
 	char *path = NULL;
 	int ret = 0;
-
+	
 	switch (flag) {
 	case 0:
 		path = val_file_path;
@@ -394,7 +394,7 @@ int test_sysfs_path_is_file(int flag)
 		return -1;
 	}
 	ret = sysfs_path_is_file(path);
-
+	
 	switch (flag) {
 	case 0:
 		if (ret != 0)
@@ -403,7 +403,7 @@ int test_sysfs_path_is_file(int flag)
 		else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
-			dbg_print("Path \"%s\" points to a file\n\n",
+			dbg_print("Path \"%s\" points to a file\n\n", 
 						path);
 		}
 		break;
@@ -424,14 +424,14 @@ int test_sysfs_path_is_file(int flag)
 }
 
 /**
- * extern int sysfs_get_link(const char *path,
+ * extern int sysfs_get_link(const char *path, 
  * 					char *target, size_t len);
  *
  * flag:
  * 	0:	path -> valid, target -> valid
- * 	1:	path -> valid, target -> NULL
- * 	2:	path -> NULL, target -> valid
- * 	3:	path -> NULL, target -> NULL
+ * 	1:	path -> valid, target -> NULL 
+ * 	2:	path -> NULL, target -> valid 
+ * 	3:	path -> NULL, target -> NULL 
  */
 int test_sysfs_get_link(int flag)
 {
@@ -447,7 +447,7 @@ int test_sysfs_get_link(int flag)
 		break;
 	case 1:
 		path = val_link_path;
-		target = NULL;
+		target = NULL; 
 		break;
 	case 2:
 		path = NULL;
@@ -455,14 +455,14 @@ int test_sysfs_get_link(int flag)
 		break;
 	case 3:
 		path = NULL;
-		target = NULL;
+		target = NULL; 
 		break;
 	default:
 		return -1;
-
+		
 	}
 	ret = sysfs_get_link(path, target, len);
-
+	
 	switch (flag) {
 	case 0:
 		if (ret != 0)
@@ -493,7 +493,7 @@ int test_sysfs_get_link(int flag)
 		free(target);
 		target = NULL;
 	}
-
+	
 	return 0;
 }
 
@@ -555,7 +555,7 @@ int  test_sysfs_open_subsystem_list(int flag)
 		sysfs_close_list(list);
 		list = NULL;
 	}
-
+	
 	return 0;
 }
 
@@ -630,7 +630,7 @@ int test_sysfs_open_bus_devices_list(int flag)
 int test_sysfs_close_list(int flag)
 {
 	struct dlist *list = NULL;
-
+	
 	switch (flag) {
 	case 0:
 		list = sysfs_open_subsystem_list("bus");
@@ -647,7 +647,7 @@ int test_sysfs_close_list(int flag)
 		return -1;
 	}
 	sysfs_close_list(list);
-
+	
 	dbg_print("%s: returns void\n", __FUNCTION__);
 
 	return 0;

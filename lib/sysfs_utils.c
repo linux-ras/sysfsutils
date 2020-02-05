@@ -25,7 +25,7 @@
 
 static int sort_char(void *new, void *old)
 {
-	return ((strncmp((char *)new, (char *)old,
+	return ((strncmp((char *)new, (char *)old, 
 			strlen((char *)new))) < 0 ? 1 : 0);
 }
 
@@ -33,7 +33,7 @@ static int sort_char(void *new, void *old)
  * sysfs_remove_trailing_slash: Removes any trailing '/' in the given path
  * @path: Path to look for the trailing '/'
  * Returns 0 on success 1 on error
- */
+ */ 
 int sysfs_remove_trailing_slash(char *path)
 {
 	char *c = NULL;
@@ -48,7 +48,7 @@ int sysfs_remove_trailing_slash(char *path)
 		errno = EINVAL;
 		return 1;
 	}
-	if (*(c+1) == '\0')
+	if (*(c+1) == '\0') 
 		*c = '\0';
 	return 0;
 }
@@ -60,7 +60,7 @@ int sysfs_remove_trailing_slash(char *path)
  * @len: size of mnt_path
  * returns 0 with success and -1 with error.
  */
-static int sysfs_get_fs_mnt_path(const char *fs_type,
+static int sysfs_get_fs_mnt_path(const char *fs_type, 
 				char *mnt_path, size_t len)
 {
 	FILE *mnt;
@@ -97,7 +97,7 @@ static int sysfs_get_fs_mnt_path(const char *fs_type,
 	}
 	if ((sysfs_remove_trailing_slash(mnt_path)) != 0)
 		ret = -1;
-
+	
 	return ret;
 }
 
@@ -137,7 +137,7 @@ int sysfs_get_name_from_path(const char *path, char *name, size_t len)
 {
 	char tmp[SYSFS_PATH_MAX];
 	char *n = NULL;
-
+                                                                                
 	if (path == NULL || name == NULL || len == 0) {
 		errno = EINVAL;
 		return -1;
@@ -161,7 +161,7 @@ int sysfs_get_name_from_path(const char *path, char *name, size_t len)
 	safestrcpymax(name, n, len);
 	return 0;
 }
-
+	
 /**
  * sysfs_get_link: returns link source
  * @path: symbolic link's path
@@ -190,15 +190,15 @@ int sysfs_get_link(const char *path, char *target, size_t len)
 		return -1;
 	}
 	d = linkpath;
-	/*
+	/* 
 	 * Three cases here:
 	 * 1. relative path => format ../..
 	 * 2. absolute path => format /abcd/efgh
 	 * 3. relative path _from_ this dir => format abcd/efgh
-	 */
+	 */ 
 	switch (*d) {
-		case '.':
-			/*
+		case '.': 
+			/* 
 			 * handle the case where link is of type ./abcd/xxx
 			 */
 			safestrcpy(temp_path, devdir);
@@ -215,9 +215,9 @@ int sysfs_get_link(const char *path, char *target, size_t len)
 			}
 			safestrcpymax(target, temp_path, len);
 			break;
-			/*
-			 * relative path
-			 * getting rid of leading "../.."
+			/* 
+			 * relative path  
+			 * getting rid of leading "../.." 
 			 */
 parse_path:
 			while (*d == '/' || *d == '.') {
@@ -257,7 +257,7 @@ parse_path:
 /**
  * sysfs_del_name: free function for sysfs_open_subsystem_list
  * @name: memory area to be freed
- */
+ */ 
 static void sysfs_del_name(void *name)
 {
 	free(name);
@@ -280,14 +280,14 @@ void sysfs_close_list(struct dlist *list)
  * 	details from the system
  * @name: name of the subsystem, eg., "bus", "class", "devices"
  * Returns a dlist of supported names or NULL if subsystem not supported
- */
+ */ 
 struct dlist *sysfs_open_subsystem_list(char *name)
 {
 	char sysfs_path[SYSFS_PATH_MAX], *subsys_name = NULL;
 	char *c = NULL;
 	struct sysfs_directory *dir = NULL, *cur = NULL;
 	struct dlist *list = NULL;
-
+	
 	if (name == NULL)
 		return NULL;
 
@@ -331,17 +331,17 @@ struct dlist *sysfs_open_subsystem_list(char *name)
 	 * We are now considering "block" as a "class". Hence, if the subsys
 	 * name requested here is "class", verify if "block" is supported on
 	 * this system and return the same.
-	 */
+	 */ 
 	if (strcmp(name, SYSFS_CLASS_NAME) == 0) {
 		c = strstr(sysfs_path, SYSFS_CLASS_NAME);
 		if (c == NULL)
 			goto out;
 		*c = '\0';
-		safestrcpymax(c, SYSFS_BLOCK_NAME,
+		safestrcpymax(c, SYSFS_BLOCK_NAME, 
 				sizeof(sysfs_path) - strlen(sysfs_path));
 		if ((sysfs_path_is_dir(sysfs_path)) == 0) {
 			subsys_name = (char *)calloc(1, SYSFS_NAME_LEN);
-			safestrcpymax(subsys_name, SYSFS_BLOCK_NAME,
+			safestrcpymax(subsys_name, SYSFS_BLOCK_NAME, 
 					SYSFS_NAME_LEN);
 			dlist_unshift_sorted(list, subsys_name, sort_char);
 		}
@@ -355,14 +355,14 @@ out:
  * sysfs_open_bus_devices_list: gets a list of all devices on "name" bus
  * @name: name of the subsystem, eg., "pci", "scsi", "usb"
  * Returns a dlist of supported names or NULL if subsystem not supported
- */
+ */ 
 struct dlist *sysfs_open_bus_devices_list(char *name)
 {
 	char sysfs_path[SYSFS_PATH_MAX], *device_name = NULL;
 	struct sysfs_directory *dir = NULL;
 	struct sysfs_link *cur = NULL;
 	struct dlist *list = NULL;
-
+	
 	if (name == NULL)
 		return NULL;
 
@@ -428,7 +428,7 @@ int sysfs_path_is_dir(const char *path)
 	}
 	if (S_ISDIR(astats.st_mode))
 		return 0;
-
+		
 	return 1;
 }
 
@@ -451,7 +451,7 @@ int sysfs_path_is_link(const char *path)
 	}
 	if (S_ISLNK(astats.st_mode))
 		return 0;
-
+		
 	return 1;
 }
 
@@ -474,6 +474,6 @@ int sysfs_path_is_file(const char *path)
 	}
 	if (S_ISREG(astats.st_mode))
 		return 0;
-
+		
 	return 1;
 }

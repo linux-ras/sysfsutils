@@ -29,7 +29,7 @@ struct pci_access {
 };
 
 extern unsigned char *pci_lookup_name(struct pci_access *a, unsigned char *buf,
-		int size, int flags, unsigned int arg1, unsigned int arg2,
+		int size, int flags, unsigned int arg1, unsigned int arg2, 
 		unsigned int arg3, unsigned int arg4);
 extern void pci_free_name_list(struct pci_access *a);
 

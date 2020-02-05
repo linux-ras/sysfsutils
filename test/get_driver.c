@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	fprintf(stdout, "Driver %s is a member of bus %s\n", argv[1], bus);
-
+	
 	if ((sysfs_get_mnt_path(path, SYSFS_PATH_MAX)) != 0) {
 		fprintf(stdout, "Sysfs not mounted?\n");
 		return 1;
@@ -73,11 +73,11 @@ int main(int argc, char *argv[])
 	devlist = sysfs_get_driver_devices(driver);
 	if (devlist != NULL) {
 		fprintf(stdout, "%s is used by:\n", argv[1]);
-		dlist_for_each_data(devlist, device, struct sysfs_device)
+		dlist_for_each_data(devlist, device, struct sysfs_device) 
 			fprintf(stdout, "\t\t%s\n", device->bus_id);
-	} else
+	} else 
 		fprintf(stdout, "%s is presently not used by any device\n", argv[1]);
-
+	
 	sysfs_close_driver(driver);
 	free(bus);
 	return 0;

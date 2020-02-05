@@ -37,7 +37,7 @@
  * extern struct sysfs_attribute *sysfs_get_bus_attribute
  * 						(struct sysfs_bus *bus,
  * 						char *attrname);
- * extern int sysfs_find_driver_bus(const char *driver,
+ * extern int sysfs_find_driver_bus(const char *driver, 
  * 				char *busname,	size_t bsize);
  ******************************************************************************
  */
@@ -47,16 +47,16 @@
 
 /**
  * extern void sysfs_close_bus(struct sysfs_bus *bus);
- *
+ * 
  * flags:
  * 	0 -> bus -> valid
- * 	1 -> bus -> null.
+ * 	1 -> bus -> null. 
  */
 int  test_sysfs_close_bus(int flag)
 {
 	struct sysfs_bus *bus = NULL;
 	char *bus_name = NULL;
-
+	
 	switch (flag) {
 	case 0:
 		bus_name = val_bus_name;
@@ -68,7 +68,7 @@ int  test_sysfs_close_bus(int flag)
 		break;
 	case 1:
 		bus = NULL;
-		break;
+		break;		
 	default:
 		return -1;
 	}
@@ -105,23 +105,23 @@ int test_sysfs_open_bus(int flag)
 		return -1;
 	}
 	bus = sysfs_open_bus(name);
-
+	
 	switch (flag) {
 	case 0:
-		if (bus == NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (bus == NULL) 
+			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		else {
-			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n", 
 					__FUNCTION__, flag);
-			dbg_print("Bus = %s, path = %s\n\n",
+			dbg_print("Bus = %s, path = %s\n\n", 
 					bus->name, bus->path);
 		}
 		break;
 	case 1:
 	case 2:
-		if (bus != NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (bus != NULL) 
+			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		else
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
@@ -154,7 +154,7 @@ int test_sysfs_get_bus_device(int flag)
 	struct sysfs_device *dev = NULL;
 	char *bus_name = NULL;
 	char *id = NULL;
-
+	
 	switch(flag) {
 	case 0:
 		bus_name = val_bus_name;
@@ -193,7 +193,7 @@ int test_sysfs_get_bus_device(int flag)
 		break;
 	case 5:
 		bus = NULL;
-		id = NULL;
+		id = NULL; 
 		break;
 	default:
 		return -1;
@@ -206,8 +206,8 @@ int test_sysfs_get_bus_device(int flag)
 			if (errno == 0)
 				dbg_print("%s: Device %s not on bus %s\n",
 						__FUNCTION__, id, bus_name);
-			else
-				dbg_print("%s: FAILED with flag = %d errno = %d\n",
+			else 
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
@@ -221,17 +221,17 @@ int test_sysfs_get_bus_device(int flag)
 	case 3:
 	case 4:
 	case 5:
-		if (dev != NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (dev != NULL) 
+			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
-		else
+		else	
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
 					__FUNCTION__, flag);
 		break;
 	default:
 		break;
 	}
-
+	
 	if (bus != NULL)
 		sysfs_close_bus(bus);
 
@@ -256,7 +256,7 @@ int test_sysfs_get_bus_driver(int flag)
 	struct sysfs_driver *drv = NULL;
 	char *drvname = NULL;
 	char *bus_name = NULL;
-
+	
 	switch(flag) {
 	case 0:
 		bus_name = val_drv_bus_name;
@@ -301,18 +301,18 @@ int test_sysfs_get_bus_driver(int flag)
 		return -1;
 	}
 	drv = sysfs_get_bus_driver(bus, drvname);
-
+	
 	switch (flag) {
 	case 0:
 		if (drv == NULL) {
 			if (errno == 0)
 				dbg_print("%s: Driver %s not on bus %s\n",
 						__FUNCTION__, drvname, bus_name);
-			else
-				dbg_print("%s: FAILED with flag = %d errno = %d\n",
+			else 
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		} else {
-			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n", 
 					__FUNCTION__, flag);
 			show_driver(drv);
 			dbg_print("\n");
@@ -324,16 +324,16 @@ int test_sysfs_get_bus_driver(int flag)
 	case 4:
 	case 5:
 		if (drv != NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
-		else
+		else	
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
 					__FUNCTION__, flag);
 		break;
 	default:
 		break;
 	}
-
+	
 	if (bus != NULL)
 		sysfs_close_bus(bus);
 
@@ -345,14 +345,14 @@ int test_sysfs_get_bus_driver(int flag)
  *
  * flag:
  * 	0 	: bus -> valid
- * 	1 	: bus -> NULL
+ * 	1 	: bus -> NULL 
  */
 int  test_sysfs_get_bus_drivers(int flag)
 {
 	struct sysfs_bus *bus = NULL;
 	struct dlist *list = NULL;
 	char *bus_name = NULL;
-
+	
 	switch (flag) {
 	case 0:
 		bus_name = val_bus_name;
@@ -364,7 +364,7 @@ int  test_sysfs_get_bus_drivers(int flag)
 		break;
 	case 1:
 		bus = NULL;
-		break;
+		break;		
 	default:
 		return -1;
 	}
@@ -377,10 +377,10 @@ int  test_sysfs_get_bus_drivers(int flag)
 				dbg_print("%s: No drivers registered with bus %s\n",
 						__FUNCTION__, bus_name);
 			else
-				dbg_print("%s: FAILED with flag = %d errno = %d\n",
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		} else {
-			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n\n", 
 					__FUNCTION__, flag);
 			show_driver_list(list);
 			dbg_print("\n");
@@ -388,10 +388,10 @@ int  test_sysfs_get_bus_drivers(int flag)
 		break;
 	case 1:
 		if (list != NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		else
-			dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n", 
 					__FUNCTION__, flag);
 		break;
 	default:
@@ -408,14 +408,14 @@ int  test_sysfs_get_bus_drivers(int flag)
  *
  * flag:
  * 	0 	: bus -> valid
- * 	1 	: bus -> NULL
+ * 	1 	: bus -> NULL 
  */
 int  test_sysfs_get_bus_devices(int flag)
 {
 	struct sysfs_bus *bus = NULL;
 	struct dlist *list = NULL;
 	char *bus_name = NULL;
-
+	
 	switch (flag) {
 	case 0:
 		bus_name = val_bus_name;
@@ -427,7 +427,7 @@ int  test_sysfs_get_bus_devices(int flag)
 		break;
 	case 1:
 		bus = NULL;
-		break;
+		break;		
 	default:
 		return -1;
 	}
@@ -440,7 +440,7 @@ int  test_sysfs_get_bus_devices(int flag)
 				dbg_print("%s: No devices registered with bus %s\n",
 						__FUNCTION__, bus_name);
 			else
-				dbg_print("%s: FAILED with flag = %d errno = %d\n",
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
@@ -451,10 +451,10 @@ int  test_sysfs_get_bus_devices(int flag)
 		break;
 	case 1:
 		if (list != NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		else
-			dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n", 
 					__FUNCTION__, flag);
 		break;
 	default:
@@ -468,17 +468,17 @@ int  test_sysfs_get_bus_devices(int flag)
 
 /**
  * extern struct dlist *sysfs_get_bus_attributes(struct sysfs_bus *bus);
- *
+ * 
  * flag:
  * 	0 	: bus -> valid
- * 	1 	: bus -> NULL
+ * 	1 	: bus -> NULL	
  */
 int test_sysfs_get_bus_attributes(int flag)
 {
 	struct sysfs_bus *bus = NULL;
 	struct dlist *list = NULL;
 	char *bus_name = NULL;
-
+	
 	switch (flag) {
 	case 0:
 		bus_name = val_bus_name;
@@ -503,8 +503,8 @@ int test_sysfs_get_bus_attributes(int flag)
 				dbg_print("%s: SUCCEEDED with flag = %d\n",
 					__FUNCTION__, flag);
 				dbg_print("since no buses have attribs as of now\n");
-			} else
-				dbg_print("%s: FAILED with flag = %d errno = %d\n",
+			} else 
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		} else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
@@ -513,7 +513,7 @@ int test_sysfs_get_bus_attributes(int flag)
 		break;
 	case 1:
 		if (list != NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		else
 			dbg_print("%s: SUCCEEDED with flag = %d\n",
@@ -534,14 +534,14 @@ int test_sysfs_get_bus_attributes(int flag)
  *
  * flag:
  * 	0 	: bus -> valid
- * 	1 	: bus -> NULL
+ * 	1 	: bus -> NULL	
  */
 int test_sysfs_refresh_bus_attributes(int flag)
 {
 	struct sysfs_bus *bus = NULL;
 	struct dlist *list = NULL;
 	char *bus_name = NULL;
-
+	
 	switch (flag) {
 	case 0:
 		bus_name = val_bus_name;
@@ -566,8 +566,8 @@ int test_sysfs_refresh_bus_attributes(int flag)
 				dbg_print("%s: SUCCEEDED with flag = %d\n",
 					__FUNCTION__, flag);
 				dbg_print("since no buses have attribs as of now\n");
-			} else
-				dbg_print("%s: FAILED with flag = %d errno = %d\n",
+			} else 
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		} else {
 			dbg_print("%s: SUCCEEDED with flag %d\n",
@@ -576,7 +576,7 @@ int test_sysfs_refresh_bus_attributes(int flag)
 		break;
 	case 1:
 		if (list != NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		else
 			dbg_print("%s: SUCCEEDED with flag %d\n",
@@ -611,7 +611,7 @@ int test_sysfs_get_bus_attribute(int flag)
 	struct sysfs_bus *bus = NULL;
 	char *attrname = NULL;
 	char *bus_name = NULL;
-
+	
 	switch(flag) {
 	case 0:
 		bus_name = val_bus_name;
@@ -655,7 +655,7 @@ int test_sysfs_get_bus_attribute(int flag)
 	default:
 		return -1;
 	}
-
+	
 	attr = sysfs_get_bus_attribute(bus, attrname);
 	switch (flag) {
 	case 0:
@@ -663,13 +663,13 @@ int test_sysfs_get_bus_attribute(int flag)
 			if (errno == 0) {
 				dbg_print("%s: SUCCEEDED with flag = %d\n",
 					__FUNCTION__, flag);
-
+			
 				dbg_print("since no buses have attribs as of now\n");
-			} else
-				dbg_print("%s: FAILED with flag = %d errno = %d\n",
-						__FUNCTION__, flag, errno);
+			} else 
+				dbg_print("%s: FAILED with flag = %d errno = %d\n", 
+						__FUNCTION__, flag, errno); 
 		} else {
-			dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n", 
 					__FUNCTION__, flag);
 		}
 		break;
@@ -679,26 +679,26 @@ int test_sysfs_get_bus_attribute(int flag)
 	case 4:
 	case 5:
 		if (attr != NULL)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
-		else
-			dbg_print("%s: SUCCEEDED with flag = %d\n",
+		else	
+			dbg_print("%s: SUCCEEDED with flag = %d\n", 
 					__FUNCTION__, flag);
 		break;
 	default:
 		break;
 	}
-
+	
 	if (bus != NULL)
 		sysfs_close_bus(bus);
-
+	
 	return 0;
 }
 
 /**
- * extern int sysfs_find_driver_bus(const char *driver,
+ * extern int sysfs_find_driver_bus(const char *driver, 
  * 				char *busname,	size_t bsize);
- *
+ * 
  * flag:
  * 	0:	driver -> valid, busname -> valid, size ->valid.
  * 	1:	driver -> valid, busname -> NULL, size ->valid.
@@ -714,7 +714,7 @@ int test_sysfs_find_driver_bus(int flag)
 	char bus_name_buf[SYSFS_NAME_LEN];
 	size_t bsize = SYSFS_NAME_LEN;
 	int ret = 0;
-
+	
 	switch (flag) {
 	case 0:
 		driver = val_drv_name;
@@ -748,10 +748,10 @@ int test_sysfs_find_driver_bus(int flag)
 	switch (flag) {
 	case 0:
 		if (ret != 0)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
 		else {
-			dbg_print("%s: SUCCEEDED with flag = %d\n",
+			dbg_print("%s: SUCCEEDED with flag = %d\n", 
 					__FUNCTION__, flag);
 			dbg_print("%s:\nDriver %s is on bus %s\n\n",
 					__FUNCTION__, driver, busname);
@@ -762,11 +762,11 @@ int test_sysfs_find_driver_bus(int flag)
 	case 3:
 	case 4:
 	case 5:
-		if (ret == 0)
-			dbg_print("%s: FAILED with flag = %d errno = %d\n",
+		if (ret == 0) 
+			dbg_print("%s: FAILED with flag = %d errno = %d\n", 
 						__FUNCTION__, flag, errno);
-		else
-			dbg_print("%s: SUCCEEDED with flag = %d\n",
+		else	
+			dbg_print("%s: SUCCEEDED with flag = %d\n", 
 					__FUNCTION__, flag);
 	default:
 		break;
