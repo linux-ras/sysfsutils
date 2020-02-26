@@ -646,12 +646,11 @@ sort:
    No sense in juggling node pointers when we can just swap the data pointers
 */
 
-void _dlist_swap(struct dlist *list, struct dl_node *a, struct dl_node *b)
+void _dlist_swap(__attribute__((unused))struct dlist *list,
+	       	struct dl_node *a, struct dl_node *b)
 {
-
   void *swap=a->data;
   a->data=b->data;
   b->data=swap;
-  
 }
   

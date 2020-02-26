@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
 	for (k = 0; k < num ; k++) {
 		dbg_print("\nThis is the %d test run\n", k+1);
 
-		for (i = 0; i < FUNC_TABLE_SIZE; i++) {
+		for (i = 0; i < (int)FUNC_TABLE_SIZE; i++) {
 dbg_print("\n**************************************************************\n");
 			dbg_print("TESTING: %s, function no: %d\n\n",
 					function_name[i], i);

@@ -60,7 +60,7 @@ int complex_filter(void *a);
 
 Simple *simple_maker(int ,char *);
 
-int main (int argc,char *argv[])
+int main (void)
 {
   Dlist *list;
   Simple *s1,*s2,*s3,*stemp;

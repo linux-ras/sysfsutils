@@ -32,14 +32,21 @@
 #include "libsysfs.h"
 #include "names.h"
 
-#define safestrcpy(to, from)	strncpy(to, from, sizeof(to)-1)
-#define safestrcat(to, from)	strncat(to, from, sizeof(to) - strlen(to)-1)
+inline void my_strncpy(char *to, const char *from, size_t max)
+{
+	size_t i;
 
-#define safestrcpymax(to, from, max) \
-do { \
-	to[max-1] = '\0'; \
-	strncpy(to, from, max-1); \
-} while (0)
+	for (i = 0; i < max && from[i] != '\0'; i++)
+		to[i] = from[i];
+	if (i < max)
+		to[i] = '\0';
+	else
+		to[max-1] = '\0';
+}
+#define safestrcpy(to, from)		my_strncpy(to, from, sizeof(to))
+#define safestrcpymax(to, from, max)	my_strncpy(to, from, max)
+
+#define safestrcat(to, from)	strncat(to, from, sizeof(to) - strlen(to)-1)
 
 #define safestrcatmax(to, from, max) \
 do { \
@@ -267,12 +274,13 @@ static void show_device(struct sysfs_device *device, int level)
 			attr = sysfs_open_attribute(path);
 			if (attr) {
 				if (!sysfs_read_attribute(attr)) {
-					vendor_id = get_pciconfig_word
-						(PCI_VENDOR_ID, attr->value);
-					device_id = get_pciconfig_word
-						(PCI_DEVICE_ID, attr->value);
+					vendor_id = get_pciconfig_word(PCI_VENDOR_ID,
+						       	(unsigned char *)attr->value);
+					device_id = get_pciconfig_word(PCI_DEVICE_ID,
+						       	(unsigned char *)attr->value);
 					fprintf(stdout, "%s\n",
-						pci_lookup_name(pacc, buf, 128,
+						pci_lookup_name(pacc,
+						buf, 128,
 						PCI_LOOKUP_VENDOR | 
 						PCI_LOOKUP_DEVICE,
 						vendor_id, device_id, 0, 0));
@@ -690,6 +698,7 @@ int main(int argc, char *argv[])
 			break;
 		case 'm':
 			show_module = optarg;
+			/* FALLTHRU */
 		case 'p':
 			show_options |= SHOW_PATH;
 			break;
