@@ -62,9 +62,14 @@ sysfsutils/lib/LGPL
 4. Reporting Bugs
 -----------------
 
-Please direct all bugs to either the linux-diag mailing list -
-linux-diag-devel@lists.sourceforge.net - or to the authors:
+Feel free to report bugs by opening an issue in the GitHub Issue Tracker.
 
-Ananth Mavinakayanahalli <ananth@in.ibm.com>
-Daniel Stekloff <dsteklof@us.ibm.com>
-Mohan Kumar <mohan@in.ibm.com>
+5. Contributions
+----------------
+
+For submitting patches, open a GitHub pull request. Please make sure that they
+are rebased on top of the current master. Code submission guidelines are the
+same as the Linux Kernel contribution guidelines.
+
+You probably want to read the through Linux kernel Documentation/SubmittingPatches
+for guidance.
