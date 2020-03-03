@@ -37,7 +37,6 @@ int main(int argc, char *argv[])
 	struct sysfs_driver *driver = NULL;
 	struct sysfs_device *device = NULL;
 	struct dlist *devlist = NULL;
-	struct sysfs_attribute *attr = NULL;
 
 	if (argc != 3) {
 		print_usage();

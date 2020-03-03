@@ -326,6 +326,7 @@ int test_sysfs_get_module_attributes(int flag)
 		if (!module) {
 			return 0;
 		}
+		break;
 	default:
 		return -1;
 	}

@@ -40,7 +40,7 @@
 #define val_drv1_attr_name	"dummy2"
 #define inval_name 		"invalid_name"
 #define inval_path 		"/sys/invalid/path"
-#define FUNC_TABLE_SIZE  	(sizeof(func_table)/sizeof(int))
+#define FUNC_TABLE_SIZE  	(sizeof(func_table) / sizeof(void *))
 
 FILE *my_stdout;
 

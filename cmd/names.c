@@ -22,7 +22,7 @@ struct nl_entry {
   struct nl_entry *next;
   unsigned short id1, id2, id3, id4;
   int cat;
-  unsigned char *name;
+  char *name;
 };
 
 #define NL_VENDOR 0
@@ -58,7 +58,7 @@ static struct nl_entry *nl_lookup(struct pci_access *a, int num, int cat, int id
   return n;
 }
 
-static int nl_add(struct pci_access *a, int cat, int id1, int id2, int id3, int id4, unsigned char *text)
+static int nl_add(struct pci_access *a, int cat, int id1, int id2, int id3, int id4, char *text)
 {
   unsigned int h = nl_calc_hash(cat, id1, id2, id3, id4);
   struct nl_entry *n = a->nl_hash[h];
@@ -81,7 +81,7 @@ static int nl_add(struct pci_access *a, int cat, int id1, int id2, int id3, int 
 }
 
 static void
-err_name_list(struct pci_access *a, unsigned char *msg)
+err_name_list(struct pci_access *a, char *msg)
 {
   fprintf(stderr, "%s: %s: %s\n", a->pci_id_file_name, msg, strerror(errno));
 }
@@ -89,8 +89,8 @@ err_name_list(struct pci_access *a, unsigned char *msg)
 static void
 parse_name_list(struct pci_access *a)
 {
-  unsigned char *p = a->nl_list;
-  unsigned char *q, *r;
+  char *p = (char *)a->nl_list;
+  char *q, *r;
   int lino = 0;
   unsigned int id1=0, id2=0, id3=0, id4=0;
   int cat = -1;
@@ -241,8 +241,8 @@ pci_free_name_list(struct pci_access *a)
   a->nl_hash = NULL;
 }
 
-unsigned char *
-pci_lookup_name(struct pci_access *a, unsigned char *buf, int size, int flags, unsigned int arg1, unsigned int arg2, unsigned int arg3, unsigned int arg4)
+char *
+pci_lookup_name(struct pci_access *a, char *buf, int size, int flags, unsigned int arg1, unsigned int arg2, unsigned int arg3, unsigned int arg4)
 {
   int num = a->numeric_ids;
   int res;

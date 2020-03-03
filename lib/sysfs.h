@@ -33,14 +33,21 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#define safestrcpy(to, from)	strncpy(to, from, sizeof(to)-1)
-#define safestrcat(to, from)	strncat(to, from, sizeof(to) - strlen(to)-1)
+inline void my_strncpy(char *to, const char *from, size_t max)
+{
+	size_t i;
 
-#define safestrcpymax(to, from, max) \
-do { \
-	to[max-1] = '\0'; \
-	strncpy(to, from, max-1); \
-} while (0)
+	for (i = 0; i < max && from[i] != '\0'; i++)
+		to[i] = from[i];
+	if (i < max)
+		to[i] = '\0';
+	else
+		to[max-1] = '\0';
+}
+#define safestrcpy(to, from)		my_strncpy(to, from, sizeof(to))
+#define safestrcpymax(to, from, max)	my_strncpy(to, from, max)
+
+#define safestrcat(to, from)	strncat(to, from, sizeof(to) - strlen(to)-1)
 
 #define safestrcatmax(to, from, max) \
 do { \

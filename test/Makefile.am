@@ -12,5 +12,5 @@ testlibsysfs_SOURCES = test.c test_attr.c test_bus.c test_class.c \
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
 EXTRA_CFLAGS = @EXTRA_CLFAGS@
-AM_CFLAGS = -Wall -W -Wstrict-prototypes $(EXTRA_CLFAGS)
+AM_CFLAGS = -Wall -W -Wextra -Wstrict-prototypes $(EXTRA_CLFAGS)
 

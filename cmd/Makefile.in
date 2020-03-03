@@ -174,7 +174,7 @@ target_alias = @target_alias@
 systool_SOURCES = systool.c names.c names.h
 INCLUDES = -I../include
 LDADD = ../lib/libsysfs.la
-AM_CFLAGS = -Wall -W -Wstrict-prototypes $(EXTRA_CFLAGS)
+AM_CFLAGS = -Wall -W -Werror -Wstrict-prototypes $(EXTRA_CFLAGS)
 all: all-am
 
 .SUFFIXES:

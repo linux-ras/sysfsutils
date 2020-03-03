@@ -1,3 +1,24 @@
+----------------------------------------------------------
+Wed Feb 26 08:47:38 PST 2020: Lee Duncan <lduncan@suse.com>
+
+* Brought up to date with gcc7 using -W, -Warn,
+  -Wextra, and -Werror. Also check with -fno-common.
+  Also, got ride of as many "unsigned char *" as
+  possible, as these just cause compiler issues
+  when mixing with normal "char *", and have
+  little value, being largely unused these days
+  in modern coding. There _should_ be no functional
+  change.
+* fixed one possible bug in test code w/r/t test
+  table size, found by the compiler
+* As part of running a "make", a new "configure" script
+  is generated, from a more up-to-date version of
+  autoconf.
+* Added .gitignore files, as needed, to ignore build files
+* Updated README with info on how to file issues.
+
+----------------------------------------------------------
+
 18/07/2006 - Mohan Kumar M <mohan@in.ibm.com>
 		* Add subsystem in sysfs_device
 
