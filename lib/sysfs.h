@@ -33,17 +33,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-inline void my_strncpy(char *to, const char *from, size_t max)
-{
-	size_t i;
-
-	for (i = 0; i < max && from[i] != '\0'; i++)
-		to[i] = from[i];
-	if (i < max)
-		to[i] = '\0';
-	else
-		to[max-1] = '\0';
-}
+extern char *my_strncpy(char *to, const char *from, size_t max);
 #define safestrcpy(to, from)		my_strncpy(to, from, sizeof(to))
 #define safestrcpymax(to, from, max)	my_strncpy(to, from, max)
 

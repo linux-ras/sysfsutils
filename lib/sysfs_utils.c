@@ -305,3 +305,19 @@ int sysfs_path_is_file(const char *path)
 
 	return 1;
 }
+
+/**
+ * my_strncpy -- a safe strncpy
+ */
+char *my_strncpy(char *to, const char *from, size_t max)
+{
+	size_t i;
+
+	for (i = 0; i < max && from[i] != '\0'; i++)
+		to[i] = from[i];
+	if (i < max)
+		to[i] = '\0';
+	else
+		to[max-1] = '\0';
+	return to;
+}
