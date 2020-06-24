@@ -27,6 +27,8 @@
 #include "test-defs.h"
 #include <errno.h>
 
+FILE *my_stdout;
+
 /*************************************************/
 char *function_name[] = {
 	"sysfs_get_mnt_path",
