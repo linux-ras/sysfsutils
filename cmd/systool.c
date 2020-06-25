@@ -36,7 +36,8 @@ extern char *my_strncpy(char *to, const char *from, size_t max);
 #define safestrcpy(to, from)		my_strncpy(to, from, sizeof(to))
 #define safestrcpymax(to, from, max)	my_strncpy(to, from, max)
 
-#define safestrcat(to, from)	strncat(to, from, sizeof(to) - strlen(to)-1)
+extern char *my_strncat(char *to, const char *from, size_t max);
+#define safestrcat(to, from)	my_strncat(to, from, sizeof(to) - strlen(to) - 1)
 
 #define safestrcatmax(to, from, max) \
 do { \
