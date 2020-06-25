@@ -165,7 +165,7 @@ static int path_is_dir(const char *path)
 {
 	struct stat astats;
 
-	if ((lstat(path, &astats)) != 0)
+	if ((stat(path, &astats)) != 0)
 		goto direrr;
 
 	if (S_ISDIR(astats.st_mode))
