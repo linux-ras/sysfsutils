@@ -4,4 +4,4 @@ config.*
 stamp-h1
 libtool
 tags
-cscope.files
+cscope.*
