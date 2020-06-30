@@ -152,12 +152,10 @@ int sysfs_get_link(const char *path, char *target, size_t len)
 			else if (*(d+1) == '.')
 				goto parse_path;
 			s = strrchr(temp_path, '/');
-			if (s != NULL) {
-				*(s+1) = '\0';
-				safestrcat(temp_path, d);
-			} else {
+			if (s != NULL)
+				safestrcpy(s+1, d);
+			else
 				safestrcpy(temp_path, d);
-			}
 			safestrcpymax(target, temp_path, len);
 			break;
 			/*
@@ -187,12 +185,10 @@ parse_path:
 			/* relative path from this directory */
 			safestrcpy(temp_path, devdir);
 			s = strrchr(temp_path, '/');
-			if (s != NULL) {
-				*(s+1) = '\0';
-				safestrcat(temp_path, linkpath);
-			} else {
+			if (s != NULL)
+				safestrcpy(s+1, linkpath);
+			else
 				safestrcpy(temp_path, linkpath);
-			}
 			safestrcpymax(target, temp_path, len);
 	}
 	return 0;
@@ -296,7 +292,7 @@ int sysfs_path_is_file(const char *path)
 		errno = EINVAL;
 		return 1;
 	}
-	if ((lstat(path, &astats)) != 0) {
+	if ((stat(path, &astats)) != 0) {
 		dprintf("stat() failed\n");
 		return 1;
 	}
@@ -304,4 +300,33 @@ int sysfs_path_is_file(const char *path)
 		return 0;
 
 	return 1;
+}
+
+/**
+ * my_strncpy -- a safe strncpy
+ */
+char *my_strncpy(char *to, const char *from, size_t max)
+{
+	size_t i;
+
+	for (i = 0; i < max && from[i] != '\0'; i++)
+		to[i] = from[i];
+	if (i < max)
+		to[i] = '\0';
+	else
+		to[max-1] = '\0';
+	return to;
+}
+
+/**
+ * my_strncpy -- a safe strncpy
+ */
+char *my_strncat(char *to, const char *from, size_t max)
+{
+	size_t i = 0;
+
+	while (i < max && to[i] != '\0')
+		i++;
+	my_strncpy(to+i, from, max-i);
+	return to;
 }

@@ -27,6 +27,8 @@
 #include "test-defs.h"
 #include <errno.h>
 
+FILE *my_stdout;
+
 /*************************************************/
 char *function_name[] = {
 	"sysfs_get_mnt_path",
@@ -163,7 +165,7 @@ static int path_is_dir(const char *path)
 {
 	struct stat astats;
 
-	if ((lstat(path, &astats)) != 0)
+	if ((stat(path, &astats)) != 0)
 		goto direrr;
 
 	if (S_ISDIR(astats.st_mode))

@@ -42,7 +42,7 @@
 #define inval_path 		"/sys/invalid/path"
 #define FUNC_TABLE_SIZE  	(sizeof(func_table) / sizeof(void *))
 
-FILE *my_stdout;
+extern FILE *my_stdout;
 
 #define dbg_print(format, arg...) fprintf(my_stdout, format, ## arg)
 
