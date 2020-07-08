@@ -83,7 +83,7 @@ static int cdev_name_equal(void *a, void *b)
 	if (length_a != length_b)
 		return 0;
 
-	if (strncmp(str_a, str_b, SYSFS_NAME_LEN+1) == 0)
+	if (strncmp(str_a, str_b, length_a+1) == 0)
 		return 1;
 
 	return 0;
