@@ -60,13 +60,30 @@ void sysfs_close_class(struct sysfs_class *cls)
 	}
 }
 
+/*
+ * pass this function to dlist_find_custom()
+ * so it can compare device names
+ *
+ * return 1 if pathnames are equal, else 0
+ */
 static int cdev_name_equal(void *a, void *b)
 {
+	size_t length_a, length_b;
+	char *str_a, *str_b;
+
 	if (!a || !b)
 		return 0;
 
-	if (strncmp((char *)a, ((struct sysfs_class_device *)b)->name,
-				strlen((char *)a)) == 0)
+	str_a = (char *)a;
+	str_b = ((struct sysfs_class_device *)b)->name;
+
+	length_a = strnlen(str_a, SYSFS_NAME_LEN+1);
+	length_b = strnlen(str_b, SYSFS_NAME_LEN+1);
+
+	if (length_a != length_b)
+		return 0;
+
+	if (strncmp(str_a, str_b, length_a+1) == 0)
 		return 1;
 
 	return 0;
