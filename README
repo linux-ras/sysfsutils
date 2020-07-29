@@ -1,5 +1,5 @@
 
-	Sysfs Utilities Package - Includes Libsysfs(v. 2.1.0)
+	Sysfs Utilities Package - Includes Libsysfs (v. 2.1.0)
 	======================================================
 
 Contents
@@ -47,7 +47,7 @@ will clean up all installed files.
 -----------
 
 The commands and tests are licensed under the GNU Public License (GPL)
-Version2, June 1991. The full text of the GPL is located in this package's
+Version 2, June 1991. The full text of the GPL is located in this package's
 "cmd" directory:
 
 sysfsutils/cmd/GPL
