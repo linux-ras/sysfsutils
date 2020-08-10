@@ -1,7 +1,6 @@
 
-The commands and utilities under the "test" directory are licensed under the 
-GNU General Public License (GPL) Version 2, June 1991. The full text of the 
-GPL is located at:
+The commands and utilities are licensed under the GNU General Public License
+(GPL) Version 2, June 1991. The full text of the GPL is located at:
 
 sysfsutils/cmd/GPL
 
