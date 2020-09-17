@@ -68,7 +68,6 @@ void sysfs_close_class(struct sysfs_class *cls)
  */
 static int cdev_name_equal(void *a, void *b)
 {
-	size_t length_a, length_b;
 	char *str_a, *str_b;
 
 	if (!a || !b)
@@ -77,13 +76,7 @@ static int cdev_name_equal(void *a, void *b)
 	str_a = (char *)a;
 	str_b = ((struct sysfs_class_device *)b)->name;
 
-	length_a = strnlen(str_a, SYSFS_NAME_LEN+1);
-	length_b = strnlen(str_b, SYSFS_NAME_LEN+1);
-
-	if (length_a != length_b)
-		return 0;
-
-	if (strncmp(str_a, str_b, length_a+1) == 0)
+	if (strncmp(str_a, str_b, SYSFS_NAME_LEN) == 0)
 		return 1;
 
 	return 0;
