@@ -5,6 +5,7 @@ arch:
   - ppc64le
 
 script:
+  - ./autogen
   - ./configure
   - make
   - sudo make install

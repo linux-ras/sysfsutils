@@ -1,8 +1,8 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT(sysfsutils, 2.1.0, linux-diag-devel@lists.sourceforge.net)
+AC_CONFIG_SRCDIR([cmd/systool.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
 
 # Checks for KLIBC support (should be before AC_PROG_LIBTOOL and AC_PROG_CC)
