@@ -1,6 +1,4 @@
 /*
- *      $Id$
- *
  *      The PCI Library
  *
  *      Copyright (c) 1997--2002 Martin Mares <mj@ucw.cz>

@@ -1,6 +1,4 @@
 /*
- *	$Id$
- *
  *	The PCI Library -- ID to Name Translation
  *
  *	Copyright (c) 1997--2002 Martin Mares <mj@ucw.cz>
