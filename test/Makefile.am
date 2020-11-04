@@ -9,7 +9,7 @@ get_module_SOURCES = get_module.c
 testlibsysfs_SOURCES = test.c test_attr.c test_bus.c test_class.c \
 		       test_device.c test_driver.c test_module.c test_utils.c \
 		       testout.c test-defs.h libsysfs.conf create-test
-INCLUDES = -I../include
+AM_CPPFLAGS = -I../include
 LDADD = ../lib/libsysfs.la
 EXTRA_CFLAGS = @EXTRA_CLFAGS@
 AM_CFLAGS = -Wall -W -Wextra -Wstrict-prototypes $(EXTRA_CLFAGS)
