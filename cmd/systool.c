@@ -657,7 +657,7 @@ int main(int argc, char *argv[])
 	char *show_root = NULL;
 	int retval = 0;
 	int opt;
-        char *pci_id_file = "/usr/local/share/pci.ids";
+	char *pci_id_file = PCI_IDS_PATHNAME;
 	
 	while((opt = getopt(argc, argv, cmd_options)) != EOF) {
 		switch(opt) {

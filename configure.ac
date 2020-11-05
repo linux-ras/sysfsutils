@@ -22,6 +22,14 @@ fi
 AM_CONDITIONAL([KLIBC],[test "X$KLIBC" == Xyes])
 AC_SUBST([EXTRA_CFLAGS])
 
+AC_ARG_WITH([pci.ids],
+	[AS_HELP_STRING([--with-pci.ids=PATHNAME],
+		[specify the pci.ids database PATHNAME])],
+	[PCI_IDS_PATHNAME=$with_pci_ids],
+	[PCI_IDS_PATHNAME="/usr/share/misc/pci.ids"])
+AC_DEFINE_UNQUOTED([PCI_IDS_PATHNAME], ["$PCI_IDS_PATHNAME"],
+	[pci.ids database pathname])
+
 # Checks for LIBTOOL
 LT_INIT
 
