@@ -3,7 +3,6 @@ AC_INIT(sysfsutils, 2.1.0, linux-diag-devel@lists.sourceforge.net)
 AC_CONFIG_SRCDIR([cmd/systool.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([config.h])
 
 # Checks for KLIBC support (should be before LT_INIT and AC_PROG_CC)
 AC_CHECK_KLIBC
@@ -51,4 +50,5 @@ AC_CONFIG_FILES([Makefile
                  lib/Makefile
                  cmd/Makefile
                  test/Makefile])
+AC_CONFIG_HEADERS([config.h])
 AC_OUTPUT
