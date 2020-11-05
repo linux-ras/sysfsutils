@@ -5,7 +5,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER([config.h])
 
-# Checks for KLIBC support (should be before AC_PROG_LIBTOOL and AC_PROG_CC)
+# Checks for KLIBC support (should be before LT_INIT and AC_PROG_CC)
 AC_CHECK_KLIBC
 
 if test "X$KLIBC" == Xyes; then
@@ -22,14 +22,13 @@ AM_CONDITIONAL([KLIBC],[test "X$KLIBC" == Xyes])
 AC_SUBST([EXTRA_CFLAGS])
 
 # Checks for LIBTOOL
-AC_PROG_LIBTOOL
+LT_INIT
 
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 AC_PROG_AWK
 
 # Checks for header files.
