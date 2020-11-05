@@ -1,4 +1,4 @@
-bin_PROGRAMS = systool 
+bin_PROGRAMS = systool
 systool_SOURCES = systool.c names.c names.h
 LDADD = ../lib/libsysfs.la
 EXTRA_CFLAGS = @EXTRA_CFLAGS@

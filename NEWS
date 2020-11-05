@@ -14,10 +14,10 @@ Version History:
  1.0.0 - Released February 24, 2004
 	* Libsysfs now ships with a comprehensive testsuite.
 	* List elements are now maintained in sorted order.
-	* Updated systool for better output and removed lsbus 
+	* Updated systool for better output and removed lsbus
 		from the package.
 	* Populated sysfs_device->drivername field correctly.
-		If device does not have a driver, field reflects 
+		If device does not have a driver, field reflects
 		"unknown".
 	* Added additional CFLAGS while building the package.
 
@@ -51,7 +51,7 @@ Version History:
 	* Added lots of "find"/utility functions.
 	* Modified commands to make use of new API.
 	* Added functions to get lists of specific subsystems.
- 
+
  0.1.1 - Released August 1, 2003
 	* Created NEWS file for Version History.
 	* Added device reference in sysfs_driver.
