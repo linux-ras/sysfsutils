@@ -27,6 +27,9 @@
  * delete function.  Otherwise dlist will just use free.
 
 */
+
+#include "config.h"
+
 #include <stdlib.h>
 #include "dlist.h"
 

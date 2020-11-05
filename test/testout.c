@@ -24,6 +24,8 @@
  * Display routines for test functions
  */
 
+#include "config.h"
+
 #include <test-defs.h>
 
 static void remove_end_newline(char *value)

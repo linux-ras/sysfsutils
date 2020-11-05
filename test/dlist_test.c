@@ -22,6 +22,9 @@
 
 /* Double linked list implementation tester.
  */
+
+#include "config.h"
+
 #include "dlist.h"
 #include <stdio.h>
 #include <stdlib.h>

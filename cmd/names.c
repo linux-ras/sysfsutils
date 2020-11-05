@@ -8,6 +8,8 @@
  *	Can be freely distributed and used under the terms of the GNU GPL.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
