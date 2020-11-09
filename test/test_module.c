@@ -40,6 +40,8 @@
  *        (struct sysfs_module *module, const char *section);
  */
 
+#include "config.h"
+
 #include "test-defs.h"
 #include <errno.h>
 

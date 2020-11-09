@@ -1,10 +1,12 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(sysfsutils, 2.1.0, linux-diag-devel@lists.sourceforge.net)
-AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR([config.h.in])
-AM_CONFIG_HEADER([config.h])
+AC_INIT([sysfsutils], [2.1.0], [linux-diag-devel@lists.sourceforge.net])
+AC_CONFIG_SRCDIR([cmd/systool.c])
+AC_CONFIG_MACRO_DIR([m4])
 
-# Checks for KLIBC support (should be before AC_PROG_LIBTOOL and AC_PROG_CC)
+AM_INIT_AUTOMAKE([1.11])
+AM_SILENT_RULES([yes])
+
+# Checks for KLIBC support (should be before LT_INIT and AC_PROG_CC)
 AC_CHECK_KLIBC
 
 if test "X$KLIBC" == Xyes; then
@@ -20,15 +22,22 @@ fi
 AM_CONDITIONAL([KLIBC],[test "X$KLIBC" == Xyes])
 AC_SUBST([EXTRA_CFLAGS])
 
+AC_ARG_WITH([pci.ids],
+	[AS_HELP_STRING([--with-pci.ids=PATHNAME],
+		[specify the pci.ids database PATHNAME])],
+	[PCI_IDS_PATHNAME=$with_pci_ids],
+	[PCI_IDS_PATHNAME="/usr/share/misc/pci.ids"])
+AC_DEFINE_UNQUOTED([PCI_IDS_PATHNAME], ["$PCI_IDS_PATHNAME"],
+	[pci.ids database pathname])
+
 # Checks for LIBTOOL
-AC_PROG_LIBTOOL
+LT_INIT
 
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 AC_PROG_AWK
 
 # Checks for header files.
@@ -51,4 +60,5 @@ AC_CONFIG_FILES([Makefile
                  lib/Makefile
                  cmd/Makefile
                  test/Makefile])
+AC_CONFIG_HEADERS([config.h])
 AC_OUTPUT
