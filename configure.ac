@@ -9,7 +9,7 @@ AM_SILENT_RULES([yes])
 # Checks for KLIBC support (should be before LT_INIT and AC_PROG_CC)
 AC_CHECK_KLIBC
 
-if test "X$KLIBC" == Xyes; then
+if test "X$KLIBC" = Xyes; then
 	# Should disable/enable building of shared libraries ... I am open to better
 	# suggestions though (AC_DISABLE_SHARED and co do not do the right thing in
 	# a situation like this that its runtime dependent) ...
@@ -19,7 +19,7 @@ else
 	# These ones make KLIBC compiles very loud
 	EXTRA_CFLAGS="-Wshadow -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs"
 fi
-AM_CONDITIONAL([KLIBC],[test "X$KLIBC" == Xyes])
+AM_CONDITIONAL([KLIBC], [test "X$KLIBC" = Xyes])
 AC_SUBST([EXTRA_CFLAGS])
 
 AC_ARG_WITH([pci.ids],
@@ -36,9 +36,7 @@ LT_INIT
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
-AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_AWK
 
 # Checks for header files.
 AC_HEADER_DIRENT
