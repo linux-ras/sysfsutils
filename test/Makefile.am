@@ -1,4 +1,4 @@
-bin_PROGRAMS = dlist_test get_device get_driver get_module testlibsysfs
+check_PROGRAMS = dlist_test get_device get_driver get_module testlibsysfs
 BUILT_SOURCES = test.h
 CLEANFILES = test.h
 test.h: libsysfs.conf create-test
