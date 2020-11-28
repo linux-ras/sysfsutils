@@ -56,6 +56,7 @@ AC_CHECK_FUNCS([bzero isascii memset strchr strerror strrchr strstr strtol])
 
 AC_CONFIG_FILES([Makefile
                  lib/Makefile
+                 lib/libsysfs.pc
                  cmd/Makefile
                  test/Makefile])
 AC_CONFIG_HEADERS([config.h])
