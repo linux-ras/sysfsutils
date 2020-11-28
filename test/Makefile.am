@@ -2,7 +2,7 @@ bin_PROGRAMS = dlist_test get_device get_driver get_module testlibsysfs
 BUILT_SOURCES = test.h
 CLEANFILES = test.h
 test.h: libsysfs.conf create-test
-	./create-test
+	$(AM_V_GEN) ./create-test
 get_device_SOURCES = get_device.c
 get_driver_SOURCES = get_driver.c
 get_module_SOURCES = get_module.c
