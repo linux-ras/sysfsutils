@@ -54,9 +54,9 @@ extern struct dlist *get_attributes_list(struct dlist *alist, const char *path);
 
 /* Debugging */
 #ifdef DEBUG
-#define dprintf(format, arg...) fprintf(stderr, format, ## arg)
+#define dbg_printf(format, arg...) fprintf(stderr, format, ## arg)
 #else
-#define dprintf(format, arg...) do { } while (0)
+#define dbg_printf(format, arg...) do { } while (0)
 #endif
 
 #endif /* _SYSFS_H_ */

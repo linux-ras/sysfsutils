@@ -105,18 +105,18 @@ struct sysfs_attribute *sysfs_open_attribute(const char *path)
 	}
 	sysattr = alloc_attribute();
 	if (!sysattr) {
-		dprintf("Error allocating attribute at %s\n", path);
+		dbg_printf("Error allocating attribute at %s\n", path);
 		return NULL;
 	}
 	if (sysfs_get_name_from_path(path, sysattr->name,
 				SYSFS_NAME_LEN) != 0) {
-		dprintf("Error retrieving attrib name from path: %s\n", path);
+		dbg_printf("Error retrieving attrib name from path: %s\n", path);
 		sysfs_close_attribute(sysattr);
 		return NULL;
 	}
 	safestrcpy(sysattr->path, path);
 	if ((stat(sysattr->path, &fileinfo)) != 0) {
-		dprintf("Stat failed: No such attribute?\n");
+		dbg_printf("Stat failed: No such attribute?\n");
 		sysattr->method = 0;
 		free(sysattr);
 		sysattr = NULL;
@@ -148,7 +148,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 		return -1;
 	}
 	if (!(sysattr->method & SYSFS_METHOD_SHOW)) {
-		dprintf("Show method not supported for attribute %s\n",
+		dbg_printf("Show method not supported for attribute %s\n",
 			sysattr->path);
 		errno = EACCES;
 		return -1;
@@ -156,17 +156,17 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 	pgsize = getpagesize();
 	fbuf = (char *)calloc(1, pgsize+1);
 	if (!fbuf) {
-		dprintf("calloc failed\n");
+		dbg_printf("calloc failed\n");
 		return -1;
 	}
 	if ((fd = open(sysattr->path, O_RDONLY)) < 0) {
-		dprintf("Error reading attribute %s\n", sysattr->path);
+		dbg_printf("Error reading attribute %s\n", sysattr->path);
 		free(fbuf);
 		return -1;
 	}
 	length = read(fd, fbuf, pgsize);
 	if (length < 0) {
-		dprintf("Error reading from attribute %s\n", sysattr->path);
+		dbg_printf("Error reading from attribute %s\n", sysattr->path);
 		close(fd);
 		free(fbuf);
 		return -1;
@@ -184,7 +184,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 	close(fd);
 	vbuf = (char *)realloc(fbuf, length+1);
 	if (!vbuf) {
-		dprintf("realloc failed\n");
+		dbg_printf("realloc failed\n");
 		free(fbuf);
 		return -1;
 	}
@@ -212,7 +212,7 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 	}
 
 	if (!(sysattr->method & SYSFS_METHOD_STORE)) {
-		dprintf ("Store method not supported for attribute %s\n",
+		dbg_printf ("Store method not supported for attribute %s\n",
 			sysattr->path);
 		errno = EACCES;
 		return -1;
@@ -222,12 +222,12 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 		 * read attribute again to see if we can get an updated value
 		 */
 		if ((sysfs_read_attribute(sysattr))) {
-			dprintf("Error reading attribute\n");
+			dbg_printf("Error reading attribute\n");
 			return -1;
 		}
 		if ((strncmp(sysattr->value, new_value, sysattr->len)) == 0 &&
 				(len == sysattr->len)) {
-			dprintf("Attr %s already has the requested value %s\n",
+			dbg_printf("Attr %s already has the requested value %s\n",
 					sysattr->name, new_value);
 			return 0;
 		}
@@ -237,18 +237,18 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 	 * "write" permission
 	 */
 	if ((fd = open(sysattr->path, O_WRONLY)) < 0) {
-		dprintf("Error reading attribute %s\n", sysattr->path);
+		dbg_printf("Error reading attribute %s\n", sysattr->path);
 		return -1;
 	}
 
 	length = write(fd, new_value, len);
 	if (length < 0) {
-		dprintf("Error writing to the attribute %s - invalid value?\n",
+		dbg_printf("Error writing to the attribute %s - invalid value?\n",
 			sysattr->name);
 		close(fd);
 		return -1;
 	} else if ((unsigned int)length != len) {
-		dprintf("Could not write %zd bytes to attribute %s\n",
+		dbg_printf("Could not write %zd bytes to attribute %s\n",
 					len, sysattr->name);
 		/*
 		 * since we could not write user supplied number of bytes,
@@ -295,12 +295,12 @@ static struct sysfs_attribute *add_attribute_to_list(struct dlist *alist,
 
 	attr = sysfs_open_attribute(path);
 	if (!attr) {
-		dprintf("Error opening attribute %s\n",	path);
+		dbg_printf("Error opening attribute %s\n",	path);
 		return NULL;
 	}
 	if (attr->method & SYSFS_METHOD_SHOW) {
 		if (sysfs_read_attribute(attr)) {
-			dprintf("Error reading attribute %s\n",	path);
+			dbg_printf("Error reading attribute %s\n",	path);
 			sysfs_close_attribute(attr);
 			return NULL;
 		}
@@ -326,12 +326,12 @@ static struct sysfs_attribute *add_attribute(void *dev, const char *path)
 
 	attr = sysfs_open_attribute(path);
 	if (!attr) {
-		dprintf("Error opening attribute %s\n",	path);
+		dbg_printf("Error opening attribute %s\n",	path);
 		return NULL;
 	}
 	if (attr->method & SYSFS_METHOD_SHOW) {
 		if (sysfs_read_attribute(attr)) {
-			dprintf("Error reading attribute %s\n",	path);
+			dbg_printf("Error reading attribute %s\n",	path);
 			sysfs_close_attribute(attr);
 			return NULL;
 		}
@@ -397,7 +397,7 @@ struct dlist *read_dir_links(const char *path)
 	}
 	dir = opendir(path);
 	if (!dir) {
-		dprintf("Error opening directory %s\n", path);
+		dbg_printf("Error opening directory %s\n", path);
 		return NULL;
 	}
 	while ((dirent = readdir(dir)) != NULL) {
@@ -414,7 +414,7 @@ struct dlist *read_dir_links(const char *path)
 				linklist = dlist_new_with_delete
 					(SYSFS_NAME_LEN, sysfs_del_name);
 				if (!linklist) {
-					dprintf("Error creating list\n");
+					dbg_printf("Error creating list\n");
 					return NULL;
 				}
 			}
@@ -469,7 +469,7 @@ struct sysfs_device *sysfs_read_dir_subdirs(const char *path)
 
 	dir = opendir(path);
 	if (!dir) {
-		dprintf("Error opening directory %s\n", path);
+		dbg_printf("Error opening directory %s\n", path);
 		return NULL;
 	}
 	while ((dirent = readdir(dir)) != NULL) {
@@ -506,7 +506,7 @@ struct dlist *read_dir_subdirs(const char *path)
 	}
 	dir = opendir(path);
 	if (!dir) {
-		dprintf("Error opening directory %s\n", path);
+		dbg_printf("Error opening directory %s\n", path);
 		return NULL;
 	}
 	while ((dirent = readdir(dir)) != NULL) {
@@ -523,7 +523,7 @@ struct dlist *read_dir_subdirs(const char *path)
 				dirlist = dlist_new_with_delete
 					(SYSFS_NAME_LEN, sysfs_del_name);
 				if (!dirlist) {
-					dprintf("Error creating list\n");
+					dbg_printf("Error creating list\n");
 					return NULL;
 				}
 			}
@@ -554,7 +554,7 @@ struct dlist *get_attributes_list(struct dlist *alist, const char *path)
 
 	dir = opendir(path);
 	if (!dir) {
-		dprintf("Error opening directory %s\n", path);
+		dbg_printf("Error opening directory %s\n", path);
 		return NULL;
 	}
 	while ((dirent = readdir(dir)) != NULL) {
@@ -572,7 +572,7 @@ struct dlist *get_attributes_list(struct dlist *alist, const char *path)
 					(sizeof(struct sysfs_attribute),
 							sysfs_del_attribute);
 				if (!alist) {
-					dprintf("Error creating list\n");
+					dbg_printf("Error creating list\n");
 					return NULL;
 				}
 			}
@@ -603,7 +603,7 @@ struct dlist *get_dev_attributes_list(void *dev)
 	safestrcpy(path, ((struct sysfs_device *)dev)->path);
 	dir = opendir(path);
 	if (!dir) {
-		dprintf("Error opening directory %s\n", path);
+		dbg_printf("Error opening directory %s\n", path);
 		return NULL;
 	}
 	while ((dirent = readdir(dir)) != NULL) {

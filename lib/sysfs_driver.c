@@ -130,27 +130,27 @@ struct sysfs_driver *sysfs_open_driver_path(const char *path)
 		return NULL;
 	}
 	if (sysfs_path_is_dir(path)) {
-		dprintf("Invalid path to driver: %s\n", path);
+		dbg_printf("Invalid path to driver: %s\n", path);
 		return NULL;
 	}
 	driver = alloc_driver();
 	if (!driver) {
-		dprintf("Error allocating driver at %s\n", path);
+		dbg_printf("Error allocating driver at %s\n", path);
 		return NULL;
 	}
 	if (sysfs_get_name_from_path(path, driver->name, SYSFS_NAME_LEN)) {
-		dprintf("Error getting driver name from path\n");
+		dbg_printf("Error getting driver name from path\n");
 		free(driver);
 		return NULL;
 	}
 	safestrcpy(driver->path, path);
 	if (sysfs_remove_trailing_slash(driver->path)) {
-		dprintf("Invalid path to driver %s\n", driver->path);
+		dbg_printf("Invalid path to driver %s\n", driver->path);
 		sysfs_close_driver(driver);
 		return NULL;
 	}
 	if (get_driver_bus(driver)) {
-		dprintf("Could not get the bus driver is on\n");
+		dbg_printf("Could not get the bus driver is on\n");
 		sysfs_close_driver(driver);
 		return NULL;
 	}
@@ -175,7 +175,7 @@ static int get_driver_path(const char *bus, const char *drv,
 		return -1;
 	}
 	if (sysfs_get_mnt_path(path, psize)) {
-		dprintf("Error getting sysfs mount path\n");
+		dbg_printf("Error getting sysfs mount path\n");
 		return -1;
 	}
 	safestrcatmax(path, "/", psize);
@@ -208,12 +208,12 @@ struct sysfs_driver *sysfs_open_driver(const char *bus_name,
 
 	memset(path, 0, SYSFS_PATH_MAX);
 	if (get_driver_path(bus_name, drv_name, path, SYSFS_PATH_MAX)) {
-		dprintf("Error getting to driver %s\n", drv_name);
+		dbg_printf("Error getting to driver %s\n", drv_name);
 		return NULL;
 	}
 	driver = sysfs_open_driver_path(path);
 	if (!driver) {
-		dprintf("Error opening driver at %s\n", path);
+		dbg_printf("Error opening driver at %s\n", path);
 		return NULL;
 	}
 	return driver;
@@ -244,7 +244,7 @@ struct dlist *sysfs_get_driver_devices(struct sysfs_driver *drv)
 
 			dev = sysfs_open_device(drv->bus, ln);
 			if (!dev) {
-				dprintf("Error opening driver's device\n");
+				dbg_printf("Error opening driver's device\n");
 				sysfs_close_list(linklist);
 				return NULL;
 			}
@@ -253,7 +253,7 @@ struct dlist *sysfs_get_driver_devices(struct sysfs_driver *drv)
 					(sizeof(struct sysfs_device),
 					 sysfs_close_driver_device);
 				if (!drv->devices) {
-					dprintf("Error creating device list\n");
+					dbg_printf("Error creating device list\n");
 					sysfs_close_list(linklist);
 					return NULL;
 				}
