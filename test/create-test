@@ -2,7 +2,7 @@
 
 rm -f test.h
 
-conf_file=./libsysfs.conf
+conf_file=${1:-libsysfs.conf}
 
 . $conf_file
 

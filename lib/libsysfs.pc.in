@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libsysfs
+Description: interface to Linux sysfs
+Version: @VERSION@
+URL: https://github.com/linux-ras/sysfsutils
+Libs: -L${libdir} -lsysfs
+Cflags: -I${includedir}
