@@ -115,12 +115,12 @@ struct dlist *sysfs_get_bus_devices(struct sysfs_bus *bus)
 			safestrcat(devpath, "/");
 			safestrcat(devpath, curlink);
 			if (sysfs_get_link(devpath, target, SYSFS_PATH_MAX)) {
-				dprintf("Error getting link - %s\n", devpath);
+				dbg_printf("Error getting link - %s\n", devpath);
 				continue;
 			}
 			dev = sysfs_open_device_path(target);
 			if (!dev) {
-				dprintf("Error opening device at %s\n",
+				dbg_printf("Error opening device at %s\n",
 								target);
 				continue;
 			}
@@ -171,7 +171,7 @@ struct dlist *sysfs_get_bus_drivers(struct sysfs_bus *bus)
 			safestrcat(drvpath, curdir);
 			drv = sysfs_open_driver_path(drvpath);
 			if (!drv) {
-				dprintf("Error opening driver at %s\n",
+				dbg_printf("Error opening driver at %s\n",
 								drvpath);
 				continue;
 			}
@@ -202,7 +202,7 @@ struct sysfs_bus *sysfs_open_bus(const char *name)
 
 	memset(buspath, 0, SYSFS_PATH_MAX);
 	if (sysfs_get_mnt_path(buspath, SYSFS_PATH_MAX)) {
-		dprintf("Sysfs not supported on this system\n");
+		dbg_printf("Sysfs not supported on this system\n");
 		return NULL;
 	}
 
@@ -211,18 +211,18 @@ struct sysfs_bus *sysfs_open_bus(const char *name)
 	safestrcat(buspath, "/");
 	safestrcat(buspath, name);
 	if (sysfs_path_is_dir(buspath)) {
-		dprintf("Invalid path to bus: %s\n", buspath);
+		dbg_printf("Invalid path to bus: %s\n", buspath);
 		return NULL;
 	}
 	bus = alloc_bus();
 	if (!bus) {
-		dprintf("calloc failed\n");
+		dbg_printf("calloc failed\n");
 		return NULL;
 	}
 	safestrcpy(bus->name, name);
 	safestrcpy(bus->path, buspath);
 	if (sysfs_remove_trailing_slash(bus->path)) {
-		dprintf("Incorrect path to bus %s\n", bus->path);
+		dbg_printf("Incorrect path to bus %s\n", bus->path);
 		sysfs_close_bus(bus);
 		return NULL;
 	}
@@ -259,13 +259,13 @@ struct sysfs_device *sysfs_get_bus_device(struct sysfs_bus *bus,
 	safestrcat(devpath, "/");
 	safestrcat(devpath, id);
 	if (sysfs_path_is_link(devpath)) {
-		dprintf("No such device %s on bus %s?\n", id, bus->name);
+		dbg_printf("No such device %s on bus %s?\n", id, bus->name);
 		return NULL;
 	}
 	if (!sysfs_get_link(devpath, target, SYSFS_PATH_MAX)) {
 		dev = sysfs_open_device_path(target);
 		if (!dev) {
-			dprintf("Error opening device at %s\n", target);
+			dbg_printf("Error opening device at %s\n", target);
 			return NULL;
 		}
 		if (!bus->devices)
@@ -307,7 +307,7 @@ struct sysfs_driver *sysfs_get_bus_driver(struct sysfs_bus *bus,
 	safestrcat(drvpath, drvname);
 	drv = sysfs_open_driver_path(drvpath);
 	if (!drv) {
-		dprintf("Error opening driver at %s\n", drvpath);
+		dbg_printf("Error opening driver at %s\n", drvpath);
 		return NULL;
 	}
 	if (!bus->drivers)

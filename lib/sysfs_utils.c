@@ -80,7 +80,7 @@ int sysfs_get_mnt_path(char *mnt_path, size_t len)
 	ret = -1;
 	mnt = setmntent(SYSFS_PROC_MNTS, "r");
 	if (mnt == NULL) {
-		dprintf("Error getting mount information\n");
+		dbg_printf("Error getting mount information\n");
 		return -1;
 	}
 	while ((mntent = getmntent(mnt)) != NULL) {
@@ -297,7 +297,7 @@ int sysfs_path_is_dir(const char *path)
 		return 1;
 	}
 	if ((lstat(path, &astats)) != 0) {
-		dprintf("stat() failed\n");
+		dbg_printf("stat() failed\n");
 		return 1;
 	}
 	if (S_ISDIR(astats.st_mode))
@@ -320,7 +320,7 @@ int sysfs_path_is_link(const char *path)
 		return 1;
 	}
 	if ((lstat(path, &astats)) != 0) {
-		dprintf("stat() failed\n");
+		dbg_printf("stat() failed\n");
 		return 1;
 	}
 	if (S_ISLNK(astats.st_mode))
@@ -343,7 +343,7 @@ int sysfs_path_is_file(const char *path)
 		return 1;
 	}
 	if ((stat(path, &astats)) != 0) {
-		dprintf("stat() failed\n");
+		dbg_printf("stat() failed\n");
 		return 1;
 	}
 	if (S_ISREG(astats.st_mode))

@@ -174,23 +174,23 @@ struct sysfs_device *sysfs_open_device_path(const char *path)
 		return NULL;
 	}
 	if (sysfs_path_is_dir(path)) {
-		dprintf("Incorrect path to device: %s\n", path);
+		dbg_printf("Incorrect path to device: %s\n", path);
 		return NULL;
 	}
 	dev = alloc_device();
 	if (!dev) {
-		dprintf("Error allocating device at %s\n", path);
+		dbg_printf("Error allocating device at %s\n", path);
 		return NULL;
 	}
 	if (sysfs_get_name_from_path(path, dev->bus_id, SYSFS_NAME_LEN)) {
 		errno = EINVAL;
-		dprintf("Error getting device bus_id\n");
+		dbg_printf("Error getting device bus_id\n");
 		sysfs_close_device(dev);
 		return NULL;
 	}
 	safestrcpy(dev->path, path);
 	if (sysfs_remove_trailing_slash(dev->path)) {
-		dprintf("Invalid path to device %s\n", dev->path);
+		dbg_printf("Invalid path to device %s\n", dev->path);
 		sysfs_close_device(dev);
 		return NULL;
 	}
@@ -202,15 +202,15 @@ struct sysfs_device *sysfs_open_device_path(const char *path)
 	safestrcpy(dev->name, dev->bus_id);
 
 	if (sysfs_get_device_bus(dev))
-		dprintf("Could not get device bus\n");
+		dbg_printf("Could not get device bus\n");
 
 	if (get_dev_driver(dev)) {
-		dprintf("Could not get device %s's driver\n", dev->bus_id);
+		dbg_printf("Could not get device %s's driver\n", dev->bus_id);
 		safestrcpy(dev->driver_name, SYSFS_UNKNOWN);
 	}
 
 	if (get_dev_subsystem(dev)) {
-		dprintf("Could not get device %s's subsystem\n", dev->bus_id);
+		dbg_printf("Could not get device %s's subsystem\n", dev->bus_id);
 		safestrcpy(dev->subsystem, SYSFS_UNKNOWN);
 	}
 	return dev;
@@ -235,7 +235,7 @@ struct sysfs_device *sysfs_open_device_tree(const char *path)
 	}
 	rootdev = sysfs_open_device_path(path);
 	if (rootdev == NULL) {
-		dprintf("Error opening root device at %s\n", path);
+		dbg_printf("Error opening root device at %s\n", path);
 		return NULL;
 	}
 
@@ -245,7 +245,7 @@ struct sysfs_device *sysfs_open_device_tree(const char *path)
 				struct sysfs_device) {
 			new = sysfs_open_device_tree(cur->path);
 			if (new == NULL) {
-				dprintf("Error opening device tree at %s\n",
+				dbg_printf("Error opening device tree at %s\n",
 						cur->path);
 				sysfs_close_device_tree(rootdev);
 				return NULL;
@@ -311,7 +311,7 @@ static int get_device_absolute_path(const char *device,	const char *bus,
 
 	memset(bus_path, 0, SYSFS_PATH_MAX);
 	if (sysfs_get_mnt_path(bus_path, SYSFS_PATH_MAX)) {
-		dprintf ("Sysfs not supported on this system\n");
+		dbg_printf ("Sysfs not supported on this system\n");
 		return -1;
 	}
 	safestrcat(bus_path, "/");
@@ -327,7 +327,7 @@ static int get_device_absolute_path(const char *device,	const char *bus,
 	 * Now read this link to reach to the device.
 	 */
 	if (sysfs_get_link(bus_path, path, psize)) {
-		dprintf("Error getting to device %s\n", device);
+		dbg_printf("Error getting to device %s\n", device);
 		return -1;
 	}
 	return 0;
@@ -356,13 +356,13 @@ struct sysfs_device *sysfs_open_device(const char *bus,	const char *bus_id)
 	memset(sysfs_path, 0, SYSFS_PATH_MAX);
 	if (get_device_absolute_path(bus_id, bus, sysfs_path,
 				SYSFS_PATH_MAX)) {
-		dprintf("Error getting to device %s\n", bus_id);
+		dbg_printf("Error getting to device %s\n", bus_id);
 		return NULL;
 	}
 
 	device = sysfs_open_device_path(sysfs_path);
 	if (!device) {
-		dprintf("Error opening device %s\n", bus_id);
+		dbg_printf("Error opening device %s\n", bus_id);
 		return NULL;
 	}
 	return device;
@@ -391,14 +391,14 @@ struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev)
 	safestrcpy(ppath, dev->path);
 	tmp = strrchr(ppath, '/');
 	if (!tmp) {
-		dprintf("Invalid path to device %s\n", ppath);
+		dbg_printf("Invalid path to device %s\n", ppath);
 		return NULL;
 	}
 	if (*(tmp + 1) == '\0') {
 		*tmp = '\0';
 		tmp = strrchr(tmp, '/');
 		if (tmp == NULL) {
-			dprintf("Invalid path to device %s\n", ppath);
+			dbg_printf("Invalid path to device %s\n", ppath);
 			return NULL;
 		}
 	}
@@ -406,20 +406,20 @@ struct sysfs_device *sysfs_get_device_parent(struct sysfs_device *dev)
 
 	/* Make sure we're at the top of the device tree */
 	if (sysfs_get_mnt_path(dpath, SYSFS_PATH_MAX) != 0) {
-		dprintf("Sysfs not supported on this system\n");
+		dbg_printf("Sysfs not supported on this system\n");
 		return NULL;
 	}
 	safestrcat(dpath, "/");
 	safestrcat(dpath, SYSFS_DEVICES_NAME);
 
 	if (strcmp(dpath, ppath) == 0) {
-		dprintf("Device at %s does not have a parent\n", dev->path);
+		dbg_printf("Device at %s does not have a parent\n", dev->path);
 		return NULL;
 	}
 
 	dev->parent = sysfs_open_device_path(ppath);
 	if (!dev->parent) {
-		dprintf("Error opening device %s's parent at %s\n",
+		dbg_printf("Error opening device %s's parent at %s\n",
 					dev->bus_id, ppath);
 		return NULL;
 	}

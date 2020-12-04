@@ -180,14 +180,14 @@ struct sysfs_class_device *sysfs_open_class_device_path(const char *path)
 	 * a link to the actual class device if a directory isn't found
 	 */
 	if (sysfs_path_is_dir(path)) {
-		dprintf("%s: Directory not found, checking for a link\n", path);
+		dbg_printf("%s: Directory not found, checking for a link\n", path);
 		if (!sysfs_path_is_link(path)) {
 			if (sysfs_get_link(path, temp_path, SYSFS_PATH_MAX)) {
-				dprintf("Error retrieving link at %s\n", path);
+				dbg_printf("Error retrieving link at %s\n", path);
 				return NULL;
 			}
 		} else {
-			dprintf("%s is not a valid class device path\n", path);
+			dbg_printf("%s is not a valid class device path\n", path);
 			return NULL;
 		}
 	} else
@@ -195,19 +195,19 @@ struct sysfs_class_device *sysfs_open_class_device_path(const char *path)
 
 	cdev = alloc_class_device();
 	if (!cdev) {
-		dprintf("calloc failed\n");
+		dbg_printf("calloc failed\n");
 		return NULL;
 	}
 	if (sysfs_get_name_from_path(temp_path, cdev->name, SYSFS_NAME_LEN)) {
 		errno = EINVAL;
-		dprintf("Error getting class device name\n");
+		dbg_printf("Error getting class device name\n");
 		sysfs_close_class_device(cdev);
 		return NULL;
 	}
 
 	safestrcpy(cdev->path, temp_path);
 	if (sysfs_remove_trailing_slash(cdev->path)) {
-		dprintf("Invalid path to class device %s\n", cdev->path);
+		dbg_printf("Invalid path to class device %s\n", cdev->path);
 		sysfs_close_class_device(cdev);
 		return NULL;
 	}
@@ -251,7 +251,7 @@ struct sysfs_class_device *sysfs_get_classdev_parent
 	*c = '\0';
 
 	if ((strncmp(tmp_path, abs_path, strlen(abs_path))) == 0) {
-		dprintf("Class device %s doesn't have a parent\n",
+		dbg_printf("Class device %s doesn't have a parent\n",
 				clsdev->name);
 		return NULL;
 	}
@@ -280,7 +280,7 @@ static int get_classdev_path(const char *classname, const char *clsdev,
 		return -1;
 	}
 	if (sysfs_get_mnt_path(path, len) != 0) {
-		dprintf("Error getting sysfs mount path\n");
+		dbg_printf("Error getting sysfs mount path\n");
 		return -1;
 	}
 	safestrcatmax(path, "/", len);
@@ -324,14 +324,14 @@ struct sysfs_class_device *sysfs_open_class_device
 	memset(devpath, 0, SYSFS_PATH_MAX);
 	if ((get_classdev_path(classname, name, devpath,
 					SYSFS_PATH_MAX)) != 0) {
-		dprintf("Error getting to device %s on class %s\n",
+		dbg_printf("Error getting to device %s on class %s\n",
 							name, classname);
 		return NULL;
 	}
 
 	cdev = sysfs_open_class_device_path(devpath);
 	if (!cdev) {
-		dprintf("Error getting class device %s from class %s\n",
+		dbg_printf("Error getting class device %s from class %s\n",
 				name, classname);
 		return NULL;
 	}
@@ -414,7 +414,7 @@ struct sysfs_class *sysfs_open_class(const char *name)
 
 	memset(classpath, 0, SYSFS_PATH_MAX);
 	if ((sysfs_get_mnt_path(classpath, SYSFS_PATH_MAX)) != 0) {
-		dprintf("Sysfs not supported on this system\n");
+		dbg_printf("Sysfs not supported on this system\n");
 		return NULL;
 	}
 
@@ -431,19 +431,19 @@ struct sysfs_class *sysfs_open_class(const char *name)
 	safestrcat(classpath, name);
 done:
 	if (sysfs_path_is_dir(classpath)) {
-		dprintf("Class %s not found on the system\n", name);
+		dbg_printf("Class %s not found on the system\n", name);
 		return NULL;
 	}
 
 	cls = alloc_class();
 	if (cls == NULL) {
-		dprintf("calloc failed\n");
+		dbg_printf("calloc failed\n");
 		return NULL;
 	}
 	safestrcpy(cls->name, name);
 	safestrcpy(cls->path, classpath);
 	if ((sysfs_remove_trailing_slash(cls->path)) != 0) {
-		dprintf("Invalid path to class device %s\n", cls->path);
+		dbg_printf("Invalid path to class device %s\n", cls->path);
 		sysfs_close_class(cls);
 		return NULL;
 	}
@@ -481,7 +481,7 @@ struct sysfs_class_device *sysfs_get_class_device(struct sysfs_class *cls,
 	safestrcat(path, name);
 	cdev = sysfs_open_class_device_path(path);
 	if (!cdev) {
-		dprintf("Error opening class device at %s\n", path);
+		dbg_printf("Error opening class device at %s\n", path);
 		return NULL;
 	}
 	if (!cls->devices)

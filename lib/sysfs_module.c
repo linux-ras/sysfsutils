@@ -87,24 +87,24 @@ struct sysfs_module *sysfs_open_module_path(const char *path)
 		return NULL;
 	}
 	if ((sysfs_path_is_dir(path)) != 0) {
-		dprintf("%s is not a valid path to a module\n", path);
+		dbg_printf("%s is not a valid path to a module\n", path);
 		return NULL;
 	}
 	mod = alloc_module();
 	if (mod == NULL) {
-		dprintf("calloc failed\n");
+		dbg_printf("calloc failed\n");
 		return NULL;
 	}
 	if ((sysfs_get_name_from_path(path, mod->name, SYSFS_NAME_LEN)) != 0) {
 		errno = EINVAL;
-		dprintf("Error getting module name\n");
+		dbg_printf("Error getting module name\n");
 		sysfs_close_module(mod);
 		return NULL;
 	}
 
 	safestrcpy(mod->path, path);
 	if ((sysfs_remove_trailing_slash(mod->path)) != 0) {
-		dprintf("Invalid path to module %s\n", mod->path);
+		dbg_printf("Invalid path to module %s\n", mod->path);
 		sysfs_close_module(mod);
 		return NULL;
 	}
@@ -128,7 +128,7 @@ struct sysfs_module *sysfs_open_module(const char *name)
 
 	memset(modpath, 0, SYSFS_PATH_MAX);
 	if ((sysfs_get_mnt_path(modpath, SYSFS_PATH_MAX)) != 0) {
-		dprintf("Sysfs not supported on this system\n");
+		dbg_printf("Sysfs not supported on this system\n");
 		return NULL;
 	}
 
@@ -138,19 +138,19 @@ struct sysfs_module *sysfs_open_module(const char *name)
 	safestrcat(modpath, name);
 
 	if ((sysfs_path_is_dir(modpath)) != 0) {
-		dprintf("Module %s not found on the system\n", name);
+		dbg_printf("Module %s not found on the system\n", name);
 		return NULL;
 	}
 
 	mod = alloc_module();
 	if (mod == NULL) {
-		dprintf("calloc failed\n");
+		dbg_printf("calloc failed\n");
 		return NULL;
 	}
 	safestrcpy(mod->name, name);
 	safestrcpy(mod->path, modpath);
 	if ((sysfs_remove_trailing_slash(mod->path)) != 0) {
-		dprintf("Invalid path to module %s\n", mod->path);
+		dbg_printf("Invalid path to module %s\n", mod->path);
 		sysfs_close_module(mod);
 		return NULL;
 	}
