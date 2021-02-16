@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT([sysfsutils], [2.1.0], [https://github.com/linux-ras/sysfsutils/issues])
+AC_INIT([sysfsutils], [2.1.1], [https://github.com/linux-ras/sysfsutils/issues])
 AC_CONFIG_SRCDIR([cmd/systool.c])
 AC_CONFIG_MACRO_DIR([m4])
 
