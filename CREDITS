@@ -43,3 +43,38 @@ have made contributions:
 		- KLIBC updates
 	o Pavel Roskin <proski@gnu.org>
 		- Use buildroot for rpmbuilds
+	o Lee Duncan <lduncan@suse.com>
+                - Supplied patches to fix compilation bugs/warnings
+		  with GCC 7/10.
+                - Improved the build scripts to work latest autotools
+		  and work with git repository.
+                - Numerous other patches to fix various bugs.
+		- Updated the README info on how to file issues.
+		- Supplied patch to add SUSE-specific libsysfs.conf
+	o Christopher Engelhard <ce@lcts.de>
+		- Supplied patch to fix adjusting COPYING file to
+		  reflect set of directories covered under GPLv2.
+		- Supplied patch to fix address in the licensing files
+		  cmd/GPL and lib/LGPL.
+		- Numerous other patches to fix various bugs.
+	o Aurelien Jarno <aurel32@debian.org>
+		- Supplied patch to fix missing m4 macro directory.
+	o Guillem Jover <guillem@hadrons.org>
+		- Modernized the build system to use the latest autotools.
+		- Cleaned up the build scripts to remove obsolete files,
+		  hooks and improved the build scripts to work with git.
+		- Supplied patch to convert bash to POSIX portable syntax.
+		- Supplied patch to introduce pkg-confile to replace
+		  libtool for library detection and linking.
+		- Supplied patch to add out-of-tree support.
+		- Supplied patch to add make rule to move test program
+		  into check_PROGRAMS.
+	o Martin Pitt <mpitt@debian.org>
+		- Supplied patch to valid mount point in
+		  sysfs_get_mnt_path().
+	o Timm Bäder <tbaeder@redhat.com>
+		- Supplied patch to rename dprintf() to debugprintf(),
+		  to avoid collision with glibc macros.
+
+Please visit pulls/issues page at https://github.com/linux-ras/sysfsutils
+for more information.
