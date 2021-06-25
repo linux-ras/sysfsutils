@@ -247,7 +247,7 @@ struct sysfs_device *sysfs_open_device_tree(const char *path)
 			if (new == NULL) {
 				dbg_printf("Error opening device tree at %s\n",
 						cur->path);
-			  sysfs_close_device(devlist);
+				sysfs_close_device(devlist);
 				sysfs_close_device_tree(rootdev);
 				return NULL;
 			}
