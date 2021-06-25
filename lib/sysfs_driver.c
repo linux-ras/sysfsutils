@@ -255,6 +255,7 @@ struct dlist *sysfs_get_driver_devices(struct sysfs_driver *drv)
 				if (!drv->devices) {
 					dbg_printf("Error creating device list\n");
 					sysfs_close_list(linklist);
+					sysfs_close_device(dev);
 					return NULL;
 				}
 			}
