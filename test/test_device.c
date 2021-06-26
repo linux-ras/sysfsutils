@@ -145,11 +145,12 @@ int test_sysfs_open_device(int flag)
 		if (dev == NULL)
 			dbg_print("%s: FAILED with flag = %d errno = %d\n",
 						__FUNCTION__, flag, errno);
-		else
+		else {
 			dbg_print("%s: SUCCEEDED with flag = %d\n\n",
 						__FUNCTION__, flag);
 			show_device(dev);
 			dbg_print("\n");
+		}
 		break;
 	case 1:
 	case 2:
