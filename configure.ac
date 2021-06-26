@@ -40,7 +40,6 @@ AC_PROG_MAKE_SET
 
 # Checks for header files.
 AC_HEADER_DIRENT
-AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h malloc.h stdlib.h string.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
