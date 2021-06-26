@@ -1,0 +1,107 @@
+LIBSYSFS_PRIVATE {
+global:
+	/*
+	 * The following symbols are used by systool, but are not intended for
+	 * public use.
+	 */
+	my_strncat;
+	my_strncpy;
+
+local:
+	*;
+};
+
+LIBSYSFS_2.0.0 {
+global:
+	/*
+	 * The header exposes these via macros, so they need to be marked as
+	 * public, even though the underscore prefix would indicate otherwise.
+	 */
+	_dlist_insert_dlnode;
+	_dlist_mark_move;
+	_dlist_merge;
+	_dlist_remove;
+	_dlist_swap;
+
+	dlist_delete;
+	dlist_destroy;
+	dlist_end;
+	dlist_filter_sort;
+	dlist_find_custom;
+	dlist_insert;
+	dlist_insert_sorted;
+	dlist_mark;
+	dlist_move;
+	dlist_new;
+	dlist_new_with_delete;
+	dlist_pop;
+	dlist_push;
+	dlist_shift;
+	dlist_sort_custom;
+	dlist_start;
+	dlist_transform;
+	dlist_unshift;
+	dlist_unshift_sorted;
+
+	sysfs_close_attribute;
+	sysfs_close_bus;
+	sysfs_close_class;
+	sysfs_close_class_device;
+	sysfs_close_device;
+	sysfs_close_device_tree;
+	sysfs_close_driver;
+	sysfs_close_list;
+	sysfs_close_module;
+	sysfs_get_bus_device;
+	sysfs_get_bus_devices;
+	sysfs_get_bus_driver;
+	sysfs_get_bus_drivers;
+	sysfs_get_class_device;
+	sysfs_get_class_devices;
+	sysfs_get_classdev_attr;
+	sysfs_get_classdev_attributes;
+	sysfs_get_classdev_device;
+	sysfs_get_classdev_parent;
+	sysfs_get_device_attr;
+	sysfs_get_device_attributes;
+	sysfs_get_device_bus;
+	sysfs_get_device_parent;
+	sysfs_get_driver_attr;
+	sysfs_get_driver_attributes;
+	sysfs_get_driver_devices;
+	sysfs_get_driver_module;
+	sysfs_get_link;
+	sysfs_get_mnt_path;
+	sysfs_get_module_attr;
+	sysfs_get_module_attributes;
+	sysfs_get_module_parm;
+	sysfs_get_module_parms;
+	sysfs_get_module_section;
+	sysfs_get_module_sections;
+	sysfs_get_name_from_path;
+	sysfs_open_attribute;
+	sysfs_open_bus;
+	sysfs_open_class;
+	sysfs_open_class_device;
+	sysfs_open_class_device_path;
+	sysfs_open_device;
+	sysfs_open_device_path;
+	sysfs_open_directory_list;
+	sysfs_open_driver;
+	sysfs_open_driver_path;
+	sysfs_open_module;
+	sysfs_open_module_path;
+	sysfs_path_is_dir;
+	sysfs_path_is_file;
+	sysfs_path_is_link;
+	sysfs_read_attribute;
+	sysfs_remove_trailing_slash;
+	sysfs_write_attribute;
+} LIBSYSFS_PRIVATE;
+
+LIBSYSFS_2.1.0 {
+global:
+	sysfs_open_device_tree;
+	sysfs_open_link_list;
+	sysfs_read_dir_subdirs;
+} LIBSYSFS_2.0.0;
