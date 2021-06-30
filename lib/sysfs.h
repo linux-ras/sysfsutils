@@ -46,6 +46,9 @@ do { \
 	strncat(to, from, max - strlen(to)-1); \
 } while (0)
 
+/* Private routine for dlist integration. */
+extern void sysfs_close_dev_tree(void *dev);
+
 extern struct sysfs_attribute *get_attribute(void *dev, const char *name);
 extern struct dlist *read_dir_subdirs(const char *path);
 extern struct dlist *read_dir_links(const char *path);
