@@ -427,9 +427,7 @@ struct dlist *read_dir_links(const char *path)
 	return linklist;
 }
 
-void sysfs_close_dev_tree(void *dev);
-
-int add_subdirectory(struct sysfs_device *dev, char *path)
+static int add_subdirectory(struct sysfs_device *dev, char *path)
 {
 	struct sysfs_device *newdev;
 

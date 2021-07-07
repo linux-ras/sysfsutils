@@ -30,8 +30,24 @@ AC_ARG_WITH([pci.ids],
 AC_DEFINE_UNQUOTED([PCI_IDS_PATHNAME], ["$PCI_IDS_PATHNAME"],
 	[pci.ids database pathname])
 
-# Checks for LIBTOOL
+# Checks for library support.
 LT_INIT
+AC_CACHE_CHECK([for --version-script linker flag], [sysfs_cv_version_script], [
+	echo "{ global: symbol; local: *; };" >conftest.map
+	save_LDFLAGS=$LDFLAGS
+	LDFLAGS="$LDFLAGS -Wl,--version-script=conftest.map"
+	AC_LINK_IFELSE([
+		AC_LANG_PROGRAM([], [])
+	], [
+		sysfs_cv_version_script=yes
+	], [
+		sysfs_cv_version_script=no
+	])
+	LDFLAGS="$save_LDFLAGS"
+	rm -f conftest.map
+])
+AM_CONDITIONAL([HAVE_LINKER_VERSION_SCRIPT],
+	[test "x$sysfs_cv_version_script" = "xyes"])
 
 # Checks for programs.
 AC_PROG_CC
@@ -40,7 +56,6 @@ AC_PROG_MAKE_SET
 
 # Checks for header files.
 AC_HEADER_DIRENT
-AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h malloc.h stdlib.h string.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.

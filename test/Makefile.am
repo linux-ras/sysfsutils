@@ -11,6 +11,5 @@ testlibsysfs_SOURCES = test.c test_attr.c test_bus.c test_class.c \
 		       testout.c test-defs.h libsysfs.conf create-test
 AM_CPPFLAGS = -I$(top_srcdir)/include
 LDADD = $(top_builddir)/lib/libsysfs.la
-EXTRA_CFLAGS = @EXTRA_CLFAGS@
-AM_CFLAGS = -Wall -W -Wextra -Wstrict-prototypes $(EXTRA_CLFAGS)
+AM_CFLAGS = -Wall -W -Wextra -Wstrict-prototypes $(EXTRA_CFLAGS)
 
