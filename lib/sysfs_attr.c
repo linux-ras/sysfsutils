@@ -415,6 +415,7 @@ struct dlist *read_dir_links(const char *path)
 					(SYSFS_NAME_LEN, sysfs_del_name);
 				if (!linklist) {
 					dbg_printf("Error creating list\n");
+					closedir(dir);
 					return NULL;
 				}
 			}
@@ -468,6 +469,7 @@ struct sysfs_device *sysfs_read_dir_subdirs(const char *path)
 	dir = opendir(path);
 	if (!dir) {
 		dbg_printf("Error opening directory %s\n", path);
+		sysfs_close_device(dev);
 		return NULL;
 	}
 	while ((dirent = readdir(dir)) != NULL) {
@@ -522,6 +524,7 @@ struct dlist *read_dir_subdirs(const char *path)
 					(SYSFS_NAME_LEN, sysfs_del_name);
 				if (!dirlist) {
 					dbg_printf("Error creating list\n");
+					closedir(dir);
 					return NULL;
 				}
 			}
@@ -571,6 +574,7 @@ struct dlist *get_attributes_list(struct dlist *alist, const char *path)
 							sysfs_del_attribute);
 				if (!alist) {
 					dbg_printf("Error creating list\n");
+					closedir(dir);
 					return NULL;
 				}
 			}
