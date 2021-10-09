@@ -25,6 +25,7 @@
 
 #include "libsysfs.h"
 #include "sysfs.h"
+#include <stdlib.h>
 #include <mntent.h>
 
 /**
@@ -141,107 +142,30 @@ int sysfs_get_name_from_path(const char *path, char *name, size_t len)
  */
 int sysfs_get_link(const char *path, char *target, size_t len)
 {
-	char devdir[SYSFS_PATH_MAX];
-	char linkpath[SYSFS_PATH_MAX];
-	char *d, *s;
-	int count;
+	struct stat path_stat;
+	char *resolved_path;
 
 	if (!path || !target || len == 0) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	count = readlink(path, linkpath, SYSFS_PATH_MAX);
-	if (count < 0)
+	/* If path is not a symlink, fail */
+	if (stat(path, &path_stat) != 0 || (path_stat.st_mode & S_IFLNK))
 		return -1;
-	else
-		linkpath[count] = '\0';
-	/*
-	 * Three cases here:
-	 * 1. relative path => format ../..
-	 * 2. absolute path => format /abcd/efgh
-	 * 3. relative path _from_ this dir => format abcd/efgh
-	 */
-	if (*linkpath == '/') {
-		/* absolute path - copy as is */
-		safestrcpymax(target, linkpath, len);
+
+	/* Canonicalize the path */
+	resolved_path = canonicalize_file_name(path);
+
+	/* We fail if we cannot find the canonical path, or it is too long to copy */
+	if (resolved_path == NULL || strlen(resolved_path) >= SYSFS_PATH_MAX) {
+		free(resolved_path);
+		return -1;
+	} else {
+		safestrcpymax(target, resolved_path, SYSFS_PATH_MAX);
+		free(resolved_path);
 		return 0;
 	}
-
-	safestrcpy(devdir, path);
-	s = strrchr(devdir, '/');
-	if (s == NULL)
-		s = devdir - 1;
-	d = linkpath;
-	while (*d == '.') {
-		if (*(d+1) == '/') {
-			/*
-			 * handle the case where link is of type ./abcd/xxx
-			 */
-			d += 2;
-			while (*d == '/')
-				d++;
-			continue;
-		} else if (*(d+1) != '.' || *(d+2) != '/')
-			/*
-			 * relative path from this directory, starting
-			 * with a hidden directory
-			 */
-			break;
-
-		/*
-		 * relative path, getting rid of leading "../.."; must
-		 * be careful here since any path component of devdir
-		 * could be a symlink again
-		 */
-		for (;;) {
-			while (s > devdir && *s == '/') {
-				s--;
-				if (*s == '.'
-				    && (s == devdir || *(s-1) == '/'))
-					s--;
-			}
-			*(s+1) = '\0';
-			if (*devdir == '\0' || sysfs_path_is_link(devdir))
-				/*
-				 * condition will be true eventually
-				 * because we already know that all
-				 * but the last component of path
-				 * resolve to a directory
-				 */
-				break;
-			if (sysfs_get_link(devdir, devdir, SYSFS_PATH_MAX))
-				return -1;
-			s = devdir + strlen(devdir) - 1;
-		}
-		while (s >= devdir) {
-			if (*s == '/') {
-				if (*(s+1) != '.' || *(s+2) != '.'
-				    || *(s+3) != '\0') {
-					d += 3;
-					while (*d == '/')
-						d++;
-				} else
-					s += 2;
-				break;
-			}
-			s--;
-		}
-		if (s < devdir || *(s+1) == '\0')
-			break;
-	}
-
-	/*
-	 * appending to devdir a slash and the (possibly shortened)
-	 * relative path to the link source
-	 */
-	s++;
-	if (s > devdir && *s == '\0')
-		*s++ = '/';
-	*s = '\0';
-	safestrcpymax(s, d, SYSFS_PATH_MAX-(s-devdir));
-	safestrcpymax(target, devdir, len);
-	return 0;
 }
 
 /**

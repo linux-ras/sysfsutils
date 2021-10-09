@@ -6,6 +6,9 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.11 foreign])
 AM_SILENT_RULES([yes])
 
+# Check for C and POSIX extensions (run before any macro using the C compiler)
+AC_USE_SYSTEM_EXTENSIONS
+
 # Checks for KLIBC support (should be before LT_INIT and AC_PROG_CC)
 AC_CHECK_KLIBC
 
