@@ -256,7 +256,7 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 		 * restore the old value if one available
 		 */
 		if (sysattr->method & SYSFS_METHOD_SHOW) {
-			length = write(fd, sysattr->value, sysattr->len);
+			(void)write(fd, sysattr->value, sysattr->len);
 			close(fd);
 			return -1;
 		}
