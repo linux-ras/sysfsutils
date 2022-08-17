@@ -179,6 +179,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 			return 0;
 		}
 		free(sysattr->value);
+		sysattr->value = NULL;
 	}
 	sysattr->len = length;
 	close(fd);
@@ -255,7 +256,7 @@ int sysfs_write_attribute(struct sysfs_attribute *sysattr,
 		 * restore the old value if one available
 		 */
 		if (sysattr->method & SYSFS_METHOD_SHOW) {
-			length = write(fd, sysattr->value, sysattr->len);
+			(void)write(fd, sysattr->value, sysattr->len);
 			close(fd);
 			return -1;
 		}
@@ -629,7 +630,7 @@ struct dlist *get_dev_attributes_list(void *dev)
 				else
 					add_attribute(dev, file_path);
 			} else
-				attr = add_attribute(dev, file_path);
+				add_attribute(dev, file_path);
 		}
 	}
 	closedir(dir);

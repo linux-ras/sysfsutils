@@ -54,6 +54,9 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
+# Checks for operating system services and capabilities.
+AC_SYS_LARGEFILE
+
 # Checks for header files.
 AC_HEADER_DIRENT
 AC_CHECK_HEADERS([fcntl.h malloc.h stdlib.h string.h unistd.h])

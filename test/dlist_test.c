@@ -68,7 +68,8 @@ int main (void)
   Dlist *list;
   Simple *s1,*s2,*s3,*stemp;
   Complex *c1,*c2,*c3, *c4, *ctemp, *cfound;
-  while(1)
+  int count = 10;
+  while(count--)
     {
 	s1=simple_maker(1,"one");
 	s2=simple_maker(2,"two");
