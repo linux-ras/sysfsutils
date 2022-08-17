@@ -179,6 +179,7 @@ int sysfs_read_attribute(struct sysfs_attribute *sysattr)
 			return 0;
 		}
 		free(sysattr->value);
+		sysattr->value = NULL;
 	}
 	sysattr->len = length;
 	close(fd);
