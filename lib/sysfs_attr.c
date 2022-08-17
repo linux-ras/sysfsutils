@@ -630,7 +630,7 @@ struct dlist *get_dev_attributes_list(void *dev)
 				else
 					add_attribute(dev, file_path);
 			} else
-				attr = add_attribute(dev, file_path);
+				add_attribute(dev, file_path);
 		}
 	}
 	closedir(dir);
