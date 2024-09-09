@@ -375,8 +375,8 @@ char *my_strncat(char *to, const char *from, size_t max)
 {
 	size_t i = 0;
 
-	while (i < max && to[i] != '\0')
+	while (to[i] != '\0')
 		i++;
-	my_strncpy(to+i, from, max-i);
+	my_strncpy(to+i, from, max);
 	return to;
 }
