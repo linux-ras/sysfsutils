@@ -560,6 +560,9 @@ void dlist_sort_custom(struct dlist *list, int (*compare)(void *, void *))
 
   dlist_start(list);
   templist = dlist_new(list->data_size);
+  if (!templist) {
+	return;
+  }
 
 	templist->del_func = list->del_func;
 

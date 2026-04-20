@@ -68,6 +68,8 @@ static int nl_add(struct pci_access *a, int cat, int id1, int id2, int id3, int 
   if (n)
     return 1;
   n = malloc(sizeof(struct nl_entry));
+  if (!n)
+    return -ENOMEM;
   bzero(n, sizeof(struct nl_entry));
   n->id1 = id1;
   n->id2 = id2;
@@ -94,6 +96,7 @@ parse_name_list(struct pci_access *a)
   int lino = 0;
   unsigned int id1=0, id2=0, id3=0, id4=0;
   int cat = -1;
+  int ret;
 
   while (*p)
     {
@@ -184,8 +187,11 @@ parse_name_list(struct pci_access *a)
 	q++;
       if (!*q)
 	goto parserr;
-      if (nl_add(a, cat, id1, id2, id3, id4, q))
+      ret = nl_add(a, cat, id1, id2, id3, id4, q);
+      if (ret == 1)
 	fprintf(stderr, "%s, line %d: duplicate entry", a->pci_id_file_name, lino);
+      else if (ret < 0)
+	fprintf(stderr, "%s, line %d: add entry failed", a->pci_id_file_name, lino);
     }
   return;
 
@@ -205,15 +211,29 @@ load_name_list(struct pci_access *a)
       a->numeric_ids = 1;
       return;
     }
-  if (fstat(fd, &st) < 0)
+  if (fstat(fd, &st) < 0) {
     err_name_list(a, "stat");
+    goto release_fd;
+  }
   a->nl_list = malloc(st.st_size + 1);
-  if (read(fd, a->nl_list, st.st_size) != st.st_size)
+  if (!a->nl_list)
+    goto release_fd;
+  if (read(fd, a->nl_list, st.st_size) != st.st_size) {
     err_name_list(a, "read");
+    goto release_list;
+  }
   a->nl_list[st.st_size] = 0;
   a->nl_hash = malloc(sizeof(struct nl_entry *) * HASH_SIZE);
+  if (!a->nl_hash)
+    goto release_list;
   bzero(a->nl_hash, sizeof(struct nl_entry *) * HASH_SIZE);
   parse_name_list(a);
+  goto release_fd;
+
+release_list:
+  free(a->nl_list);
+  a->nl_list = NULL;
+release_fd:
   close(fd);
 }
 
