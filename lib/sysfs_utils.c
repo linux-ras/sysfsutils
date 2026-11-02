@@ -151,7 +151,7 @@ int sysfs_get_link(const char *path, char *target, size_t len)
 		return -1;
 	}
 
-	count = readlink(path, linkpath, SYSFS_PATH_MAX);
+	count = readlink(path, linkpath, SYSFS_PATH_MAX - 1);
 	if (count < 0)
 		return -1;
 	else
