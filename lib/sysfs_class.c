@@ -142,11 +142,22 @@ static void set_classdev_classname(struct sysfs_class_device *cdev)
 			e++;
 			count++;
 		}
+		if (count >= (int)sizeof(cdev->classname))
+			count = sizeof(cdev->classname) - 1;
 		strncpy(cdev->classname, c, count);
+		cdev->classname[count] = '\0';
 	} else {
-		strcpy(link, cdev->path);
-		strcat(link, "/subsystem");
-		sysfs_get_link(link, name, SYSFS_PATH_MAX);
+		int len;
+
+		len = snprintf(link, sizeof(link), "%s/subsystem", cdev->path);
+		if (len < 0 || (size_t)len >= sizeof(link)) {
+			safestrcpy(cdev->classname, SYSFS_UNKNOWN);
+			return;
+		}
+		if (sysfs_get_link(link, name, SYSFS_PATH_MAX)) {
+			safestrcpy(cdev->classname, SYSFS_UNKNOWN);
+			return;
+		}
 		if (lstat(name, &stats))
 			safestrcpy(cdev->classname, SYSFS_UNKNOWN);
 		else {
